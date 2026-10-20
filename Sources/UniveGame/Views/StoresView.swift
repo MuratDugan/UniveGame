@@ -286,7 +286,7 @@ private struct StoreLoginWebView: NSViewRepresentable {
         // GOG redirects to embed.gog.com/on_login_success?code=…
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                      decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
-            if kind == .gog, let url = navigationAction.request.url, url.host == "embed.gog.com",
+            if kind == .gog, let url = navigationAction.request.url, url.scheme == "https", url.host == "embed.gog.com",
                url.path.contains("on_login_success"),
                let code = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "code" })?.value {
                 decisionHandler(.cancel)
@@ -298,7 +298,9 @@ private struct StoreLoginWebView: NSViewRepresentable {
 
         // Epic ends on /id/api/redirect, a JSON page carrying "authorizationCode".
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            guard kind == .epic, let url = webView.url, url.path.hasSuffix("/id/api/redirect") else { return }
+            // Only Epic's own redirect page may hand over a code; a look-alike path on another site is ignored.
+            guard kind == .epic, let url = webView.url, url.scheme == "https", url.host == "www.epicgames.com",
+                  url.path == "/id/api/redirect" else { return }
             webView.evaluateJavaScript("document.body.innerText") { [weak self] result, _ in
                 guard let text = result as? String, let data = text.data(using: .utf8),
                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],

@@ -1,0 +1,40 @@
+name: Game report
+description: Tell us how a game runs (or doesn't) in UniveGame.
+title: "[Game] "
+labels: ["game report"]
+body:
+  - type: input
+    id: game
+    attributes:
+      label: Game
+      description: Name and store (Steam, Epic, GOG, Ubisoft, EA or your own .exe).
+      placeholder: Hades (Steam)
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: How does it run?
+      options:
+        - Runs well
+        - Runs with problems
+        - Starts but isn't playable
+        - Doesn't start
+    validations:
+      required: true
+  - type: input
+    id: score
+    attributes:
+      label: UniveGame's score
+      placeholder: 92 · Excellent
+  - type: input
+    id: setup
+    attributes:
+      label: Mac and settings
+      description: Mac model, macOS version, graphics backend (Automatic, DXVK, D3DMetal, WineD3D).
+      placeholder: MacBook Pro M3, macOS 26.1, Automatic
+  - type: textarea
+    id: notes
+    attributes:
+      label: What happened?
+      description: Steps, what you expected, what you saw. Attach the game's log (game page › … › Open Logs) if it doesn't start.

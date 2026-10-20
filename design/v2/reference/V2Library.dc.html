@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Kütüphane</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#4d8eff;text-decoration:none}a:hover{color:#7aaaff}
+input::placeholder{color:#71717a}
+@keyframes ugUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ugGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ugPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ug-in{animation:ugUp .55s cubic-bezier(.2,.7,.2,1) both}
+.ug-grow{transform-origin:left center;animation:ugGrow 1s cubic-bezier(.2,.7,.2,1) both}
+.ug-pulse{animation:ugPulse 1.6s ease-in-out infinite}
+.ug-rail{transition:background-color .15s ease-out,color .15s ease-out}
+.ug-rail:hover{background-color:#18181b;color:#f4f4f5}
+.ug-cover{outline:1px solid rgba(255,255,255,.08);outline-offset:-1px;transition:transform .15s ease-out,box-shadow .15s ease-out,outline-color .15s ease-out}
+.ug-pick:hover .ug-cover{transform:translateY(-4px) scale(1.02);box-shadow:0 6px 24px rgba(0,0,0,.4);outline-color:rgba(255,255,255,.5)}
+.ug-chip{transition:background-color .15s ease-out,color .15s ease-out}
+.ug-chip:hover{background-color:#18181b;color:#f4f4f5}
+.ug-btn{background:#232328;border:1px solid rgba(255,255,255,.08);color:#f4f4f5;transition:background-color .15s ease-out}
+.ug-btn:hover{background:#2c2c32;color:#f4f4f5}
+.ug-cta{background:#f4f4f5;color:#0c0c0e;transition:opacity .15s ease-out}
+.ug-cta:hover{opacity:.88;color:#0c0c0e}
+.ug-swap{transition:background-color .4s ease-out}
+.ug-fill{transition:width .6s cubic-bezier(.2,.7,.2,1),background-color .4s ease-out}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; display: flex; overflow: hidden; background: #0c0c0e; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif; font-size: 13px;">
+  <dc-import name="V2Rail" sel="library" hint-size="80px,800px"></dc-import>
+  <main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 52px; flex-shrink: 0; display: flex; align-items: center; gap: 6px; padding: 0 16px 0 32px;">
+      <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+        <button type="button" class="ug-chip" style="height: 28px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: none; border-radius: 999px; background: {{c.bg}}; color: {{c.fg}}; font: inherit; font-size: 13px; font-weight: {{c.fw}};">
+          {{c.label}}<span style="font-size: 11px; color: #a1a1aa; font-variant-numeric: tabular-nums;">{{c.count}}</span>
+        </button>
+      </sc-for>
+      <span style="flex-grow: 1;"></span>
+      <label style="width: 260px; height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 10px; box-sizing: border-box; border-radius: 999px; background: #18181b; border: 1px solid rgba(255,255,255,0.08); color: #a1a1aa;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg>
+        <input type="search" placeholder="Oyun, kaynak ya da durum ara" aria-label="Kütüphanende ara" style="flex-grow: 1; min-width: 0; border: none; outline: none; background: transparent; color: #f4f4f5; font: inherit; font-size: 13px;">
+        <kbd style="height: 20px; display: flex; align-items: center; padding: 0 6px; border-radius: 6px; background: #232328; font-family: inherit; font-size: 11px; color: #a1a1aa;">⌘K</kbd>
+      </label>
+    </header>
+    <div style="flex-grow: 1; overflow: hidden; padding: 16px 32px 0; display: flex; flex-direction: column; gap: 32px;">
+      <section aria-label="Seçili oyun" style="display: grid; grid-template-columns: 500px minmax(0, 1fr); gap: 32px; height: 280px; flex-shrink: 0;">
+        <div class="ug-swap ug-in" style="border-radius: 12px; background: {{s.art}}; outline: 1px solid rgba(255,255,255,0.08); outline-offset: -1px; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 12px; color: rgba(255,255,255,0.55);">Görsel · {{s.name}}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; gap: 12px; min-width: 0;">
+          <span class="ug-in" style="animation-delay: 60ms; font-size: 12px; font-weight: 600; color: #a1a1aa;">{{s.shelf}}</span>
+          <h1 class="ug-in" style="animation-delay: 120ms; margin: 0; font-size: 30px; font-weight: 700; line-height: 36px;">{{s.name}}</h1>
+          <span class="ug-in" style="animation-delay: 180ms; font-size: 13px; color: #a1a1aa;">{{s.meta}}</span>
+          <div class="ug-in" style="animation-delay: 240ms; display: flex; flex-direction: column; gap: 8px; max-width: 420px; padding-top: 4px;">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums;">{{s.score}}</span>
+              <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: {{s.tc}};">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.td}}"></path></svg>{{s.tier}}</span>
+              <span style="font-size: 12px; color: #a1a1aa;">· {{s.why}}</span>
+            </div>
+            <div style="position: relative; height: 6px; border-radius: 999px; background: #232328;">
+              <div class="ug-grow" style="height: 6px; border-radius: 999px; overflow: hidden; width: 100%;">
+                <div class="ug-fill" style="height: 6px; border-radius: 999px; width: {{s.pct}}; background: {{s.tc}};"></div>
+              </div>
+              <span style="position: absolute; left: 20%; top: -2px; width: 1px; height: 10px; background: #0c0c0e;"></span>
+              <span style="position: absolute; left: 40%; top: -2px; width: 1px; height: 10px; background: #0c0c0e;"></span>
+              <span style="position: absolute; left: 60%; top: -2px; width: 1px; height: 10px; background: #0c0c0e;"></span>
+              <span style="position: absolute; left: 80%; top: -2px; width: 1px; height: 10px; background: #0c0c0e;"></span>
+            </div>
+          </div>
+          <div class="ug-in" style="animation-delay: 300ms; display: flex; gap: 8px; padding-top: 8px;">
+            <sc-if value="{{s.primary}}" hint-placeholder-val="{{true}}">
+              <a href="{{s.href}}" class="ug-cta" style="height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 24px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="{{s.ctaD}}"></path></svg>{{s.cta}}</a>
+            </sc-if>
+            <a href="{{s.href}}" class="ug-btn" style="height: 40px; box-sizing: border-box; display: flex; align-items: center; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 500;">{{s.second}}</a>
+          </div>
+        </div>
+      </section>
+      <sc-for list="{{shelves}}" as="sh" hint-placeholder-count="3">
+        <section style="display: flex; flex-direction: column; gap: 12px; flex-shrink: 0;">
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <h2 style="margin: 0; font-size: 13px; font-weight: 600;">{{sh.title}}</h2>
+            <span style="font-size: 12px; color: #a1a1aa; font-variant-numeric: tabular-nums;">{{sh.count}}</span>
+            <span style="font-size: 12px; color: #a1a1aa;">· {{sh.hint}}</span>
+          </div>
+          <div style="display: flex; gap: 16px;">
+            <sc-for list="{{sh.games}}" as="g" hint-placeholder-count="7">
+              <button type="button" class="ug-pick ug-in" onClick="{{g.pick}}" aria-pressed="{{g.on}}" style="animation-delay: {{g.delay}}; width: 132px; flex-shrink: 0; padding: 0; border: none; background: transparent; color: #f4f4f5; font: inherit; text-align: left; display: flex; flex-direction: column; gap: 8px; cursor: pointer;">
+                <div style="border-radius: 8px; box-shadow: {{g.ring}};">
+                  <div class="ug-cover" style="width: 132px; height: 198px; border-radius: 8px; background: {{g.art}}; display: flex; align-items: flex-end; padding: 8px; box-sizing: border-box;">
+                    <span style="font-size: 11px; color: rgba(255,255,255,0.5);">Kapak</span>
+                  </div>
+                </div>
+                <div style="height: 3px; border-radius: 999px; background: #232328; overflow: hidden;">
+                  <div class="ug-grow" style="animation-delay: {{g.delay}}; height: 3px; width: {{g.pct}}; background: {{g.tc}};"></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                  <span style="font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{g.name}}</span>
+                  <span style="font-size: 12px; color: #a1a1aa; font-variant-numeric: tabular-nums;">{{g.score}} · {{g.tier}}</span>
+                </div>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 'Hades' }; }
+  renderVals() {
+    const C = 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z';
+    const tier = (s) => s >= 80 ? ['#30d158', C + 'm-4-10 3 3 5-6', 'Mükemmel']
+      : s >= 60 ? ['#86d96b', C + 'm-4-10 3 3 5-6', 'İyi']
+      : s >= 40 ? ['#ffb340', 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01', 'Oynanabilir']
+      : s >= 20 ? ['#ff8a3d', C + 'M8 12h8', 'Zayıf']
+      : ['#ff453a', C + 'm3-13-6 6M9 9l6 6', 'Çalışmaz'];
+    const G = [
+      ['ready', 'Hades', 92, '#40201a', 'Steam · Yüklü · 42 sa oynandı', 'Steam Deck Doğrulandı', 'V2GameHades.dc.html'],
+      ['ready', 'Hollow Knight', 96, '#1c2433', 'Steam · Yüklü · 18 sa oynandı', 'ProtonDB: Platinum'],
+      ['ready', 'Cyberpunk 2077', 72, '#35321a', "Steam · Yüklü · D3DMetal bekliyor", "D3DMetal'i kurunca açılır", 'V2GameCyberpunk.dc.html'],
+      ['ready', 'Valheim', 81, '#1f2a2e', 'Steam · Yüklü · 7 sa oynandı', 'DXVK ile çalışır'],
+      ['ready', 'S2 Rebirth', 38, '#2a2a2f', 'Kendi Oyunlarım · Yüklü', 'DirectX 9, 32-bit'],
+      ['install', 'Stardew Valley', 100, '#223a28', 'Steam · Yüklü değil · 1,2 GB', 'Steam Deck Doğrulandı'],
+      ['install', 'Celeste', 98, '#2a2034', 'Epic Games · Yüklü değil · 1,1 GB', 'ProtonDB: Platinum'],
+      ['install', 'Hades II', 90, '#3b1f2a', 'Steam · Yüklü değil · 9 GB', 'Steam Deck Doğrulandı'],
+      ['install', 'The Witcher 3: Wild Hunt', 88, '#262a2c', 'Epic Games · Yüklü değil · 50 GB', 'ProtonDB: Gold'],
+      ['install', "Baldur's Gate 3", 84, '#2b2420', 'Steam · Yüklü değil · 150 GB', 'Vulkan ile çalışır'],
+      ['install', 'Dead Cells', 95, '#1e2e33', 'Steam · Yüklü değil · 1,5 GB', 'Steam Deck Doğrulandı'],
+      ['install', 'Portal 2', 99, '#272a33', 'Steam · Yüklü değil · 13 GB', 'macOS sürümü de var'],
+      ['hard', 'ELDEN RING', 46, '#2e2a1f', 'Steam · Yüklü değil · 60 GB', 'Takılmalar bildiriliyor'],
+      ['hard', 'Apex Legends', 10, '#1d2a3a', 'Steam · Yüklü değil', "Anti-cheat Wine'ı engelliyor", 'V2GameApex.dc.html'],
+      ['hard', 'PUBG: Battlegrounds', 12, '#2c2a24', 'Steam · Yüklü değil', "Anti-cheat Wine'ı engelliyor"]
+    ];
+    const SH = { ready: ['Oynamaya hazır', 'Yüklü oyunların'], install: ['Yükle ve oyna', 'Mac’te iyi çalışanlar'], hard: ['Mac’te zor', 'Engel ya da bilinen sorun var'] };
+    const sel = this.state.sel;
+    let cur = null;
+    const byShelf = { ready: [], install: [], hard: [] };
+    G.forEach(([shelf, name, score, art, meta, why, href], i) => {
+      const [tc, td, tn] = tier(score);
+      const on = name === sel;
+      const g = {
+        shelf, name, score, art, meta, why, tc, td, tier: tn, href: href || '#',
+        pct: score + '%', on: on ? 'true' : 'false',
+        ring: on ? '0 0 0 2px #0c0c0e, 0 0 0 4px #4d8eff' : 'none',
+        delay: (byShelf[shelf].length * 50 + 200) + 'ms',
+        pick: () => this.setState({ sel: name })
+      };
+      if (on) cur = g;
+      byShelf[shelf].push(g);
+    });
+    const installed = cur.shelf === 'ready';
+    const blocked = cur.score < 20;
+    const s = {
+      ...cur,
+      shelf: SH[cur.shelf][0],
+      primary: !blocked && !(cur.name === 'Cyberpunk 2077'),
+      cta: installed ? 'Oyna' : 'Yükle',
+      ctaD: installed ? 'M7 4.5v15l12-7.5z' : 'M12 4v11M7 11l5 5 5-5M5 20h14',
+      second: blocked ? 'Neden çalışmıyor?' : cur.name === 'Cyberpunk 2077' ? "D3DMetal'i kur" : 'Oyun sayfası'
+    };
+    const shelves = ['ready', 'install', 'hard'].map((k) => ({ title: SH[k][0], hint: SH[k][1], count: byShelf[k].length, games: byShelf[k] }));
+    const chips = [['Tümü', 244, true], ['Steam', 196], ['Epic Games', 47], ['Kendi Oyunlarım', 1]].map(([label, count, on]) => ({
+      label, count, bg: on ? '#232328' : 'transparent', fg: on ? '#f4f4f5' : '#a1a1aa', fw: on ? 600 : 500
+    }));
+    return { s, shelves, chips };
+  }
+}
+</script>
+</body>
+</html>

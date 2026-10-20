@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Ayarlar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#4d8eff;text-decoration:none}a:hover{color:#7aaaff}
+@keyframes ugUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ugGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ugPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ug-in{animation:ugUp .55s cubic-bezier(.2,.7,.2,1) both}
+.ug-grow{transform-origin:left center;animation:ugGrow 2.4s cubic-bezier(.2,.7,.2,1) both}
+.ug-pulse{animation:ugPulse 1.6s ease-in-out infinite}
+.ug-rail{transition:background-color .15s ease-out,color .15s ease-out}
+.ug-rail:hover{background-color:#18181b;color:#f4f4f5}
+.ug-nav{transition:background-color .15s ease-out,color .15s ease-out}
+.ug-nav:hover{background-color:#18181b;color:#f4f4f5}
+.ug-btn{background:#232328;border:1px solid rgba(255,255,255,.08);color:#f4f4f5;transition:background-color .15s ease-out}
+.ug-btn:hover{background:#2c2c32;color:#f4f4f5}
+.ug-cta{background:#f4f4f5;color:#0c0c0e;transition:opacity .15s ease-out}
+.ug-cta:hover{opacity:.88;color:#0c0c0e}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; display: flex; overflow: hidden; background: #0c0c0e; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif; font-size: 13px;">
+  <dc-import name="V2Rail" sel="settings" hint-size="80px,800px"></dc-import>
+  <nav aria-label="Ayar bölümleri" style="width: 240px; flex-shrink: 0; box-sizing: border-box; padding: 52px 16px 0; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 4px;">
+    <h1 style="margin: 0 0 16px 12px; font-size: 30px; font-weight: 700;">Ayarlar</h1>
+    <sc-for list="{{sections}}" as="sc" hint-placeholder-count="4">
+      <button type="button" class="ug-nav" aria-current="{{sc.cur}}" onClick="{{sc.pick}}" style="height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: none; border-radius: 8px; background: {{sc.bg}}; color: {{sc.fg}}; font: inherit; font-size: 13px; font-weight: {{sc.fw}}; text-align: left; cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{sc.ic}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{sc.d}}"></path></svg>
+        <span style="flex-grow: 1;">{{sc.label}}</span>
+        <sc-if value="{{sc.flag}}" hint-placeholder-val="{{false}}">
+          <span aria-label="Kurulum gerekiyor" style="width: 8px; height: 8px; border-radius: 999px; background: #ffb340;"></span>
+        </sc-if>
+      </button>
+    </sc-for>
+  </nav>
+  <main style="flex-grow: 1; min-width: 0; overflow: hidden; padding: 112px 56px 0;">
+    <sc-if value="{{isGeneral}}" hint-placeholder-val="{{false}}">
+      <div style="max-width: 640px; display: flex; flex-direction: column; gap: 24px;">
+        <h2 class="ug-in" style="margin: 0; font-size: 20px; font-weight: 600;">Genel</h2>
+        <div class="ug-in" style="animation-delay: 60ms; display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600;">Dil</span>
+          <div role="radiogroup" aria-label="Dil" style="display: flex; width: 420px; padding: 2px; border-radius: 8px; background: #232328;">
+            <sc-for list="{{langs}}" as="l" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{l.on}}" onClick="{{l.pick}}" style="flex: 1; height: 28px; border: none; border-radius: 6px; background: {{l.bg}}; color: {{l.fg}}; font: inherit; font-size: 13px; font-weight: {{l.fw}}; transition: background-color .15s ease-out; cursor: pointer;">{{l.label}}</button>
+            </sc-for>
+          </div>
+          <span style="font-size: 12px; color: #a1a1aa;">Değişiklik hemen uygulanır.</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{isEngine}}" hint-placeholder-val="{{false}}">
+      <div style="max-width: 640px; display: flex; flex-direction: column; gap: 24px;">
+        <h2 class="ug-in" style="margin: 0; font-size: 20px; font-weight: 600;">Motor</h2>
+        <div class="ug-in" style="animation-delay: 60ms; display: flex; align-items: center; gap: 16px; padding: 20px; border-radius: 12px; background: #18181b; border: 1px solid rgba(255,255,255,0.08);">
+          <span style="font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums;">1.0.0</span>
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px;">
+            <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #30d158;"><span class="ug-pulse" style="width: 8px; height: 8px; border-radius: 999px; background: #30d158;"></span>Hazır</span>
+            <span style="font-size: 12px; color: #a1a1aa;">Wine 11.18 (Staging) · DXVK</span>
+          </span>
+          <button type="button" class="ug-btn" style="height: 34px; padding: 0 14px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 500;">Yeni Motor Var mı Bak</button>
+          <button type="button" class="ug-btn" style="height: 34px; padding: 0 14px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 500;">Yeniden Tara</button>
+        </div>
+        <p class="ug-in" style="animation-delay: 120ms; margin: 0; font-size: 12px; line-height: 1.5; color: #a1a1aa;">Motorlar UniveGame'in açık kaynak motor listesinden gelir ve kurulmadan önce SHA-256 ile doğrulanır.</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{isDx}}" hint-placeholder-val="{{true}}">
+      <div style="max-width: 640px; display: flex; flex-direction: column; gap: 28px;">
+        <div class="ug-in" style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 600;">DirectX 12 (D3DMetal)</h2>
+            <span style="height: 22px; display: flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: 999px; background: #232328; font-size: 12px; font-weight: 500; color: {{dx.chipFg}};">{{dx.chip}}</span>
+          </div>
+          <p style="margin: 0; font-size: 13px; line-height: 1.55; color: #a1a1aa;">Cyberpunk 2077 ve PEAK gibi DirectX 12 oyunları Apple'ın D3DMetal'ini gerektirir. Sadece 64-bit oyunlarda çalışır. İki adımda kurulur.</p>
+        </div>
+        <ol style="position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 32px;">
+          <span aria-hidden="true" style="position: absolute; left: 15px; top: 36px; bottom: 60px; width: 2px; border-radius: 2px; background: #232328;"></span>
+          <li class="ug-in" style="animation-delay: 80ms; position: relative; display: flex; gap: 16px;">
+            <span style="width: 32px; height: 32px; flex-shrink: 0; box-sizing: border-box; border-radius: 999px; border: 2px solid #4d8eff; background: #0c0c0e; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #4d8eff;">1</span>
+            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 12px; background: #18181b; border: 1px solid rgba(255,255,255,0.08);">
+              <span style="font-size: 13px; font-weight: 600;">D3DMetal motorunu indir</span>
+              <span style="font-size: 12px; line-height: 1.5; color: #a1a1aa;">D3DMetal için hazırlanmış bir Wine sürümü, yaklaşık 290 MB. SHA-256 ile doğrulanır; diğer oyunlar kendi motorlarında kalır.</span>
+              <sc-if value="{{dx.idle}}" hint-placeholder-val="{{true}}">
+                <button type="button" class="ug-cta" onClick="{{startDl}}" style="align-self: flex-start; margin-top: 4px; height: 36px; padding: 0 20px; border: none; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Motoru İndir</button>
+              </sc-if>
+              <sc-if value="{{dx.busy}}" hint-placeholder-val="{{false}}">
+                <div class="ug-in" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                    <span style="display: flex; align-items: center; gap: 6px; color: #f4f4f5; font-weight: 600;"><span class="ug-pulse" style="width: 8px; height: 8px; border-radius: 999px; background: #4d8eff;"></span>İndiriliyor</span>
+                    <span style="color: #a1a1aa; font-variant-numeric: tabular-nums;">182 / 290 MB · 40 sn kaldı</span>
+                  </div>
+                  <div style="height: 6px; border-radius: 999px; background: #232328; overflow: hidden;">
+                    <div class="ug-grow" style="width: 62%; height: 6px; border-radius: 999px; background: #4d8eff;"></div>
+                  </div>
+                  <button type="button" class="ug-btn" onClick="{{stopDl}}" style="align-self: flex-start; height: 30px; padding: 0 12px; border-radius: 8px; font: inherit; font-size: 12px; font-weight: 500; cursor: pointer;">Vazgeç</button>
+                </div>
+              </sc-if>
+            </div>
+          </li>
+          <li class="ug-in" style="animation-delay: 160ms; position: relative; display: flex; gap: 16px;">
+            <span style="width: 32px; height: 32px; flex-shrink: 0; box-sizing: border-box; border-radius: 999px; border: 2px solid rgba(255,255,255,0.16); background: #0c0c0e; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #a1a1aa;">2</span>
+            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 12px; background: #141417; border: 1px solid rgba(255,255,255,0.08);">
+              <span style="font-size: 13px; font-weight: 600;">Apple'ın Game Porting Toolkit'ini ekle</span>
+              <span style="font-size: 12px; line-height: 1.5; color: #a1a1aa;">developer.apple.com'da ücretsiz Apple Hesabınla giriş yap, Game Porting Toolkit dosyasını (.dmg) indir ve burada seç. UniveGame Apple imzasını kontrol eder, sadece D3DMetal'i kopyalar.</span>
+              <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button type="button" class="ug-btn" style="height: 34px; padding: 0 14px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 500;">Apple'ın İndirme Sayfasını Aç</button>
+                <button type="button" class="ug-btn" style="height: 34px; padding: 0 14px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 500;">İndirdiğim Dosyayı Seç…</button>
+              </div>
+            </div>
+          </li>
+        </ol>
+        <p class="ug-in" style="animation-delay: 220ms; margin: 0 0 0 48px; font-size: 12px; line-height: 1.5; color: #71717a;">D3DMetal, Apple'ın lisansıyla gelen Apple yazılımıdır. UniveGame ile birlikte gelmez ve dağıtılmaz.</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{isAbout}}" hint-placeholder-val="{{false}}">
+      <div class="ug-in" style="max-width: 640px; display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-size: 30px; font-weight: 700;">UniveGame</span>
+        <span style="font-size: 13px; color: #a1a1aa;">Sürüm 1.0 · Windows oyunlarını Mac'te çalıştıran evrensel oyun kütüphanesi.</span>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sec: 'dx', lang: 0, dl: false }; }
+  renderVals() {
+    const cur = this.state.sec;
+    const S = [
+      ['general', 'Genel', 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20'],
+      ['engine', 'Motor', 'M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 9h6v6H9z'],
+      ['dx', 'DirectX 12', 'M4 6h16M4 12h16M4 18h10', true],
+      ['about', 'Hakkında', 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-5M12 8h.01']
+    ];
+    const sections = S.map(([id, label, d, flag]) => {
+      const on = id === cur;
+      return { label, d, flag: !!flag && !this.state.dl, cur: on ? 'page' : 'false', bg: on ? '#18181b' : 'transparent', fg: on ? '#f4f4f5' : '#a1a1aa', ic: on ? '#4d8eff' : 'currentColor', fw: on ? 600 : 500, pick: () => this.setState({ sec: id }) };
+    });
+    const langs = ['Sistem', 'Türkçe', 'English'].map((label, i) => {
+      const on = this.state.lang === i;
+      return { label, on: on ? 'true' : 'false', bg: on ? '#3a3a40' : 'transparent', fg: on ? '#f4f4f5' : '#a1a1aa', fw: on ? 600 : 500, pick: () => this.setState({ lang: i }) };
+    });
+    const dl = this.state.dl;
+    return {
+      sections, langs,
+      isGeneral: cur === 'general', isEngine: cur === 'engine', isDx: cur === 'dx', isAbout: cur === 'about',
+      dx: { idle: !dl, busy: dl, chip: dl ? 'Adım 1 / 2' : 'Kurulmadı', chipFg: dl ? '#4d8eff' : '#a1a1aa' },
+      startDl: () => this.setState({ dl: true }),
+      stopDl: () => this.setState({ dl: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+/* Menüler */
+"menu.import" = "Windows Oyunu Ekle…";
+"menu.refresh" = "Kütüphaneyi Yenile";
+"menu.settings" = "Ayarlar…";
+
+/* Kenar çubuğu */
+"sidebar.library" = "Kütüphane";
+"sidebar.sources" = "Kaynaklar";
+"sidebar.store" = "Mağaza";
+"sidebar.discover" = "Keşfet";
+"sidebar.connections" = "Mağaza Hesapları";
+"sidebar.settings" = "Ayarlar";
+"sidebar.addGame" = "Oyun Ekle";
+
+"filter.all" = "Tüm Oyunlar";
+"filter.installed" = "Yüklü";
+"filter.favorites" = "Favoriler";
+"filter.recent" = "Son Oynananlar";
+"source.custom" = "Kendi Oyunlarım";
+
+/* Kütüphane */
+"library.search" = "Kütüphanende ara";
+"library.sort" = "Sırala";
+"library.allGames" = "Tüm oyunlar";
+"library.continue" = "Kaldığın yerden devam et";
+"sort.title" = "Ad";
+"sort.lastPlayed" = "Son oynama";
+"sort.playTime" = "Oynama süresi";
+
+"empty.library.title" = "Kütüphanen boş";
+"empty.library.message" = "Mağaza Hesapları'ndan bir mağaza bağla ya da elindeki bir Windows oyununu .exe dosyasıyla ekle.";
+"empty.filter.title" = "Burada henüz bir şey yok";
+"empty.filter.message" = "Yüklediğin, favorilere eklediğin ya da oynadığın oyunlar bu listede görünür.";
+"empty.search.title" = "Sonuç yok";
+"empty.search.message" = "“%@” ile eşleşen bir şey yok. Yazımı kontrol et ya da daha kısa bir ad dene.";
+
+/* Durum */
+"status.running" = "Çalışıyor";
+"status.launching" = "Başlatılıyor…";
+"status.notInstalled" = "Yüklü değil";
+"status.installing" = "Yükleniyor %%%ld";
+
+/* Eylemler */
+"action.play" = "Oyna";
+"action.stop" = "Durdur";
+"action.install" = "Yükle";
+"action.favorite" = "Favorilere Ekle";
+"action.unfavorite" = "Favorilerden Çıkar";
+"action.showInFinder" = "Finder'da Göster";
+"action.openLogs" = "Kayıtları Aç";
+"action.edit" = "Düzenle…";
+"action.remove" = "Kütüphaneden Kaldır";
+
+/* Ayrıntı */
+"detail.activity" = "Etkinlik";
+"detail.playTime" = "Oynama süresi";
+"detail.lastPlayed" = "Son oynama";
+"detail.never" = "Hiç";
+"detail.info" = "Ayrıntılar";
+"detail.source" = "Kaynak";
+"detail.location" = "Konum";
+"detail.executable" = "Program";
+"detail.size" = "Diskteki boyut";
+"detail.more" = "Diğer";
+"detail.exeMissing" = "Program dosyası bulunamıyor. Taşınmış ya da silinmiş olabilir. Düzenle ile yeniden seç.";
+"detail.missing.title" = "Oyun bulunamadı";
+"detail.missing.message" = "Kütüphanenden kaldırılmış olabilir.";
+
+"time.hours" = "%ld sa";
+"time.minutes" = "%ld dk";
+
+/* Başlatma ayarları */
+"settings.launch" = "Başlatma ayarları";
+"launch.backend" = "Grafik";
+"launch.backend.auto" = "Otomatik";
+"launch.backend.help" = "Otomatik, oyunun DirectX sürümüne en uygun seçeneği seçer. Sadece oyun açılmıyorsa ya da görüntü bozuksa değiştir.";
+"launch.retina" = "Retina çözünürlük";
+"launch.retina.help" = "Ekranının tam çözünürlüğünde çizer. Daha keskin ama daha yavaş.";
+"launch.metalfx" = "MetalFX ölçekleme";
+"launch.metalfx.help" = "DLSS sunan DirectX 12 oyunlarında Apple'ın ölçekleyicisi.";
+"launch.hud" = "Performans göstergesi";
+"launch.hud.help" = "Kare hızını ve GPU kullanımını oyunun üstünde gösterir.";
+"launch.cmdctrl" = "Command, Control gibi çalışsın";
+"launch.cmdctrl.help" = "Ctrl kısayolları kullanan oyunlar için.";
+"launch.verbose" = "Ayrıntılı kayıtlar";
+"launch.verbose.help" = "Bir sorunu bildirirken işe yarar. Kayıt dosyalarını büyütür.";
+
+/* İçe aktarma */
+"import.title" = "Windows oyunu ekle";
+"import.editTitle" = "Oyunu düzenle";
+"import.subtitle" = "Oyunun .exe dosyasını seç. Dosya yerinde kalır; UniveGame sadece nerede olduğunu hatırlar.";
+"import.help" = "Elindeki bir Windows oyununu (.exe) ekle";
+"import.exe" = "Program (.exe)";
+"import.drop" = "Bir .exe dosyasını buraya bırak ya da seçmek için tıkla";
+"import.drop.help" = "Genellikle oyunun veri klasörlerinin yanındaki dosyadır";
+"import.choose" = "Seç…";
+"import.change" = "Değiştir";
+"import.name" = "Ad";
+"import.name.help" = "Kütüphanende bu adla görünür.";
+"import.arguments" = "Başlatma seçenekleri";
+"import.arguments.help" = "İsteğe bağlı. Seçenekleri boşlukla ayır.";
+"import.cover" = "Kapak görseli";
+"import.cover.add" = "Kapak ekle";
+"import.cover.help" = "Dikey görsel, en iyisi 600×900";
+"import.add" = "Kütüphaneye Ekle";
+"import.error.notExe" = "Sadece Windows .exe dosyaları eklenebilir.";
+"import.panel.exe" = "Oyunun .exe dosyasını seç";
+"import.panel.cover" = "Bir kapak görseli seç";
+
+/* Mağazalar */
+"stores.subtitle" = "Oyun aldığın mağazaları bağla. Her mağaza kendi Windows ortamında çalışır ve girişi mağazanın kendi sayfasında yaparsın.";
+"stores.status.ready" = "Bağlı";
+"stores.status.signIn" = "Giriş gerekli";
+"stores.status.notSetUp" = "Kurulmadı";
+"stores.setUp" = "Kur";
+"stores.installLauncher" = "Başlatıcıyı Kur";
+"stores.signIn" = "Giriş Yap";
+"stores.signOut" = "Çıkış Yap";
+"stores.signInTo" = "%@ hesabına giriş yap";
+"stores.openLauncher" = "%@ Aç";
+"stores.gameCount" = "%ld oyun";
+"stores.steam.about" = "Windows Steam istemcisini kurar. Steam'de her zamanki gibi giriş yap, oyun yükle ve oyna.";
+"stores.epic.about" = "Açık kaynak Epic istemcisi Legendary'yi kullanır. Oyunların Epic başlatıcısı olmadan yüklenir ve açılır.";
+"stores.gog.about" = "Heroic Games Launcher'ın gogdl aracını kullanır. DRM'siz oyunlar doğrudan kütüphanene yüklenir.";
+"stores.ubisoft.about" = "Ubisoft Connect'i kurar. Oyunlar onun üzerinden açılır, böylece Ubisoft girişi ve güncellemeleri çalışmaya devam eder.";
+"stores.ea.about" = "EA uygulamasını kurar. Oyunlar onun üzerinden açılır.";
+
+/* Keşfet */
+"discover.featured" = "Steam'de öne çıkanlar";
+"discover.results" = "Arama sonuçları";
+"discover.search" = "Steam mağazasında ara";
+"discover.poweredBy" = "Fiyatlar Steam mağazasından";
+"discover.free" = "Ücretsiz";
+"discover.openInSteam" = "Mağaza sayfasını aç";
+"discover.error.title" = "Mağazaya ulaşılamıyor";
+"discover.error.message" = "İnternet bağlantını kontrol edip yeniden dene.";
+
+/* Motor */
+"engine.ready" = "Motor hazır";
+"engine.missing" = "Motor yüklü değil";
+"engine.demo" = "Demo modu";
+"engine.download" = "Motoru İndir";
+"engine.update" = "Yeni Motor Var mı Bak";
+"engine.banner.title" = "Oyunların çalışması için motor gerekiyor";
+"engine.banner.message" = "Motor (Wine, DXVK, MoltenVK), Windows oyunlarını Mac'in için çevirir. Yaklaşık 400 MB.";
+"engine.phase.downloading" = "İndiriliyor…";
+"engine.phase.verifying" = "Doğrulanıyor…";
+"engine.phase.extracting" = "Açılıyor…";
+"engine.phase.finishing" = "Tamamlanıyor…";
+
+/* Ayarlar */
+"settings.language" = "Dil";
+"settings.language.help" = "Değişiklik hemen uygulanır.";
+"settings.engine" = "Motor";
+"settings.engineVersion" = "Motor %@";
+"settings.engine.help" = "Motorlar MaPC'nin açık kaynak motor listesinden gelir ve kurulmadan önce SHA-256 ile doğrulanır. MaPC'nin daha önce indirdiği motorlar da kullanılır.";
+"settings.rescan" = "Yeniden Tara";
+"settings.data" = "Veri klasörü";
+"settings.openFolder" = "Finder'da Aç";
+"settings.about" = "Hakkında";
+"settings.about.text" = "UniveGame, Windows oyunlarını MaPC'nin açık kaynak çekirdeği MacadeKit (Apache 2.0) ile ve kendi lisanslarıyla gelen Wine, DXVK ve MoltenVK ile çalıştırır. UniveGame'nın Valve, Epic Games, GOG, Ubisoft, Electronic Arts ya da Steale LLC ile bir bağı yoktur.";
+
+/* Ortak */
+"common.ok" = "Tamam";
+"common.cancel" = "Vazgeç";
+"common.save" = "Kaydet";
+"common.retry" = "Yeniden Dene";
+
+/* Uyarılar */
+"alert.demoTitle" = "Bu demo modu. Oynamak için UniveGame'yı --demo olmadan başlat.";
+"alert.noEngine" = "Önce bir motor indir (Ayarlar › Motor).";
+"alert.launchFailed" = "Oyun başlatılamadı";
+"alert.installFailed" = "Oyun yüklenemedi";
+"alert.storeFailed" = "Mağaza kurulamadı";
+"alert.signInFailed" = "Giriş yapılamadı";
+"alert.engineFailed" = "Motor kurulamadı";
+
+"action.refresh" = "Yenile";
+
+/* Kurulum */
+"menu.runInstaller" = "Oyun Kurulum Dosyası Çalıştır…";
+"import.installerDetected" = "Bu bir kurulum dosyası";
+"import.installerWarning" = "UniveGame bunu Windows'taki gibi çalıştırıp kurulan oyunu kütüphanene ekleyebilir.";
+"import.runInstaller" = "Kur…";
+"installer.title" = "Oyun kur";
+"installer.intro" = "Kurulum, Windows'taki gibi kendi penceresinde açılır. Her zamanki gibi ilerle. Pencere kapanınca UniveGame kurulan oyunu bulur ve kütüphanene ekler.";
+"installer.driveTip.title" = "Nereye kurulmalı";
+"installer.driveTip" = "Kurulum bir Windows C: sürücüsü görür. C:\\Games\\Oyunum gibi yollar her zamanki gibi çalışır; Mac'inde bunlar UniveGame'nın Windows ortamının içinde durur. Bir sebebin yoksa önerilen klasörü değiştirme.";
+"installer.runtime" = ".NET çalışma zamanını kur (Wine Mono)";
+"installer.runtime.help" = "Birçok kurulum ve oyun başlatıcısı .NET ile yazılır. WineHQ'dan bir kez indirilir (yaklaşık 80 MB) ve kullanılmadan önce doğrulanır.";
+"installer.start" = "Kurulumu Başlat";
+"installer.step.prepare" = "Windows ortamı hazırlanıyor";
+"installer.step.runtime" = ".NET çalışma zamanı kuruluyor";
+"installer.step.run" = "Kurulum çalışıyor";
+"installer.step.finish" = "Tamamlanıyor";
+"installer.hint.prepare" = "İlk seferde bir dakika kadar sürebilir.";
+"installer.hint.runtime" = "Wine Mono indirilip kuruluyor. Bu sadece bir kez olur.";
+"installer.hint.running" = "Kurulum penceresini takip et; bu pencerenin arkasında kalmış olabilir. Sonda oyunu başlatmayı önerirse işareti kaldırabilirsin.";
+"installer.hint.finishing" = "Kurulum kapandı. Başlattığı programların bitmesi bekleniyor. Oyun açıldıysa şimdi devam edebilirsin.";
+"installer.stop" = "Kurulumu Durdur";
+"installer.skipWait" = "Şimdi Devam Et";
+"installer.a11y.done" = "Tamamlandı";
+"installer.a11y.active" = "Sürüyor";
+"installer.done" = "Kurulum tamamlandı";
+"installer.installedTo" = "Kurulduğu yer: %@";
+"installer.pick" = "Oyunu hangi program başlatıyor?";
+"installer.pick.help" = "Oyunun bir başlatıcısı varsa başlatıcıyı seç. Bunu sonra Düzenle ile değiştirebilirsin.";
+"installer.recommended" = "Önerilen";
+"installer.browse" = "Başka Bir Dosya Seç…";
+"installer.openDrive" = "C: Sürücüsünü Finder'da Göster";
+"installer.failed" = "Oyun bulunamadı";
+"installer.error.noEngine" = "Önce bir motor indir (Ayarlar › Motor).";
+"installer.error.nothingFound" = "Kurulum bitti ama C: sürücüsünde yeni bir program görünmedi. Başka bir yere kurduysa oyunun .exe dosyasını elle seç.";
+"installer.error.failed" = "Kurulum bir şey kurmadan hatayla kapandı. C: sürücüsü klasöründen kurulumun kaydına bak ya da yeniden dene.";
+"common.close" = "Kapat";
+"action.uninstall" = "Kaldır…";
+"uninstall.title" = "%@ kaldırılsın mı?";
+"uninstall.confirm" = "Kaldır";
+"uninstall.message.uninstaller" = "Oyunun kendi kaldırma programı açılacak. Kütüphaneden Kaldır seçeneği oyunun dosyalarını korur.";
+"uninstall.message.trash" = "Oyunun klasörü Çöp Sepeti'ne taşınacak. Kütüphaneden Kaldır seçeneği oyunun dosyalarını korur.";
+"alert.uninstallFailed" = "Oyun kaldırılamadı";
+
+"stores.steam.signIn" = "Giriş için Steam'i Aç";
+"stores.signedInAs" = "%@ olarak giriş yapıldı";
+
+"issue.title" = "Bilinen sorun";
+"issue.epic:Fortnite" = "Fortnite, macOS'ta çalışmayan çekirdek seviyesinde bir hile koruması kullanıyor; bu yüzden açılmaz.";
+
+/* Uyumluluk */
+"sort.compatibility" = "Uyumluluk";
+"compat.title" = "Uyumluluk";
+"compat.analyze" = "İncele";
+"compat.reanalyze" = "Yeniden İncele";
+"compat.analyze.help" = "Oyunun dosyalarını okur; Steam, ProtonDB ve AreWeAntiCheatYet'e bakar";
+"compat.analyzing" = "İnceleniyor…";
+"compat.empty" = "Henüz incelenmedi. UniveGame oyunun dosyalarını ve topluluk verilerini okuyarak bu Mac'te ne kadar iyi çalışacağını tahmin edebilir.";
+"compat.analyzedAt" = "İncelendi:";
+"compat.source.files" = "oyun dosyaları";
+"compat.source.steam" = "Steam";
+"compat.source.protondb" = "ProtonDB";
+"compat.source.awacy" = "AreWeAntiCheatYet";
+"compat.confidence.low" = "Düşük güven: az bilgi bulundu.";
+"compat.confidence.medium" = "Orta güven.";
+"compat.confidence.high" = "Yüksek güven: birden fazla kaynak aynı şeyi söylüyor.";
+"compat.tier.excellent" = "Mükemmel";
+"compat.tier.excellent.help" = "Akıcı çalışması beklenir.";
+"compat.tier.good" = "İyi";
+"compat.tier.good.help" = "İyi çalışması beklenir, küçük sorunlar olabilir.";
+"compat.tier.playable" = "Oynanabilir";
+"compat.tier.playable.help" = "Çalışır ama takılma ya da görüntü hataları olabilir.";
+"compat.tier.poor" = "Zayıf";
+"compat.tier.poor.help" = "Açılabilir ama büyük ihtimalle kötü çalışır.";
+"compat.tier.broken" = "Çalışmaz";
+"compat.tier.broken.help" = "Bu oyunu Mac'te durduran bir şey var.";
+"compat.analyzeAll" = "Tüm Kütüphaneyi İncele";
+"compat.cancelAll" = "İncelemeyi Durdur";
+"compat.progress" = "%ld/%ld";
+
+"compat.f.knownIssue" = "Bilinen sorun: %@";
+"compat.f.kernelAC" = "%@ bulundu: çekirdek seviyesi anti-cheat macOS'ta çalışmaz.";
+"compat.f.acLinuxOnly" = "%@: Linux'ta (Proton) destekleniyor ama macOS'ta desteklenmiyor.";
+"compat.f.onlineAC" = "Wine'ı engelleyen anti-cheat (%@).";
+"compat.f.deckAC" = "Steam Deck: desteklenmeyen anti-cheat.";
+"compat.f.punkbuster" = "PunkBuster: çevrimiçi oyun reddedilebilir.";
+"compat.f.dx11" = "DirectX 11: DXVK ile Metal üzerinde çalışır (hızlı yol).";
+"compat.f.dx10" = "DirectX 10: DXVK ile Metal üzerinde çalışır.";
+"compat.f.dx12metal" = "DirectX 12: Apple'ın D3DMetal'ı ile çalışır.";
+"compat.f.dx12x86" = "32-bit DirectX 12: Mac'te hızlı bir yolu yok.";
+"compat.f.dx12noMetal" = "DirectX 12, D3DMetal (Game Porting Toolkit) gerektiriyor; kurulu değil.";
+"compat.f.dx9" = "DirectX 9: OpenGL (WineD3D) üzerinden çalışır; ağır oyunlarda takılma olur.";
+"compat.f.dx9old" = "DirectX 9 (eski oyun): OpenGL yolu genelde yeterli.";
+"compat.f.dxOld" = "DirectX 8 / DirectDraw: OpenGL yolu, hafif oyunlar için yeterli.";
+"compat.f.opengl" = "OpenGL: Mac, OpenGL 4.1 ile sınırlı.";
+"compat.f.vulkan" = "Sadece Vulkan: MoltenVK'de geometry shader yok.";
+"compat.f.gfxUnknown" = "Grafik API'si bilinmiyor.";
+"compat.f.32bit" = "32-bit oyun: D3DMetal yok, ek çeviri katmanı var.";
+"compat.f.engineGood" = "%@: Wine altında genelde iyi çalışır.";
+"compat.f.engineLight" = "%@: hafif bir motor, genelde sorunsuz.";
+"compat.f.engineHeavy" = "%@: ağır (DirectX 12, Nanite/Lumen).";
+"compat.f.engineChromium" = "%@: Chromium tabanlı; Wine altında sık sık hatalı çizer.";
+"compat.f.engine" = "Motor: %@.";
+"compat.f.chromium" = "Gömülü tarayıcı (Chromium) kullanıyor; Wine altında sık sık siyah pencere verir.";
+"compat.f.customAC" = "Oyunun kendi anti-cheat'i (%@): denemeden bilinemez.";
+"compat.f.dotnet" = ".NET programı: Wine Mono gerektirir.";
+"compat.f.mediaFoundation" = "Media Foundation kullanıyor: videolar oynamayabilir.";
+"compat.f.launcher" = "%@ gerektiriyor; Wine altında sorunlu olabilir.";
+"compat.f.dxHelpers" = "Kendi DirectX yardımcılarını getiriyor; UniveGame onları kullanır.";
+"compat.f.deckVerified" = "Steam Deck: Doğrulandı.";
+"compat.f.deckPlayable" = "Steam Deck: Oynanabilir.";
+"compat.f.deckUnsupported" = "Steam Deck: Desteklenmiyor.";
+"compat.f.proton" = "ProtonDB: %@ (%@ rapor).";
+"compat.f.macVersion" = "macOS sürümü var: Steam ya da Epic'in Mac uygulamasıyla oyna.";
+"compat.f.noData" = "Yeterli bilgi yok; daha derin analiz için oyunu yükle.";
+
+"compat.tier.unknown" = "Bilinmiyor";
+"compat.tier.unknown.help" = "Tahmin için yeterli bilgi yok. Dosya analizi için oyunu yükle.";
+"compat.f.dx11guess" = "Muhtemelen DirectX 11 (en düşük ekran kartına göre): DXVK yolu.";
+
+"compat.f.userAC" = "%@: Linux'ta Wine altında çalışan, çekirdek seviyesinde olmayan bir anti-cheat; burada da çalışması beklenir.";
+
+"sidebar.runInstaller" = "Kurulum Dosyası Çalıştır";
+"sidebar.runInstaller.help" = "Bir oyunu setup.exe ya da .msi dosyasından Windows'taki gibi kur";
+
+"cover.found" = "Steam'den: %@";
+"cover.dismiss" = "Bu kapağı kullanma";
+"cover.searching" = "Kapak aranıyor…";
+"cover.findOnline" = "İnternetten Kapak Bul";
+"cover.notFound" = "İnternette kapak bulunamadı";
+
+/* D3DMetal */
+"d3dmetal.title" = "DirectX 12 (D3DMetal)";
+"d3dmetal.ready" = "Hazır";
+"d3dmetal.notReady" = "Kurulmadı";
+"d3dmetal.about" = "DirectX 12 oyunları (Cyberpunk 2077, PEAK…) Apple'ın D3DMetal'ını gerektirir. Sadece 64-bit oyunlarda çalışır.";
+"d3dmetal.step1" = "D3DMetal motorunu indir";
+"d3dmetal.step1.help" = "D3DMetal için hazırlanmış bir Wine sürümü (yaklaşık 290 MB, SHA-256 ile doğrulanır). Diğer oyunların mevcut motorlarında kalır.";
+"d3dmetal.step1.button" = "Motoru İndir";
+"d3dmetal.step2" = "Apple'ın Game Porting Toolkit'ini ekle";
+"d3dmetal.step2.help" = "developer.apple.com'a ücretsiz Apple Hesabınla giriş yap, \"Game Porting Toolkit\" dosyasını (.dmg) indir, sonra burada seç. Uygulama Apple imzasını kontrol eder ve sadece D3DMetal'ı kopyalar.";
+"d3dmetal.step2.open" = "Apple'ın İndirme Sayfasını Aç";
+"d3dmetal.step2.choose" = "İndirdiğim Dosyayı Seç…";
+"d3dmetal.step2.panel" = "Game Porting Toolkit disk görüntüsünü (.dmg) seç";
+"d3dmetal.license.note" = "D3DMetal, Apple'ın lisansıyla gelen Apple yazılımıdır; oyun geliştirme, test ve değerlendirme amacıyla kullanıma izin verir. Bu uygulamayla birlikte gelmez ve dağıtılmaz.";
+"d3dmetal.license.title" = "D3DMetal için Apple lisansı";
+"d3dmetal.license.subtitle" = "D3DMetal'ı indirdiğin dosyadan kurmak için Apple'ın koşullarını oku ve kabul et.";
+"d3dmetal.license.missing" = "Lisans dosyası araç setinde bulunamadı. Kabul etmeden önce Apple'ın indirme sayfasından oku.";
+"d3dmetal.license.accept" = "Kabul Et ve Kur";
+"d3dmetal.importFailed" = "D3DMetal eklenemedi";
+"d3dmetal.setUp" = "Kur";
+"d3dmetal.setUp.help" = "DirectX 12 desteğini Ayarlar'da kur";
+
+/* v2 — Rail */
+"rail.library" = "Kütüphane";
+"rail.discover" = "Keşfet";
+"rail.stores" = "Mağazalar";
+"rail.add" = "Ekle";
+"rail.settings" = "Ayarlar";
+"rail.engine" = "Motor";
+
+/* v2 — Kütüphane */
+"library.chip.all" = "Tümü";
+"library.search.v2" = "Oyun, kaynak ya da durum ara";
+"shelf.ready" = "Oynamaya hazır";
+"shelf.ready.hint" = "Yüklü oyunların";
+"shelf.install" = "Yükle ve oyna";
+"shelf.install.hint" = "Mac'te iyi çalışanlar";
+"shelf.hard" = "Mac'te zor";
+"shelf.hard.hint" = "Engel ya da bilinen sorun var";
+"shelf.unknown" = "Henüz incelenmedi";
+"shelf.unknown.hint" = "Puan için oyunu incele";
+"stage.playtime" = "%@ oynandı";
+"stage.openPage" = "Oyun sayfası";
+"stage.whyBroken" = "Neden çalışmıyor?";
+"stage.setUpD3DMetal" = "D3DMetal'i kur";
+"cover.notAnalyzed" = "Henüz incelenmedi";
+
+/* v2 — Boş kütüphane */
+"empty.v2.title" = "Rafların boş";
+"empty.v2.body" = "Steam ya da Epic hesabını bağla; oyunların gelir ve Mac'te ne kadar iyi çalışacaklarına göre raflara dizilir.";
+"empty.v2.connect" = "Mağaza Hesabı Bağla";
+"empty.v2.drop" = "Ya da bir .exe ya da kurulum dosyasını pencereye sürükle";
+
+/* v2 — Oyun sayfası */
+"game.back" = "Kütüphane";
+"game.installAnyway" = "Yine de Yükle";
+"game.fact.status" = "Durum";
+"game.fact.playtime" = "Oynama süresi";
+"game.fact.lastPlayed" = "Son oynama";
+"game.fact.location" = "Konum";
+"game.fact.size" = "Tahmini boyut";
+"game.fact.source" = "Kaynak";
+"compat.notice.blocked" = "Mac'te açılmaz";
+"compat.notice.blocked.body" = "Bu engel kalkana kadar yüklesen de oyun açılmaz.";
+"compat.notice.track" = "Durumu takip et";
+"compat.notice.d3d" = "Önce D3DMetal'i kur";
+"compat.notice.d3d.body" = "Bu oyun DirectX 12 kullanıyor. Motor yaklaşık 290 MB; Apple'ın Game Porting Toolkit'i de gerekir.";
+"launch.backend.manual" = "%@ elle seçildi. Sorun olursa Otomatik'e dön.";
+
+/* v2 — Oyun ekle */
+"add.title" = "Oyun ekle";
+"add.subtitle" = "Bir Windows oyununu kütüphanene getirmenin üç yolu var. Dosyalar yerinde kalır.";
+"add.method.installed" = "Kurulu bir oyun";
+"add.method.installed.detail" = "Oyunun .exe dosyasını seç";
+"add.method.setup" = "Kurulum dosyası";
+"add.method.setup.detail" = "setup.exe çalıştır, sonra ekle";
+"add.method.store" = "Mağaza hesabı";
+"add.method.store.detail" = "Steam, Epic, GOG, Ubisoft, EA";
+"add.cover.found" = "%@'den bulundu";
+"add.cover.other" = "Başka kapak seç…";
+"add.firstLook" = "İlk inceleme:";
+"add.drop" = "Bir .exe dosyasını buraya bırak ya da seçmek için tıkla";
+
+/* v2 — Kurulum */
+"installer.close" = "Kapat";
+"installer.step.file" = "Dosya";
+"installer.step.file.detail" = "Kurulum dosyasını gözden geçir";
+"installer.step.run.detail" = "Windows ortamında çalışır";
+"installer.step.pick" = "Başlatıcı";
+"installer.step.pick.detail" = "Oyunu açan programı seç";
+"installer.ready.title" = "Kurulum dosyası hazır";
+"installer.ready.body" = "Kurulum programı UniveGame'in Windows ortamında, ayrı bir pencerede açılır. Oradaki adımları izle; bitince oyunu kütüphanene eklemene yardım ederiz.";
+"installer.info.location" = "Kurulacağı yer";
+"installer.info.engine" = "Motor";
+"installer.info.space" = "Boş alan";
+"installer.info.spaceValue" = "%@ kullanılabilir";
+"installer.running.title" = "Kurulum programı açık";
+"installer.running.body" = "Kurulum penceresinde Bitir'e bastığında burası kendiliğinden devam eder.";
+"installer.running.state" = "Çalışıyor";
+"installer.log.preparing" = "Windows ortamı hazırlanıyor";
+"installer.log.prepared" = "Windows ortamı hazır";
+"installer.log.runtime" = "Wine Mono kuruluyor";
+"installer.log.started" = "%@ başlatıldı";
+"installer.log.windowOpen" = "Kurulum penceresi açık…";
+"installer.log.finishing" = "Kurulum kapandı, son işlemler bekleniyor…";
+"installer.done.title" = "Kurulum tamamlandı";
+"installer.done.body" = "%@ klasörüne kuruldu. Oyunu hangi program başlatıyor?";
+
+/* v2 — Mağazalar */
+"stores.v2.title" = "Mağazalar";
+"stores.v2.subtitle" = "Her mağaza kendi Windows ortamında çalışır. Girişi mağazanın kendi sayfasında yaparsın.";
+"stores.meter.connected" = "%1$@ / %2$@ mağaza bağlı";
+"stores.status.syncing" = "Eşitleniyor";
+"stores.meta.synced" = "%1$@ oyun · %2$@ eşitlendi";
+"stores.meta.found" = "%@ yeni bulundu";
+
+/* v2 — Keşfet */
+"discover.v2.subtitle" = "Steam'de öne çıkanlar, Mac'te ne kadar iyi çalışacaklarıyla birlikte. Fiyatlar Steam mağazasından.";
+"discover.chip.featured" = "Öne çıkanlar";
+"discover.chip.deals" = "İndirimde";
+"discover.chip.macGreat" = "Mac'te mükemmel";
+"discover.chip.new" = "Yeni çıkanlar";
+
+/* v2 — Ayarlar */
+"settings.section.general" = "Genel";
+"settings.section.engine" = "Motor";
+"settings.section.dx12" = "DirectX 12";
+"settings.section.about" = "Hakkında";
+"settings.dx12.needsSetup" = "Kurulum gerekiyor";
+"d3dmetal.step" = "Adım %1$@ / %2$@";
+"d3dmetal.downloading" = "İndiriliyor";
+"d3dmetal.progress" = "%1$@ / %2$@ MB · %3$@ kaldı";
+"d3dmetal.status.notInstalled" = "Kurulmadı";
+"d3dmetal.status.ready" = "Hazır";
+"add.cover.found.steam" = "Steam'den bulundu";
+"add.cover.found.gog" = "GOG'dan bulundu";
+
+/* v2 — uygulama ayrıntıları */
+"rail.a11y" = "Ana gezinme";
+"stage.a11y" = "Seçili oyun";
+"installer.a11y.step" = "Adım %1$@ / %2$@";
+"launch.retina.short" = "Daha keskin, biraz daha yavaş";
+"launch.metalfx.short" = "DLSS sunan DirectX 12 oyunlarında";
+"launch.hud.short" = "Kare hızı ve GPU kullanımı";
+"launch.cmdctrl.short" = "Ctrl kısayolları kullanan oyunlar";
+"compat.f.onlineAC.title" = "%@ engelliyor";
+"compat.f.kernelAC.title" = "%@ engelliyor";
+"compat.f.acLinuxOnly.title" = "%@ Mac'i desteklemiyor";
+"compat.f.deckAC.title" = "Anti-cheat engelliyor";
+"settings.language.system" = "Sistem";
+"settings.language.v2help" = "Değişiklik hemen uygulanır.";
+"settings.about.version" = "Sürüm %@ · Windows oyunlarını Mac'te çalıştıran evrensel oyun kütüphanesi.";
+"stores.meta.size" = "Yaklaşık %@";
+"add.cover.placeholder" = "Kapak eklenecek";
+"installer.step.install" = "Kurulum";
+"installer.info.show" = "Göster";
+"installer.info.runtime" = ".NET";
+"installer.runtime.short" = "Wine Mono ile kur (önerilir)";
+"installer.showWindow" = "Kurulum Penceresini Göster";
+
+/* Sorumluluk reddi */
+"disclaimer.title" = "Başlamadan önce";
+"disclaimer.subtitle" = "UniveGame'i kullanmadan önce lütfen aşağıdakileri oku. Devam etmek için kabul etmen gerekir.";
+"disclaimer.reviewTitle" = "Lisans ve sorumluluk reddi";
+"disclaimer.os.title" = "Açık kaynak bileşenler";
+"disclaimer.os.body" = "UniveGame, MaPC'nin açık kaynak çekirdeği MacadeKit (Apache 2.0) üzerine kurulu. Oyunlar; Wine (LGPL 2.1+), DXVK (zlib), MoltenVK (Apache 2.0) ve Wine Mono (MIT, LGPL, GPL) ile çalışır. Epic ve GOG için Legendary ve gogdl (GPL 3.0) ayrı programlar olarak çalışır; UniveGame onların kodunu içermez ve değiştirmez. Her bileşen kendi lisansıyla gelir; lisans metinleri motorların içindedir ve LGPL/GPL bileşenlerin kaynak kodu yayıncılarından alınabilir.";
+"disclaimer.apple.title" = "Apple'ın D3DMetal'i";
+"disclaimer.apple.body" = "D3DMetal, Apple'ın Game Porting Toolkit'inin parçasıdır ve UniveGame ile birlikte gelmez. Onu Apple'dan kendin indirirsin; kullanımı Apple'ın lisansına tabidir.";
+"disclaimer.warranty.title" = "Garanti yok";
+"disclaimer.warranty.body" = "UniveGame ve içerdiği bileşenler \"OLDUĞU GİBİ\" sunulur. Satılabilirlik, belirli bir amaca uygunluk, hatasızlık ya da herhangi bir oyunun çalışacağı dahil, açık ya da örtük hiçbir garanti verilmez. Uyumluluk puanları yalnızca tahmindir.";
+"disclaimer.liability.title" = "Sorumluluk reddi";
+"disclaimer.liability.body" = "Yürürlükteki yasaların izin verdiği en geniş ölçüde, UniveGame'i geliştirenler; veri ya da kayıt dosyası kaybı, oyun ya da sistem sorunları, hesap kısıtlamaları veya yasaklar dahil, uygulamanın kullanımından ya da kullanılamamasından doğan hiçbir doğrudan veya dolaylı zarardan sorumlu tutulamaz.";
+"disclaimer.accounts.title" = "Oyun hesapların ve anti-cheat";
+"disclaimer.accounts.body" = "Windows oyunlarını Wine ile çalıştırmak bazı oyunların ya da mağazaların kullanım koşullarına aykırı olabilir. Anti-cheat sistemleri Wine'ı tanımayabilir ve hesabını kısıtlayabilir ya da yasaklayabilir. Çevrimiçi oyunlarda bu riski üstlenmek senin sorumluluğundadır. Önemli kayıtlarının yedeğini al.";
+"disclaimer.games.title" = "Oyunlar ve lisansları";
+"disclaimer.games.body" = "UniveGame oyun satmaz ve oyun dağıtmaz. Sadece yasal olarak sahip olduğun oyunları çalıştır; her oyun kendi lisans ve kullanım koşullarına tabidir.";
+"disclaimer.trademarks.title" = "Ticari markalar";
+"disclaimer.trademarks.body" = "UniveGame; Valve, Epic Games, GOG, Ubisoft, Electronic Arts, Apple, CodeWeavers ya da Steale LLC ile bağlantılı değildir ve onlar tarafından desteklenmez. Steam, Mac, macOS, Metal ve diğer adlar sahiplerinin markalarıdır; yalnızca neyle çalışıldığını belirtmek için kullanılır.";
+"disclaimer.accept" = "Kabul Ediyorum";
+"disclaimer.decline" = "Reddet ve Çık";
+"disclaimer.acceptedOn" = "Bu koşulları %@ tarihinde kabul ettin.";
+"disclaimer.more" = "Açık kaynak ayrıntıları";
+"disclaimer.reread" = "Yeniden Oku";
+"settings.legal" = "Lisans ve sorumluluk reddi";

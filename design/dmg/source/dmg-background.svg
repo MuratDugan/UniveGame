@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- UniveGame DMG window background. 660×440 pt (render 1× = 660×440 px, 2× = 1320×880 px).
+     The design area is the top 660×400; the extra 40 pt of plain background covers the strip that
+     Finder shows below it when the window is sized for macOS 26+ (whose Finder toolbar can't be hidden).
+     Finder draws the window frame, the two icons and their names ON TOP of this image, so the image
+     contains only: the bilingual hint, two dashed drop slots, the arrow and the footer.
+     Icon centres (Finder coordinates, top-left origin): UniveGame.app (180, 200), Applications (480, 200).
+     Slots are 176×192 around each icon (icon 128 + name below). Colors: UniveGame tokens. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="440" viewBox="0 0 660 440">
+  <rect width="660" height="440" fill="#0C0C0E"/>
+
+  <!-- Hint (TR primary, EN secondary) -->
+  <g font-family="-apple-system, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif" text-anchor="middle">
+    <text x="330" y="53" font-size="13" font-weight="600" fill="#F4F4F5">Kurmak için UniveGame'i Uygulamalar klasörüne sürükle</text>
+    <text x="330" y="71" font-size="12" fill="#A1A1AA">Drag UniveGame to Applications to install</text>
+  </g>
+
+  <!-- Drop slots -->
+  <rect x="92" y="108" width="176" height="192" rx="16" fill="#141417" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <rect x="392" y="108" width="176" height="192" rx="16" fill="#141417" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="6 5"/>
+
+  <!-- Name plates: Finder always draws icon names in black on a picture background, so each name
+       sits on a light plate (Finder label centre ≈ y 283.5 for a 128 pt icon centred at y 200). -->
+  <rect x="128" y="272" width="104" height="23" rx="11.5" fill="#E4E4E7"/>
+  <rect x="428" y="272" width="104" height="23" rx="11.5" fill="#E4E4E7"/>
+
+  <!-- Arrow (accent) -->
+  <line x1="288" y1="200" x2="364" y2="200" stroke="#4D8EFF" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 7"/>
+  <path d="M360 190 L372 200 L360 210" fill="none" stroke="#4D8EFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Footer -->
+  <text x="330" y="364" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11" fill="#71717A">UniveGame · macOS 15+</text>
+</svg>

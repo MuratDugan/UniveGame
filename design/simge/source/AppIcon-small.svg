@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- UniveGame app icon, "Yörünge", small-size variant. Use ONLY for 16 px and 32 px renders
+     (icon_16x16, icon_16x16@2x, icon_32x32). Same geometry as AppIcon.svg with:
+     no hairline, orbit 28→44, planet r 36→54, controller buttons bigger. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <filter id="iconShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#18181B" filter="url(#iconShadow)"/>
+
+  <g transform="rotate(-18 512 512)">
+    <ellipse cx="512" cy="512" rx="378" ry="128" fill="none" stroke="#4D8EFF" stroke-width="44"/>
+  </g>
+
+  <path d="M300 430 C300 382 340 360 390 360 H634 C684 360 724 382 724 430 L760 600 C772 660 720 702 676 664 L612 610 H412 L348 664 C304 702 252 660 264 600 Z" fill="#F4F4F5"/>
+  <path d="M400 440 V500 M370 470 H430" stroke="#18181B" stroke-width="34" stroke-linecap="round"/>
+  <circle cx="612" cy="452" r="28" fill="#18181B"/>
+  <circle cx="656" cy="494" r="28" fill="#18181B"/>
+
+  <g transform="rotate(-18 512 512)">
+    <path d="M134 512 A378 128 0 0 0 890 512" fill="none" stroke="#4D8EFF" stroke-width="44" stroke-linecap="round"/>
+    <circle cx="157" cy="556" r="54" fill="#4D8EFF" stroke="#18181B" stroke-width="14"/>
+  </g>
+</svg>

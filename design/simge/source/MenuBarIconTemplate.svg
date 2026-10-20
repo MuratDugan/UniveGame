@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- UniveGame menu bar / template glyph, "Yörünge". Single color (black) on transparent:
+     macOS tints it (set NSImage.isTemplate = true, or name the asset "…Template").
+     18×18 pt. Same 1024 coordinates as AppIcon.svg, cropped to the glyph (viewBox 132 132 760 760)
+     so it fills the menu bar slot. Filled controller (no buttons: too small to read); the front
+     of the orbit and the planet are cut out of it with a gap so the shapes stay separate.
+     Optional: only needed for a status item. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="132 132 760 760">
+  <defs>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+      <rect width="1024" height="1024" fill="#FFFFFF"/>
+      <g transform="rotate(-18 512 512)">
+        <path d="M140 512 A372 128 0 0 0 884 512" fill="none" stroke="#000000" stroke-width="170" stroke-linecap="round"/>
+      </g>
+    </mask>
+  </defs>
+  <g transform="rotate(-18 512 512)">
+    <ellipse cx="512" cy="512" rx="372" ry="128" fill="none" stroke="#000000" stroke-width="72"/>
+  </g>
+  <path mask="url(#cut)" fill="#000000" d="M300 430 C300 382 340 360 390 360 H634 C684 360 724 382 724 430 L760 600 C772 660 720 702 676 664 L612 610 H412 L348 664 C304 702 252 660 264 600 Z"/>
+  <g transform="rotate(-18 512 512)">
+    <path d="M140 512 A372 128 0 0 0 884 512" fill="none" stroke="#000000" stroke-width="72" stroke-linecap="round"/>
+    <circle cx="163" cy="556" r="78" fill="#000000"/>
+  </g>
+</svg>

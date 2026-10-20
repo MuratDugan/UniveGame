@@ -1,0 +1,493 @@
+/* Menus */
+"menu.import" = "Add a Windows Game…";
+"menu.refresh" = "Refresh Library";
+"menu.settings" = "Settings…";
+
+/* Sidebar */
+"sidebar.library" = "Library";
+"sidebar.sources" = "Sources";
+"sidebar.store" = "Store";
+"sidebar.discover" = "Discover";
+"sidebar.connections" = "Store Accounts";
+"sidebar.settings" = "Settings";
+"sidebar.addGame" = "Add Game";
+
+"filter.all" = "All Games";
+"filter.installed" = "Installed";
+"filter.favorites" = "Favorites";
+"filter.recent" = "Recently Played";
+"source.custom" = "My Games";
+
+/* Library */
+"library.search" = "Search your library";
+"library.sort" = "Sort";
+"library.allGames" = "All games";
+"library.continue" = "Continue playing";
+"sort.title" = "Name";
+"sort.lastPlayed" = "Last played";
+"sort.playTime" = "Play time";
+
+"empty.library.title" = "Your library is empty";
+"empty.library.message" = "Connect a store under Store Accounts, or add a Windows game you already have as an .exe file.";
+"empty.filter.title" = "Nothing here yet";
+"empty.filter.message" = "Games you install, favorite or play show up in this list.";
+"empty.search.title" = "No results";
+"empty.search.message" = "Nothing matches “%@”. Check the spelling or try a shorter name.";
+
+/* Status */
+"status.running" = "Running";
+"status.launching" = "Starting…";
+"status.notInstalled" = "Not installed";
+"status.installing" = "Installing %ld%%";
+
+/* Actions */
+"action.play" = "Play";
+"action.stop" = "Stop";
+"action.install" = "Install";
+"action.favorite" = "Add to Favorites";
+"action.unfavorite" = "Remove from Favorites";
+"action.showInFinder" = "Show in Finder";
+"action.openLogs" = "Open Logs";
+"action.edit" = "Edit…";
+"action.remove" = "Remove from Library";
+
+/* Detail */
+"detail.activity" = "Activity";
+"detail.playTime" = "Play time";
+"detail.lastPlayed" = "Last played";
+"detail.never" = "Never";
+"detail.info" = "Details";
+"detail.source" = "Source";
+"detail.location" = "Location";
+"detail.executable" = "Program";
+"detail.size" = "Size on disk";
+"detail.more" = "More";
+"detail.exeMissing" = "The program file can't be found. It may have been moved or deleted. Use Edit to pick it again.";
+"detail.missing.title" = "Game not found";
+"detail.missing.message" = "It may have been removed from your library.";
+
+"time.hours" = "%ld h";
+"time.minutes" = "%ld min";
+
+/* Launch settings */
+"settings.launch" = "Launch settings";
+"launch.backend" = "Graphics";
+"launch.backend.auto" = "Automatic";
+"launch.backend.help" = "Automatic picks the best option for the game's DirectX version. Change it only if the game doesn't start or looks wrong.";
+"launch.retina" = "Retina resolution";
+"launch.retina.help" = "Render at your display's full resolution. Sharper, but slower.";
+"launch.metalfx" = "MetalFX upscaling";
+"launch.metalfx.help" = "Apple's upscaler, in DirectX 12 games that offer DLSS.";
+"launch.hud" = "Performance HUD";
+"launch.hud.help" = "Shows frame rate and GPU use on top of the game.";
+"launch.cmdctrl" = "Command acts as Control";
+"launch.cmdctrl.help" = "For games that use Ctrl shortcuts.";
+"launch.verbose" = "Detailed logs";
+"launch.verbose.help" = "Useful when reporting a problem. Makes log files larger.";
+
+/* Import */
+"import.title" = "Add a Windows game";
+"import.editTitle" = "Edit game";
+"import.subtitle" = "Pick the game's .exe file. It stays where it is; UniveGame only remembers where to find it.";
+"import.help" = "Add a Windows game you already have (.exe)";
+"import.exe" = "Program (.exe)";
+"import.drop" = "Drop an .exe here or click to choose";
+"import.drop.help" = "Usually the file next to the game's data folders";
+"import.choose" = "Choose…";
+"import.change" = "Change";
+"import.name" = "Name";
+"import.name.help" = "Shown in your library.";
+"import.arguments" = "Launch options";
+"import.arguments.help" = "Optional. Separate options with spaces.";
+"import.cover" = "Cover image";
+"import.cover.add" = "Add cover";
+"import.cover.help" = "Portrait image, 600×900 works best";
+"import.add" = "Add to Library";
+"import.error.notExe" = "Only Windows .exe files can be added.";
+"import.panel.exe" = "Choose the game's .exe file";
+"import.panel.cover" = "Choose a cover image";
+
+/* Stores */
+"stores.subtitle" = "Connect the stores you buy games from. Each store runs in its own Windows environment, and you sign in on the store's own page.";
+"stores.status.ready" = "Connected";
+"stores.status.signIn" = "Sign-in needed";
+"stores.status.notSetUp" = "Not set up";
+"stores.setUp" = "Set Up";
+"stores.installLauncher" = "Install Launcher";
+"stores.signIn" = "Sign In";
+"stores.signOut" = "Sign Out";
+"stores.signInTo" = "Sign in to %@";
+"stores.openLauncher" = "Open %@";
+"stores.gameCount" = "%ld games";
+"stores.steam.about" = "Installs the Windows Steam client. Sign in, install and play inside Steam as usual.";
+"stores.epic.about" = "Uses Legendary, an open-source Epic client. Your games are installed and started without the Epic launcher.";
+"stores.gog.about" = "Uses gogdl from Heroic Games Launcher. DRM-free games are installed straight into your library.";
+"stores.ubisoft.about" = "Installs Ubisoft Connect. Games are started through it, so Ubisoft's sign-in and updates keep working.";
+"stores.ea.about" = "Installs the EA app. Games are started through it.";
+
+/* Discover */
+"discover.featured" = "Featured on Steam";
+"discover.results" = "Search results";
+"discover.search" = "Search the Steam store";
+"discover.poweredBy" = "Prices from the Steam store";
+"discover.free" = "Free";
+"discover.openInSteam" = "Open the store page";
+"discover.error.title" = "Can't reach the store";
+"discover.error.message" = "Check your internet connection and try again.";
+
+/* Engine */
+"engine.ready" = "Engine ready";
+"engine.missing" = "No engine installed";
+"engine.demo" = "Demo mode";
+"engine.download" = "Download Engine";
+"engine.update" = "Check for New Engine";
+"engine.banner.title" = "Games need an engine to run";
+"engine.banner.message" = "The engine (Wine, DXVK, MoltenVK) translates Windows games for your Mac. It's about 400 MB.";
+"engine.phase.downloading" = "Downloading…";
+"engine.phase.verifying" = "Verifying…";
+"engine.phase.extracting" = "Unpacking…";
+"engine.phase.finishing" = "Finishing…";
+
+/* Settings */
+"settings.language" = "Language";
+"settings.language.help" = "Changes take effect immediately.";
+"settings.engine" = "Engine";
+"settings.engineVersion" = "Engine %@";
+"settings.engine.help" = "Engines come from MaPC's open-source engine list and are checked with SHA-256 before they're installed. Engines MaPC has already downloaded are used too.";
+"settings.rescan" = "Look Again";
+"settings.data" = "Data folder";
+"settings.openFolder" = "Open in Finder";
+"settings.about" = "About";
+"settings.about.text" = "UniveGame runs Windows games with MacadeKit, the open-source core of MaPC (Apache 2.0), and Wine, DXVK and MoltenVK under their own licenses. UniveGame isn't affiliated with Valve, Epic Games, GOG, Ubisoft, Electronic Arts or Steale LLC.";
+
+/* Common */
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.save" = "Save";
+"common.retry" = "Try Again";
+
+/* Alerts */
+"alert.demoTitle" = "This is demo mode. Start UniveGame without --demo to play.";
+"alert.noEngine" = "Download an engine first (Settings › Engine).";
+"alert.launchFailed" = "The game couldn't be started";
+"alert.installFailed" = "The game couldn't be installed";
+"alert.storeFailed" = "The store couldn't be set up";
+"alert.signInFailed" = "Sign-in didn't work";
+"alert.engineFailed" = "The engine couldn't be installed";
+
+"action.refresh" = "Refresh";
+
+/* Installer */
+"menu.runInstaller" = "Run a Game Installer…";
+"import.installerDetected" = "This is an installer";
+"import.installerWarning" = "UniveGame can run it like on Windows, then add the installed game to your library.";
+"import.runInstaller" = "Install…";
+"installer.title" = "Install a game";
+"installer.intro" = "The installer opens in its own window, just like on Windows. Go through it as usual. When it closes, UniveGame finds the installed game and adds it to your library.";
+"installer.driveTip.title" = "Where to install";
+"installer.driveTip" = "The installer sees a Windows C: drive. Paths like C:\\Games\\MyGame work as usual; on your Mac they live inside UniveGame's Windows environment. Leave the suggested folder unless you have a reason to change it.";
+"installer.runtime" = "Install the .NET runtime (Wine Mono)";
+"installer.runtime.help" = "Many installers and game launchers are built with .NET. Downloaded once from WineHQ (about 80 MB) and checked before use.";
+"installer.start" = "Start Installer";
+"installer.step.prepare" = "Preparing the Windows environment";
+"installer.step.runtime" = "Installing the .NET runtime";
+"installer.step.run" = "Installer running";
+"installer.step.finish" = "Finishing up";
+"installer.hint.prepare" = "The first time takes up to a minute.";
+"installer.hint.runtime" = "Downloading and installing Wine Mono. This happens only once.";
+"installer.hint.running" = "Follow the installer window. It may be behind this one. If it offers to start the game at the end, you can leave that unticked.";
+"installer.hint.finishing" = "The installer closed. Waiting for programs it started to finish. If the game opened, you can continue now.";
+"installer.stop" = "Stop Installer";
+"installer.skipWait" = "Continue Now";
+"installer.a11y.done" = "Done";
+"installer.a11y.active" = "In progress";
+"installer.done" = "Installation finished";
+"installer.installedTo" = "Installed to %@";
+"installer.pick" = "Which program starts the game?";
+"installer.pick.help" = "If the game has a launcher, pick the launcher. You can change this later with Edit.";
+"installer.recommended" = "Recommended";
+"installer.browse" = "Choose Another File…";
+"installer.openDrive" = "Show C: Drive in Finder";
+"installer.failed" = "No game was found";
+"installer.error.noEngine" = "Download an engine first (Settings › Engine).";
+"installer.error.nothingFound" = "The installer finished, but no new program appeared on the C: drive. If it installed somewhere else, choose the game's .exe by hand.";
+"installer.error.failed" = "The installer closed with an error before installing anything. Open the installer's log from the C: drive folder, or try again.";
+"common.close" = "Close";
+"action.uninstall" = "Uninstall…";
+"uninstall.title" = "Uninstall %@?";
+"uninstall.confirm" = "Uninstall";
+"uninstall.message.uninstaller" = "The game's own uninstaller will open. Remove from Library keeps the game's files.";
+"uninstall.message.trash" = "The game's folder will be moved to the Trash. Remove from Library keeps the game's files.";
+"alert.uninstallFailed" = "The game couldn't be uninstalled";
+
+"stores.steam.signIn" = "Open Steam to Sign In";
+"stores.signedInAs" = "Signed in as %@";
+
+"issue.title" = "Known issue";
+"issue.epic:Fortnite" = "Fortnite uses kernel-level anti-cheat that does not run on macOS, so it will not start.";
+
+/* Compatibility */
+"sort.compatibility" = "Compatibility";
+"compat.title" = "Compatibility";
+"compat.analyze" = "Analyze";
+"compat.reanalyze" = "Analyze Again";
+"compat.analyze.help" = "Reads the game's files and checks Steam, ProtonDB and AreWeAntiCheatYet";
+"compat.analyzing" = "Analyzing…";
+"compat.empty" = "Not analyzed yet. UniveGame can read the game's files and community data to estimate how well it will run on this Mac.";
+"compat.analyzedAt" = "Analyzed";
+"compat.source.files" = "game files";
+"compat.source.steam" = "Steam";
+"compat.source.protondb" = "ProtonDB";
+"compat.source.awacy" = "AreWeAntiCheatYet";
+"compat.confidence.low" = "Low confidence: little evidence was found.";
+"compat.confidence.medium" = "Medium confidence.";
+"compat.confidence.high" = "High confidence: several sources agree.";
+"compat.tier.excellent" = "Excellent";
+"compat.tier.excellent.help" = "Should run smoothly.";
+"compat.tier.good" = "Good";
+"compat.tier.good.help" = "Should run well, maybe with small issues.";
+"compat.tier.playable" = "Playable";
+"compat.tier.playable.help" = "Runs, but expect stutter or glitches.";
+"compat.tier.poor" = "Poor";
+"compat.tier.poor.help" = "May start, but likely runs badly.";
+"compat.tier.broken" = "Won't run";
+"compat.tier.broken.help" = "Something stops this game on a Mac.";
+"compat.analyzeAll" = "Analyze Whole Library";
+"compat.cancelAll" = "Stop Analyzing";
+"compat.progress" = "%ld/%ld";
+
+"compat.f.knownIssue" = "Known issue: %@";
+"compat.f.kernelAC" = "%@ found: kernel-level anti-cheat doesn't run on macOS.";
+"compat.f.acLinuxOnly" = "%@: supported on Linux (Proton), but not on macOS.";
+"compat.f.onlineAC" = "Anti-cheat (%@) that blocks Wine.";
+"compat.f.deckAC" = "Steam Deck: unsupported anti-cheat.";
+"compat.f.punkbuster" = "PunkBuster: online play may be refused.";
+"compat.f.dx11" = "DirectX 11: runs through DXVK on Metal (fast path).";
+"compat.f.dx10" = "DirectX 10: runs through DXVK on Metal.";
+"compat.f.dx12metal" = "DirectX 12: runs through Apple's D3DMetal.";
+"compat.f.dx12x86" = "32-bit DirectX 12: no fast path on the Mac.";
+"compat.f.dx12noMetal" = "DirectX 12 needs D3DMetal (Game Porting Toolkit), not installed.";
+"compat.f.dx9" = "DirectX 9: goes through OpenGL (WineD3D); heavier games stutter.";
+"compat.f.dx9old" = "DirectX 9 (older game): OpenGL path is usually enough.";
+"compat.f.dxOld" = "DirectX 8 / DirectDraw: OpenGL path, fine for lighter games.";
+"compat.f.opengl" = "OpenGL: the Mac is limited to OpenGL 4.1.";
+"compat.f.vulkan" = "Vulkan only: MoltenVK lacks geometry shaders.";
+"compat.f.gfxUnknown" = "Graphics API unknown.";
+"compat.f.32bit" = "32-bit game: no D3DMetal, extra translation.";
+"compat.f.engineGood" = "%@: usually runs well under Wine.";
+"compat.f.engineLight" = "%@: light engine, usually fine.";
+"compat.f.engineHeavy" = "%@: demanding (DirectX 12, Nanite/Lumen).";
+"compat.f.engineChromium" = "%@: built on Chromium, which often draws badly under Wine.";
+"compat.f.engine" = "Engine: %@.";
+"compat.f.chromium" = "Uses an embedded browser (Chromium), often a black window under Wine.";
+"compat.f.customAC" = "Game's own anti-cheat (%@): unknown until tested.";
+"compat.f.dotnet" = ".NET program: needs Wine Mono.";
+"compat.f.mediaFoundation" = "Uses Media Foundation: videos may not play.";
+"compat.f.launcher" = "Needs %@, which can be unreliable under Wine.";
+"compat.f.dxHelpers" = "Ships its own DirectX helpers; UniveGame uses them.";
+"compat.f.deckVerified" = "Steam Deck Verified.";
+"compat.f.deckPlayable" = "Steam Deck Playable.";
+"compat.f.deckUnsupported" = "Steam Deck Unsupported.";
+"compat.f.proton" = "ProtonDB: %@ (%@ reports).";
+"compat.f.macVersion" = "Has a macOS version: play it with Steam or Epic for Mac instead.";
+"compat.f.noData" = "Not enough information; install the game for a deeper analysis.";
+
+"compat.tier.unknown" = "Unknown";
+"compat.tier.unknown.help" = "Not enough information to estimate. Install the game for a file analysis.";
+"compat.f.dx11guess" = "Probably DirectX 11 (judging by the minimum graphics card): DXVK path.";
+
+"compat.f.userAC" = "%@: user-mode anti-cheat that runs under Wine on Linux, so it should here too.";
+
+"sidebar.runInstaller" = "Run a Game Installer";
+"sidebar.runInstaller.help" = "Install a game from its setup.exe or .msi, as on Windows";
+
+"cover.found" = "From Steam: %@";
+"cover.dismiss" = "Don't use this cover";
+"cover.searching" = "Looking for a cover…";
+"cover.findOnline" = "Find Cover Online";
+"cover.notFound" = "No cover found online";
+
+/* D3DMetal */
+"d3dmetal.title" = "DirectX 12 (D3DMetal)";
+"d3dmetal.ready" = "Ready";
+"d3dmetal.notReady" = "Not set up";
+"d3dmetal.about" = "DirectX 12 games (Cyberpunk 2077, PEAK…) need Apple's D3DMetal. It works for 64-bit games only.";
+"d3dmetal.step1" = "Download the D3DMetal engine";
+"d3dmetal.step1.help" = "A Wine build prepared for D3DMetal (about 290 MB, checked with SHA-256). Your other games keep their current engine.";
+"d3dmetal.step1.button" = "Download Engine";
+"d3dmetal.step2" = "Add Apple's Game Porting Toolkit";
+"d3dmetal.step2.help" = "Sign in at developer.apple.com with a free Apple Account, download \"Game Porting Toolkit\" (.dmg), then choose the file here. The app checks Apple's signature and copies only D3DMetal.";
+"d3dmetal.step2.open" = "Open Apple's Download Page";
+"d3dmetal.step2.choose" = "Choose Downloaded File…";
+"d3dmetal.step2.panel" = "Choose the Game Porting Toolkit disk image (.dmg)";
+"d3dmetal.license.note" = "D3DMetal is Apple's software under Apple's license, which allows using it to develop, test and evaluate games. It is never included in or distributed with this app.";
+"d3dmetal.license.title" = "Apple's license for D3DMetal";
+"d3dmetal.license.subtitle" = "Read and accept Apple's terms to install D3DMetal from your download.";
+"d3dmetal.license.missing" = "The license file wasn't found in the toolkit. Read it on Apple's download page before accepting.";
+"d3dmetal.license.accept" = "Accept and Install";
+"d3dmetal.importFailed" = "D3DMetal couldn't be added";
+"d3dmetal.setUp" = "Set Up";
+"d3dmetal.setUp.help" = "Set up DirectX 12 support in Settings";
+
+/* v2 — Rail */
+"rail.library" = "Library";
+"rail.discover" = "Discover";
+"rail.stores" = "Stores";
+"rail.add" = "Add";
+"rail.settings" = "Settings";
+"rail.engine" = "Engine";
+
+/* v2 — Library */
+"library.chip.all" = "All";
+"library.search.v2" = "Search games, sources or status";
+"shelf.ready" = "Ready to play";
+"shelf.ready.hint" = "Your installed games";
+"shelf.install" = "Install and play";
+"shelf.install.hint" = "Run well on Mac";
+"shelf.hard" = "Hard on Mac";
+"shelf.hard.hint" = "Blocked or known issues";
+"shelf.unknown" = "Not analyzed yet";
+"shelf.unknown.hint" = "Analyze a game to get a score";
+"stage.playtime" = "%@ played";
+"stage.openPage" = "Game page";
+"stage.whyBroken" = "Why won't it run?";
+"stage.setUpD3DMetal" = "Set up D3DMetal";
+"cover.notAnalyzed" = "Not analyzed yet";
+
+/* v2 — Empty library */
+"empty.v2.title" = "Your shelves are empty";
+"empty.v2.body" = "Connect Steam or Epic. Your games arrive and line up on shelves by how well they'll run on your Mac.";
+"empty.v2.connect" = "Connect a Store";
+"empty.v2.drop" = "Or drag an .exe or installer onto the window";
+
+/* v2 — Game page */
+"game.back" = "Library";
+"game.installAnyway" = "Install Anyway";
+"game.fact.status" = "Status";
+"game.fact.playtime" = "Play time";
+"game.fact.lastPlayed" = "Last played";
+"game.fact.location" = "Location";
+"game.fact.size" = "Estimated size";
+"game.fact.source" = "Source";
+"compat.notice.blocked" = "Won't open on Mac";
+"compat.notice.blocked.body" = "Until this block is lifted, the game won't open even if you install it.";
+"compat.notice.track" = "Track status";
+"compat.notice.d3d" = "Set up D3DMetal first";
+"compat.notice.d3d.body" = "This game uses DirectX 12. The engine is about 290 MB, and Apple's Game Porting Toolkit is also needed.";
+"launch.backend.manual" = "%@ chosen manually. If anything breaks, switch back to Automatic.";
+
+/* v2 — Add game */
+"add.title" = "Add a game";
+"add.subtitle" = "Three ways to bring a Windows game into your library. Files stay where they are.";
+"add.method.installed" = "An installed game";
+"add.method.installed.detail" = "Choose the game's .exe";
+"add.method.setup" = "An installer";
+"add.method.setup.detail" = "Run setup.exe, then add";
+"add.method.store" = "A store account";
+"add.method.store.detail" = "Steam, Epic, GOG, Ubisoft, EA";
+"add.cover.found" = "Found on %@";
+"add.cover.other" = "Choose another cover…";
+"add.firstLook" = "First look:";
+"add.drop" = "Drop an .exe here or click to choose one";
+
+/* v2 — Installer */
+"installer.close" = "Close";
+"installer.step.file" = "File";
+"installer.step.file.detail" = "Review the installer";
+"installer.step.run.detail" = "Runs in the Windows environment";
+"installer.step.pick" = "Launcher";
+"installer.step.pick.detail" = "Choose what opens the game";
+"installer.ready.title" = "Installer ready";
+"installer.ready.body" = "The installer opens in a separate window inside UniveGame's Windows environment. Follow its steps; when it's done, we'll help you add the game.";
+"installer.info.location" = "Install to";
+"installer.info.engine" = "Engine";
+"installer.info.space" = "Free space";
+"installer.info.spaceValue" = "%@ available";
+"installer.running.title" = "Installer is open";
+"installer.running.body" = "Click Finish in the installer window and this continues on its own.";
+"installer.running.state" = "Running";
+"installer.log.preparing" = "Preparing the Windows environment";
+"installer.log.prepared" = "Windows environment ready";
+"installer.log.runtime" = "Installing Wine Mono";
+"installer.log.started" = "Started %@";
+"installer.log.windowOpen" = "Installer window is open…";
+"installer.log.finishing" = "Installer closed, waiting for it to finish…";
+"installer.done.title" = "Installation complete";
+"installer.done.body" = "Installed to %@. Which program starts the game?";
+
+/* v2 — Stores */
+"stores.v2.title" = "Stores";
+"stores.v2.subtitle" = "Each store runs in its own Windows environment. You sign in on the store's own page.";
+"stores.meter.connected" = "%1$@ / %2$@ stores connected";
+"stores.status.syncing" = "Syncing";
+"stores.meta.synced" = "%1$@ games · synced %2$@";
+"stores.meta.found" = "%@ new found";
+
+/* v2 — Discover */
+"discover.v2.subtitle" = "Featured on Steam, with how well each will run on your Mac. Prices from the Steam store.";
+"discover.chip.featured" = "Featured";
+"discover.chip.deals" = "On sale";
+"discover.chip.macGreat" = "Great on Mac";
+"discover.chip.new" = "New releases";
+
+/* v2 — Settings */
+"settings.section.general" = "General";
+"settings.section.engine" = "Engine";
+"settings.section.dx12" = "DirectX 12";
+"settings.section.about" = "About";
+"settings.dx12.needsSetup" = "Setup needed";
+"d3dmetal.step" = "Step %1$@ of %2$@";
+"d3dmetal.downloading" = "Downloading";
+"d3dmetal.progress" = "%1$@ / %2$@ MB · %3$@ left";
+"d3dmetal.status.notInstalled" = "Not installed";
+"d3dmetal.status.ready" = "Ready";
+"add.cover.found.steam" = "Found on Steam";
+"add.cover.found.gog" = "Found on GOG";
+
+/* v2 — app details */
+"rail.a11y" = "Main navigation";
+"stage.a11y" = "Selected game";
+"installer.a11y.step" = "Step %1$@ of %2$@";
+"launch.retina.short" = "Sharper, a little slower";
+"launch.metalfx.short" = "In DirectX 12 games that offer DLSS";
+"launch.hud.short" = "Frame rate and GPU use";
+"launch.cmdctrl.short" = "Games that use Ctrl shortcuts";
+"compat.f.onlineAC.title" = "%@ blocks it";
+"compat.f.kernelAC.title" = "%@ blocks it";
+"compat.f.acLinuxOnly.title" = "%@ doesn't support Mac";
+"compat.f.deckAC.title" = "Anti-cheat blocks it";
+"settings.language.system" = "System";
+"settings.language.v2help" = "Changes apply right away.";
+"settings.about.version" = "Version %@ · A universal library that runs Windows games on your Mac.";
+"stores.meta.size" = "About %@";
+"add.cover.placeholder" = "Cover goes here";
+"installer.step.install" = "Install";
+"installer.info.show" = "Show";
+"installer.info.runtime" = ".NET";
+"installer.runtime.short" = "Install with Wine Mono (recommended)";
+"installer.showWindow" = "Show Installer Window";
+
+/* Disclaimer */
+"disclaimer.title" = "Before you start";
+"disclaimer.subtitle" = "Please read the following before using UniveGame. You need to accept it to continue.";
+"disclaimer.reviewTitle" = "License and disclaimer";
+"disclaimer.os.title" = "Open-source components";
+"disclaimer.os.body" = "UniveGame is built on MacadeKit, the open-source core of MaPC (Apache 2.0). Games run with Wine (LGPL 2.1+), DXVK (zlib), MoltenVK (Apache 2.0) and Wine Mono (MIT, LGPL, GPL). For Epic and GOG, Legendary and gogdl (GPL 3.0) run as separate programs; UniveGame neither includes nor modifies their code. Each component comes with its own license; the license texts ship inside the engines, and source code for the LGPL/GPL components is available from their publishers.";
+"disclaimer.apple.title" = "Apple's D3DMetal";
+"disclaimer.apple.body" = "D3DMetal is part of Apple's Game Porting Toolkit and doesn't come with UniveGame. You download it from Apple yourself, and its use is governed by Apple's license.";
+"disclaimer.warranty.title" = "No warranty";
+"disclaimer.warranty.body" = "UniveGame and its components are provided \"AS IS\", without warranty of any kind, express or implied, including merchantability, fitness for a particular purpose, freedom from errors, or that any game will run. Compatibility scores are estimates only.";
+"disclaimer.liability.title" = "Limitation of liability";
+"disclaimer.liability.body" = "To the fullest extent permitted by law, the developers of UniveGame are not liable for any direct or indirect damage arising from using or being unable to use the app, including lost data or save files, game or system problems, and account restrictions or bans.";
+"disclaimer.accounts.title" = "Your game accounts and anti-cheat";
+"disclaimer.accounts.body" = "Running Windows games through Wine may conflict with some games' or stores' terms of use. Anti-cheat systems may not recognize Wine and can restrict or ban your account. Taking that risk in online games is your responsibility. Keep backups of important saves.";
+"disclaimer.games.title" = "Games and their licenses";
+"disclaimer.games.body" = "UniveGame doesn't sell or distribute games. Only run games you legally own; each game is subject to its own license and terms of use.";
+"disclaimer.trademarks.title" = "Trademarks";
+"disclaimer.trademarks.body" = "UniveGame isn't affiliated with or endorsed by Valve, Epic Games, GOG, Ubisoft, Electronic Arts, Apple, CodeWeavers or Steale LLC. Steam, Mac, macOS, Metal and other names are trademarks of their owners, used only to say what UniveGame works with.";
+"disclaimer.accept" = "I Accept";
+"disclaimer.decline" = "Decline and Quit";
+"disclaimer.acceptedOn" = "You accepted these terms on %@.";
+"disclaimer.more" = "Open-source details";
+"disclaimer.reread" = "Read Again";
+"settings.legal" = "License and disclaimer";

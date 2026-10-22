@@ -96,7 +96,8 @@ final class AppModel {
     private let customPaths = Paths(home: AppPaths.home.appendingPathComponent("Custom", isDirectory: true))
     private var playStarts: [String: Date] = [:]
 
-    static let engineManifestURL = URL(string: "https://mapc.games/engine-manifest.json")!
+    /// Our own engine list (UniveEngine releases), so engines stay available whatever happens upstream.
+    static let engineManifestURL = URL(string: "https://raw.githubusercontent.com/MuratDugan/UniveEngine/main/engine/manifest.json")!
 
     /// Game page to open on launch (`--open <id>`, for development and screenshots).
     var pendingDetailID: String?
@@ -1004,17 +1005,12 @@ final class AppModel {
         }
     }
 
-    /// Wine reads Retina mode when its server starts, so it's written only while the environment is idle
-    /// (a running Steam keeps its current mode until it restarts) and only when it changed.
+    /// Wine reads Retina mode when its server starts, so it's synced only while the environment is idle
+    /// (a running Steam keeps its current mode until it restarts). UniveEngine reads the registry and
+    /// writes only what differs.
     private func applyRetina(_ retina: Bool, runner: WineRunner, engine: Engine, bottle: Bottle) async {
-        let key = bottle.url.path
-        guard state.appliedMacDriver?[key]?["RetinaMode"] != retina, bottle.exists,
-              !(await runner.isBottleActive(engine: engine, bottle: bottle)) else { return }
-        await runner.applyMacDriver(["RetinaMode": retina], engine: engine, bottle: bottle)
-        var applied = state.appliedMacDriver ?? [:]
-        applied[key, default: [:]]["RetinaMode"] = retina
-        state.appliedMacDriver = applied
-        persist()
+        guard bottle.exists, !(await runner.isBottleActive(engine: engine, bottle: bottle)) else { return }
+        await runner.syncMacDriver(["RetinaMode": retina], engine: engine, bottle: bottle)
     }
 
     func stop(_ item: LibraryItem) {

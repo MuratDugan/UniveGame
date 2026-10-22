@@ -1,12 +1,12 @@
 {
-  "originHash" : "272dfb30792aae202a53e6b655793c6b878bb1acf8e445ea6821182bad923c61",
+  "originHash" : "8ad9cc0252ca410193937ab185ae76f88e0929e7670945a43871765f2a115e7d",
   "pins" : [
     {
-      "identity" : "mapc-engine",
+      "identity" : "univeengine",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/abduzeedo/mapc-engine.git",
+      "location" : "https://github.com/MuratDugan/UniveEngine.git",
       "state" : {
-        "revision" : "37bb046423dbb85c5cb98fee742868dccb96002d"
+        "revision" : "37721818a43a59402e5b91100b4eb2a7529a16c2"
       }
     }
   ],

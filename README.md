@@ -38,6 +38,9 @@ and Apple's D3DMetal. You don't set up Wine prefixes or read forum threads first
 library tells you which games are ready to play, which ones are worth installing and which ones won't open on a Mac,
 with the reason. It costs nothing and it never will.
 
+Setup files are covered too: if an installer won't run under Wine, UniveGame unpacks it directly (Inno Setup, NSIS,
+MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
+
 <p align="center">
   <img src="docs/screenshots/library.jpg" alt="UniveGame library: a stage for the selected game with its compatibility score, and shelves for games ready to play, worth installing, hard on Mac and not analyzed yet" width="100%">
 </p>
@@ -118,8 +121,8 @@ open -n build/UniveGame.app --args --demo    # try the interface without engines
 swift test                                   # unit tests
 ```
 
-Swift Package Manager fetches the engine library, [MacadeKit](https://github.com/abduzeedo/mapc-engine), pinned to an
-exact commit. Developer flags: `--section discover|stores|add|settings|dx12`, `--open steam:1145360`,
+Swift Package Manager fetches the engine library, [UniveEngine](https://github.com/MuratDugan/UniveEngine), pinned
+to an exact commit. Developer flags: `--section discover|stores|add|settings|dx12`, `--open steam:1145360`,
 `--install <setup.exe>`, `-appLanguage en|tr|system`.
 
 Releases are built with `scripts/release.sh` (Developer ID signing, hardened runtime, notarization, stapling, DMG).
@@ -155,8 +158,9 @@ backups of important saves.
 
 ## Roadmap
 
-- **UniveEngine.** UniveGame currently uses MacadeKit and MaPC's published Wine engine builds. The plan is a fully
-  independent engine and build pipeline, made in the open.
+- **UniveEngine.** The engine now lives in its own repository, [UniveEngine](https://github.com/MuratDugan/UniveEngine),
+  with its own engine list and releases (including the complete source of every Wine build). Next: engines built in
+  CI from pinned sources, newer Wine and DXVK.
 - More stores and better per-game fixes.
 - Community compatibility reports from inside the app.
 
@@ -168,7 +172,8 @@ UniveGame is released under the [Apache License 2.0](LICENSE). See [NOTICE](NOTI
 
 It stands on the work of others:
 
-- [MacadeKit](https://github.com/abduzeedo/mapc-engine), the open-source core of [MaPC](https://mapc.games)
+- [UniveEngine](https://github.com/MuratDugan/UniveEngine), our engine, derived from
+  [MacadeKit](https://github.com/abduzeedo/mapc-engine), the open-source core of [MaPC](https://mapc.games)
   (Apache 2.0): Wine engines, environments, graphics backends and store integrations.
 - [Wine](https://www.winehq.org) (LGPL 2.1+), [DXVK](https://github.com/doitsujin/dxvk) (zlib),
   [MoltenVK](https://github.com/KhronosGroup/MoltenVK) (Apache 2.0), Wine Mono and

@@ -35,7 +35,8 @@ açılmayacağını söyler. Ücretsizdir ve öyle kalacak.
 - **Her oyun için uyumluluk puanı.** 0–100 puan, Mükemmel'den Çalışmaz'a bir seviye, güven derecesi ve her gerekçe:
   DirectX sürümü, 32/64-bit, oyun motoru, anti-cheat, Steam Deck sonucu, ProtonDB raporları.
 - **Windows'taki gibi kurulum.** `setup.exe` ya da `.msi` dosyasını pencereye bırak. Kendi Windows ortamında çalışır,
-  `C:\Games\...` yolları olduğu gibi işler, kurulum kapanınca UniveGame oyunun başlatıcısını bulur.
+  `C:\Games\...` yolları olduğu gibi işler, kurulum kapanınca UniveGame oyunun başlatıcısını bulur. Kurulum programı
+  Wine'da çalışmazsa UniveGame paketi doğrudan açar (Inno Setup, NSIS, MSI, 7z, ZIP, RAR, CAB).
 - **DirectX 9'dan 12'ye.** DirectX 10/11 için DXVK, eski oyunlar için WineD3D, DirectX 12 için Apple'ın D3DMetal'i
   (kendi indirdiğin Game Porting Toolkit'ten iki adımda kurulur).
 - **Oyun başına ayarlar.** Grafik katmanı, Retina, MetalFX, performans göstergesi, Command → Control.
@@ -96,8 +97,8 @@ open -n build/UniveGame.app --args --demo    # motor ve hesap olmadan arayüzü 
 swift test
 ```
 
-Swift Package Manager motor kütüphanesi [MacadeKit](https://github.com/abduzeedo/mapc-engine)'i sabit bir commit'ten
-indirir. Geliştirme parametreleri: `--section discover|stores|add|settings|dx12`, `--open steam:1145360`,
+Swift Package Manager motor kütüphanesi [UniveEngine](https://github.com/MuratDugan/UniveEngine)'i sabit bir
+commit'ten indirir. Geliştirme parametreleri: `--section discover|stores|add|settings|dx12`, `--open steam:1145360`,
 `--install <setup.exe> [--no-runtime] [--start]`, `-appLanguage tr|en|system`.
 
 ### Sürüm ve dağıtım
@@ -131,15 +132,17 @@ Yeni bir dil eklemek için `Resources/en.lproj/Localizable.strings` dosyasını 
 
 ## Yol haritası
 
-- **UniveEngine:** UniveGame şu an MacadeKit'i ve MaPC'nin yayımladığı Wine motorlarını kullanıyor. Hedef, açık
-  geliştirilen, tamamen bağımsız bir motor ve derleme hattı.
+- **UniveEngine:** Motor artık kendi reposunda: [UniveEngine](https://github.com/MuratDugan/UniveEngine). Kendi motor
+  listesi ve release'leri var (her Wine derlemesinin tam kaynağıyla). Sıradaki adım: motorların CI'da sabit
+  kaynaklardan derlenmesi, daha yeni Wine ve DXVK.
 - Daha fazla mağaza ve oyun başına düzeltmeler.
 - Uygulama içinden topluluk uyumluluk raporları.
 
 ## Lisans ve teşekkürler
 
 UniveGame [Apache License 2.0](LICENSE) ile yayımlanır; atıflar [NOTICE](NOTICE) dosyasında.
-[MacadeKit](https://github.com/abduzeedo/mapc-engine) (Apache 2.0), [Wine](https://www.winehq.org),
+[UniveEngine](https://github.com/MuratDugan/UniveEngine) ([MacadeKit](https://github.com/abduzeedo/mapc-engine)'ten
+türetildi, Apache 2.0), [Wine](https://www.winehq.org),
 [DXVK](https://github.com/doitsujin/dxvk), [MoltenVK](https://github.com/KhronosGroup/MoltenVK), Wine Mono,
 [Legendary](https://github.com/derrod/legendary) ve gogdl üzerine kuruludur.
 

@@ -158,7 +158,7 @@
 "settings.data" = "Veri klasörü";
 "settings.openFolder" = "Finder'da Aç";
 "settings.about" = "Hakkında";
-"settings.about.text" = "UniveGame, Windows oyunlarını MaPC'nin açık kaynak çekirdeği MacadeKit (Apache 2.0) ile ve kendi lisanslarıyla gelen Wine, DXVK ve MoltenVK ile çalıştırır. UniveGame'nın Valve, Epic Games, GOG, Ubisoft, Electronic Arts ya da Steale LLC ile bir bağı yoktur.";
+"settings.about.text" = "UniveGame, Windows oyunlarını MacadeKit'ten türetilen açık kaynak motoru UniveEngine (Apache 2.0) ile ve kendi lisanslarıyla gelen Wine, DXVK ve MoltenVK ile çalıştırır. UniveGame'nın Valve, Epic Games, GOG, Ubisoft, Electronic Arts ya da Steale LLC ile bir bağı yoktur.";
 
 /* Ortak */
 "common.ok" = "Tamam";
@@ -472,7 +472,7 @@
 "disclaimer.subtitle" = "UniveGame'i kullanmadan önce lütfen aşağıdakileri oku. Devam etmek için kabul etmen gerekir.";
 "disclaimer.reviewTitle" = "Lisans ve sorumluluk reddi";
 "disclaimer.os.title" = "Açık kaynak bileşenler";
-"disclaimer.os.body" = "UniveGame, MaPC'nin açık kaynak çekirdeği MacadeKit (Apache 2.0) üzerine kurulu. Oyunlar; Wine (LGPL 2.1+), DXVK (zlib), MoltenVK (Apache 2.0) ve Wine Mono (MIT, LGPL, GPL) ile çalışır. Epic ve GOG için Legendary ve gogdl (GPL 3.0) ayrı programlar olarak çalışır; UniveGame onların kodunu içermez ve değiştirmez. Her bileşen kendi lisansıyla gelir; lisans metinleri motorların içindedir ve LGPL/GPL bileşenlerin kaynak kodu yayıncılarından alınabilir.";
+"disclaimer.os.body" = "UniveGame, kendi açık kaynak motoru UniveEngine üzerine kurulu; UniveEngine, MaPC'nin açık kaynak çekirdeği MacadeKit'ten (Apache 2.0) türetildi. Oyunlar; Wine (LGPL 2.1+), DXVK (zlib), MoltenVK (Apache 2.0) ve Wine Mono (MIT, LGPL, GPL) ile çalışır. Epic ve GOG için Legendary ve gogdl (GPL 3.0) ayrı programlar olarak çalışır; UniveGame onların kodunu içermez ve değiştirmez. Her bileşen kendi lisansıyla gelir; lisans metinleri motorların içindedir ve LGPL/GPL bileşenlerin kaynak kodu yayıncılarından alınabilir.";
 "disclaimer.apple.title" = "Apple'ın D3DMetal'i";
 "disclaimer.apple.body" = "D3DMetal, Apple'ın Game Porting Toolkit'inin parçasıdır ve UniveGame ile birlikte gelmez. Onu Apple'dan kendin indirirsin; kullanımı Apple'ın lisansına tabidir.";
 "disclaimer.warranty.title" = "Garanti yok";

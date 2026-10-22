@@ -158,7 +158,7 @@
 "settings.data" = "Data folder";
 "settings.openFolder" = "Open in Finder";
 "settings.about" = "About";
-"settings.about.text" = "UniveGame runs Windows games with MacadeKit, the open-source core of MaPC (Apache 2.0), and Wine, DXVK and MoltenVK under their own licenses. UniveGame isn't affiliated with Valve, Epic Games, GOG, Ubisoft, Electronic Arts or Steale LLC.";
+"settings.about.text" = "UniveGame runs Windows games with UniveEngine, its open-source engine derived from MaPC's MacadeKit (Apache 2.0), and Wine, DXVK and MoltenVK under their own licenses. UniveGame isn't affiliated with Valve, Epic Games, GOG, Ubisoft, Electronic Arts or Steale LLC.";
 
 /* Common */
 "common.ok" = "OK";
@@ -472,7 +472,7 @@
 "disclaimer.subtitle" = "Please read the following before using UniveGame. You need to accept it to continue.";
 "disclaimer.reviewTitle" = "License and disclaimer";
 "disclaimer.os.title" = "Open-source components";
-"disclaimer.os.body" = "UniveGame is built on MacadeKit, the open-source core of MaPC (Apache 2.0). Games run with Wine (LGPL 2.1+), DXVK (zlib), MoltenVK (Apache 2.0) and Wine Mono (MIT, LGPL, GPL). For Epic and GOG, Legendary and gogdl (GPL 3.0) run as separate programs; UniveGame neither includes nor modifies their code. Each component comes with its own license; the license texts ship inside the engines, and source code for the LGPL/GPL components is available from their publishers.";
+"disclaimer.os.body" = "UniveGame is built on its own open-source engine, UniveEngine, derived from MacadeKit, the open-source core of MaPC (Apache 2.0). Games run with Wine (LGPL 2.1+), DXVK (zlib), MoltenVK (Apache 2.0) and Wine Mono (MIT, LGPL, GPL). For Epic and GOG, Legendary and gogdl (GPL 3.0) run as separate programs; UniveGame neither includes nor modifies their code. Each component comes with its own license; the license texts ship inside the engines, and source code for the LGPL/GPL components is available from their publishers.";
 "disclaimer.apple.title" = "Apple's D3DMetal";
 "disclaimer.apple.body" = "D3DMetal is part of Apple's Game Porting Toolkit and doesn't come with UniveGame. You download it from Apple yourself, and its use is governed by Apple's license.";
 "disclaimer.warranty.title" = "No warranty";

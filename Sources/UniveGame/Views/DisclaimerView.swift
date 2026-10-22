@@ -22,7 +22,7 @@ struct DisclaimerView: View {
         ("games", "gamecontroller"),
         ("trademarks", "c.circle"),
     ]
-    static let openSourcePage = URL(string: "https://mapc.games/opensource.html")!
+    static let openSourcePage = URL(string: "https://github.com/MuratDugan/UniveEngine#engines-and-the-manifest")!
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {

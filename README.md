@@ -172,9 +172,8 @@ UniveGame is released under the [Apache License 2.0](LICENSE). See [NOTICE](NOTI
 
 It stands on the work of others:
 
-- [UniveEngine](https://github.com/MuratDugan/UniveEngine), our engine, derived from
-  [MacadeKit](https://github.com/abduzeedo/mapc-engine), the open-source core of [MaPC](https://mapc.games)
-  (Apache 2.0): Wine engines, environments, graphics backends and store integrations.
+- [UniveEngine](https://github.com/MuratDugan/UniveEngine), our engine (Apache 2.0, derived from MacadeKit; see
+  [NOTICE](NOTICE)): Wine engines, environments, graphics backends and store integrations.
 - [Wine](https://www.winehq.org) (LGPL 2.1+), [DXVK](https://github.com/doitsujin/dxvk) (zlib),
   [MoltenVK](https://github.com/KhronosGroup/MoltenVK) (Apache 2.0), Wine Mono and
   [Gcenx's macOS Wine builds](https://github.com/Gcenx/macOS_Wine_builds).

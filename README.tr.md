@@ -141,8 +141,8 @@ Yeni bir dil eklemek için `Resources/en.lproj/Localizable.strings` dosyasını 
 ## Lisans ve teşekkürler
 
 UniveGame [Apache License 2.0](LICENSE) ile yayımlanır; atıflar [NOTICE](NOTICE) dosyasında.
-[UniveEngine](https://github.com/MuratDugan/UniveEngine) ([MacadeKit](https://github.com/abduzeedo/mapc-engine)'ten
-türetildi, Apache 2.0), [Wine](https://www.winehq.org),
+[UniveEngine](https://github.com/MuratDugan/UniveEngine) (MacadeKit'ten türetildi, Apache 2.0; bkz.
+[NOTICE](NOTICE)), [Wine](https://www.winehq.org),
 [DXVK](https://github.com/doitsujin/dxvk), [MoltenVK](https://github.com/KhronosGroup/MoltenVK), Wine Mono,
 [Legendary](https://github.com/derrod/legendary) ve gogdl üzerine kuruludur.
 

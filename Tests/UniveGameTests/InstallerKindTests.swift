@@ -44,3 +44,33 @@ final class InstallerKindTests: XCTestCase {
         XCTAssertEqual(InstallScanner.defaultArguments(for: game.appendingPathComponent("game.exe")), [])
     }
 }
+
+final class ExtractionFolderNameTests: XCTestCase {
+    func testInstallerWordsGoOnlyAsWholeWords() {
+        XCTAssertEqual(AppModel.folderName(fromSetup: URL(fileURLWithPath: "/d/Game Installer.exe")), "Game")
+        XCTAssertEqual(AppModel.folderName(fromSetup: URL(fileURLWithPath: "/d/Kurtlar Vadisi Kur.exe")), "Kurtlar Vadisi")
+        XCTAssertEqual(AppModel.folderName(fromSetup: URL(fileURLWithPath: "/d/cs16kurv2017_oyunyoneticisi.exe")), "cs16kurv2017 oyunyoneticisi")
+        XCTAssertEqual(AppModel.folderName(fromSetup: URL(fileURLWithPath: "/d/setup.exe")), "Game")
+        XCTAssertEqual(AppModel.folderName(from: "Half: Life?"), "Half Life")
+    }
+}
+
+final class StateDecodingTests: XCTestCase {
+    func testOldAndPartialLibraryFilesStillLoad() throws {
+        // A file from an older version: no compat, no profiles, a custom game without the newer fields.
+        let json = #"{"customGames":[{"title":"S2 Rebirth","executable":"file:///tmp/S2.exe"}],"favorites":["steam:1"]}"#
+        let state = try JSONDecoder().decode(LibraryState.self, from: Data(json.utf8))
+        XCTAssertEqual(state.customGames.first?.title, "S2 Rebirth")
+        XCTAssertEqual(state.customGames.first?.arguments, [])
+        XCTAssertEqual(state.favorites, ["steam:1"])
+        XCTAssertNil(state.compat)
+    }
+
+    func testUnknownGraphicsAPIDoesNotLoseTheReport() throws {
+        let json = #"{"analyzedFiles":3,"has64Bit":true,"graphics":["d3d11","d3d13"],"engine":"newEngine"}"#
+        let files = try JSONDecoder().decode(FileFindings.self, from: Data(json.utf8))
+        XCTAssertEqual(files.graphics, [.d3d11])
+        XCTAssertNil(files.engine)
+        XCTAssertTrue(files.has64Bit)
+    }
+}

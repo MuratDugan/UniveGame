@@ -495,3 +495,6 @@
 "installer.error.crashed" = "Kurulum programı penceresini açamadan kapandı; bu kurulum UniveGame'in Windows ortamında çalışmıyor. Hiçbir şey kurulmadı. Oyunun resmi sürümünü (Steam, GOG…) ya da başka bir kurulum dosyasını dene. Oyun Windows'ta kuruluysa klasörünü Mac'e kopyalayıp .exe dosyasını \"Oyun ekle\" ile ekleyebilirsin.";
 "installer.crashed.title" = "Kurulum açılamadı";
 "installer.log.extracting" = "Kurulum programı çalışmadı; %@ paketi doğrudan açılıyor…";
+"uninstall.message.trashFolder" = "%@ klasörü Çöp Sepeti'ne taşınacak. \"Kütüphaneden Kaldır\" seçeneği oyunun dosyalarını korur.";
+"uninstall.message.keepFiles" = "Bu oyunun güvenle silinebilecek kendi klasörü bulunamadı; yalnızca kütüphaneden kaldırılacak, dosyalar yerinde kalacak.";
+"stores.status.syncFailed" = "Eşitlenemedi";

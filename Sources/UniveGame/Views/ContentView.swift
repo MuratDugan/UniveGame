@@ -60,7 +60,15 @@ struct ContentView: View {
             }
             Button(L("common.cancel"), role: .cancel) { model.pendingUninstall = nil }
         } message: {
-            Text(model.pendingUninstall?.uninstaller != nil ? L("uninstall.message.uninstaller") : L("uninstall.message.trash"))
+            if let game = model.pendingUninstall {
+                if game.uninstaller != nil {
+                    Text(L("uninstall.message.uninstaller"))
+                } else if let folder = model.trashableInstallFolder(of: game) {
+                    Text(L("uninstall.message.trashFolder", InstallScanner.windowsPath(of: folder, driveC: model.customDriveC)))
+                } else {
+                    Text(L("uninstall.message.keepFiles"))
+                }
+            }
         }
         .alert(item: $model.alert) { alert in
             Alert(title: Text(L(alert.titleKey)),

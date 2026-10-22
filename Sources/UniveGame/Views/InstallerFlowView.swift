@@ -371,6 +371,7 @@ struct InstallerFlowView: View {
         session.result.candidates.removeAll { $0.url == url }
         session.result.candidates.insert(candidate, at: 0)
         session.selected = url
+        session.arguments = InstallScanner.defaultArguments(for: url)   // its own options, not the old top pick's
         if session.title.isEmpty { session.title = AppModel.suggestedTitle(for: url) }
         session.phase = .choosing
     }

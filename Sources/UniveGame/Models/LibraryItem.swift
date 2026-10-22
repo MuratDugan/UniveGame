@@ -25,6 +25,24 @@ struct CustomGame: Codable, Identifiable, Hashable {
     var executableExists: Bool { FileManager.default.fileExists(atPath: executable.path) }
 }
 
+extension CustomGame {
+    /// Fields added later may be missing from older library files.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        title = try c.decode(String.self, forKey: .title)
+        executable = try c.decode(URL.self, forKey: .executable)
+        arguments = try c.decodeIfPresent([String].self, forKey: .arguments) ?? []
+        coverImage = try c.decodeIfPresent(URL.self, forKey: .coverImage)
+        heroImage = try c.decodeIfPresent(URL.self, forKey: .heroImage)
+        addedAt = try c.decodeIfPresent(Date.self, forKey: .addedAt) ?? Date()
+        profile = try c.decodeIfPresent(LaunchProfile.self, forKey: .profile) ?? LaunchProfile()
+        installDirectory = try c.decodeIfPresent(URL.self, forKey: .installDirectory)
+        uninstaller = try c.decodeIfPresent(URL.self, forKey: .uninstaller)
+        dllOverrides = try c.decodeIfPresent([String].self, forKey: .dllOverrides)
+    }
+}
+
 /// Where a library entry comes from.
 enum GameSource: Hashable {
     case store(StoreKind)

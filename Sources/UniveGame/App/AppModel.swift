@@ -147,7 +147,7 @@ final class AppModel {
         }
         pendingDetailID = value(after: "--open")
         if args.contains("--review-disclaimer") { reviewingDisclaimer = true }
-        if args.contains("--install-engine") { Task { await installEngine() } }
+        if args.contains("--install-engine") { startEngineInstall() }
         if args.contains("--analyze-all") { Task { await analyzeAll() } }
     }
 
@@ -330,13 +330,7 @@ final class AppModel {
 
     /// `C:\Games\<name>` for an unpacked installer: the product's own name, else the setup file's; never reuses a folder.
     static func extractionFolder(named product: String?, setup: URL, driveC: URL) -> URL {
-        var name = product ?? setup.deletingPathExtension().lastPathComponent
-        for noise in ["setup", "install", "installer", "kurulum", "kur"] {
-            name = name.replacingOccurrences(of: noise, with: "", options: [.caseInsensitive])
-        }
-        name = name.components(separatedBy: CharacterSet(charactersIn: "\\/:*?\"<>|")).joined()
-            .trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: "-_.")))
-        if name.isEmpty { name = "Game" }
+        let name = product.map(folderName(from:)) ?? folderName(fromSetup: setup)
         let games = driveC.appendingPathComponent("Games", isDirectory: true)
         var folder = games.appendingPathComponent(name, isDirectory: true)
         var n = 2
@@ -344,6 +338,24 @@ final class AppModel {
             folder = games.appendingPathComponent("\(name) \(n)", isDirectory: true); n += 1
         }
         return folder
+    }
+
+    /// "cs16kurv2017_kurulum" → "cs16kurv2017": installer words go only when they are whole words
+    /// ("Kurtlar Vadisi" keeps its "Kur"), longest first ("Game Installer" doesn't become "Game er").
+    nonisolated static func folderName(fromSetup setup: URL) -> String {
+        let noise: Set = ["setup", "installer", "install", "kurulum", "kur", "x64", "x86", "win64", "win32"]
+        let words = setup.deletingPathExtension().lastPathComponent
+            .split(whereSeparator: { $0 == " " || $0 == "_" || $0 == "-" || $0 == "." })
+            .map(String.init)
+            .filter { !noise.contains($0.lowercased()) }
+        return folderName(from: words.joined(separator: " "))
+    }
+
+    /// Characters Windows doesn't allow in a folder name are dropped; an empty result becomes "Game".
+    nonisolated static func folderName(from text: String) -> String {
+        let cleaned = text.components(separatedBy: CharacterSet(charactersIn: "\\/:*?\"<>|")).joined()
+            .trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: ".")))
+        return cleaned.isEmpty ? "Game" : cleaned
     }
 
     func cancelInstaller() {
@@ -365,17 +377,22 @@ final class AppModel {
             return
         }
         do {
+            // After every wait: Stop may have been pressed meanwhile, and then nothing more may start.
+            func stillWanted() -> Bool { installer === session && !Task.isCancelled }
             session.phase = .preparing
             let bottle = try await BottleManager(paths: customPaths).ensure(.gog, engine: engine)
+            guard stillWanted() else { return }
             if session.installRuntime {
                 session.phase = .installingRuntime
                 try await WineMono(paths: customPaths).ensureInstalled(in: bottle, engine: engine)
+                guard stillWanted() else { return }
             }
             // A crashing installer would otherwise sit behind Wine's hidden "Program Error" dialog for minutes.
             _ = try? await ProcessRunner.run(engine.wine, ["reg", "add", #"HKCU\Software\Wine\WineDbg"#, "/v", "ShowCrashDialog",
                                                            "/t", "REG_DWORD", "/d", "0", "/f"],
                                              environment: WineRunner.environment(bottle: bottle, profile: LaunchProfile()))
             let before = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
+            guard stillWanted() else { return }
 
             session.phase = .running
             let runStarted = Date()
@@ -411,10 +428,11 @@ final class AppModel {
                 session.phase = .extracting
                 let extractor = InstallerExtractor(paths: customPaths, engine: engine, bottle: bottle)
                 unpackedName = await extractor.productName(of: session.setup, kind: session.kind)
+                guard stillWanted() else { return }
                 let destination = Self.extractionFolder(named: unpackedName, setup: session.setup, driveC: bottle.driveC)
                 do {
                     try await extractor.extract(session.setup, kind: session.kind, into: destination)
-                    guard installer === session else { return }
+                    guard stillWanted() else { try? FileManager.default.removeItem(at: destination); return }
                     let unpacked = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
                     result = InstallScanner.scan(before: before, after: unpacked, driveC: bottle.driveC)
                     if result.candidates.isEmpty { try? FileManager.default.removeItem(at: destination) }
@@ -469,13 +487,29 @@ final class AppModel {
                 }
                 let env = WineRunner.environment(bottle: bottle, profile: LaunchProfile())
                 _ = try? await ProcessRunner.run(engine.wineserver, ["-w"], environment: env)
-            } else if let folder = game.installDirectory, FileManager.default.fileExists(atPath: folder.path) {
+                // Answering "No" in the game's own uninstaller leaves it installed, and in the library.
+                guard !game.executableExists else { return }
+            } else if let folder = trashableInstallFolder(of: game) {
                 try FileManager.default.trashItem(at: folder, resultingItemURL: nil)
             }
             removeCustomGame(game)
         } catch {
             alert = AppAlert(titleKey: "alert.uninstallFailed", message: error.localizedDescription)
         }
+    }
+
+    /// The folder Uninstall may move to the Trash: the game's own install folder, never one other software
+    /// shares (Program Files, a Windows user's profile…) or one holding another game in the library.
+    func trashableInstallFolder(of game: CustomGame) -> URL? {
+        guard let folder = game.installDirectory?.resolvingSymlinksInPath(),
+              FileManager.default.fileExists(atPath: folder.path) else { return nil }
+        let driveC = customDriveC.resolvingSymlinksInPath()
+        let relative = InstallScanner.relativePath(of: folder, in: driveC)
+        let parts = relative.split(separator: "/").map(String.init)
+        guard folder.path.hasPrefix(driveC.path + "/"), !parts.isEmpty, !InstallScanner.isSharedFolder(parts) else { return nil }
+        let others = state.customGames.filter { $0.id != game.id }
+        guard !others.contains(where: { $0.executable.resolvingSymlinksInPath().path.hasPrefix(folder.path + "/") }) else { return nil }
+        return folder
     }
 
     func revealDriveC() {
@@ -740,10 +774,16 @@ final class AppModel {
         return engines.first { $0.info.backends.contains(GraphicsBackend.dxvk.rawValue) } ?? engines.first
     }
 
+    /// Starts the main engine download so Settings' Cancel can stop it.
+    func startEngineInstall() {
+        guard engineInstall == nil else { return }
+        engineInstallTask = Task { await installEngine() }
+    }
+
     func installEngine() async {
         guard engineInstall == nil else { return }
         engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0)
-        defer { engineInstall = nil }
+        defer { engineInstall = nil; engineInstallTask = nil }
         do {
             let manager = EngineManager(paths: paths)
             let manifest = try await manager.fetchManifest(from: Self.engineManifestURL)
@@ -764,6 +804,7 @@ final class AppModel {
             }
             reloadEngines()
         } catch {
+            if Task.isCancelled || error is CancellationError || (error as? URLError)?.code == .cancelled { return }
             alert = AppAlert(titleKey: "alert.engineFailed", message: error.localizedDescription)
         }
     }
@@ -1000,7 +1041,11 @@ final class AppModel {
                 installProgress[id] = 0
                 defer { installProgress[id] = nil }
                 let report: @Sendable (Double) -> Void = { p in
-                    Task { @MainActor [weak self] in self?.installProgress[id] = p }
+                    // A late update must not bring back the progress of an install that already ended.
+                    Task { @MainActor [weak self] in
+                        guard let self, self.installProgress[id] != nil else { return }
+                        self.installProgress[id] = p
+                    }
                 }
                 if game.store == .epic { try await EpicProvider(paths: paths).install(game, onProgress: report) }
                 else { try await GOGProvider(paths: paths).install(game, onProgress: report) }
@@ -1050,8 +1095,19 @@ final class AppModel {
 
     // MARK: Stores
 
+    /// Store status, read from the store's files at most every few seconds: the Stores page asks for it many
+    /// times per redraw. Setting up, signing in or out and refreshing clear it.
+    @ObservationIgnored private var connectionCache: [StoreKind: (value: StoreConnection, at: Date)] = [:]
+
     func connection(for kind: StoreKind) -> StoreConnection {
         if isDemo { return kind == .steam || kind == .gog ? .ready : .notSetUp }
+        if let cached = connectionCache[kind], Date().timeIntervalSince(cached.at) < 3 { return cached.value }
+        let value = readConnection(kind)
+        connectionCache[kind] = (value, Date())
+        return value
+    }
+
+    private func readConnection(_ kind: StoreKind) -> StoreConnection {
         switch kind {
         case .steam:
             guard SteamProvider(paths: paths).isSteamInstalled else { return .notSetUp }
@@ -1091,8 +1147,10 @@ final class AppModel {
                 if kind == .steam { try await SteamProvider(paths: paths).installSteam(engine: engine) }
                 else { try await LauncherStore(kind: kind, paths: paths).installLauncher(engine: engine) }
             }
+            connectionCache = [:]
             await refreshStores()
         } catch {
+            connectionCache = [:]
             alert = AppAlert(titleKey: "alert.storeFailed", message: error.localizedDescription)
         }
     }
@@ -1120,6 +1178,7 @@ final class AppModel {
         do {
             if kind == .epic { try await EpicProvider(paths: paths).signIn(authorizationCode: code) }
             else if kind == .gog { try await GOGProvider(paths: paths).signIn(code: code) }
+            connectionCache = [:]
             await refreshStores()
         } catch {
             alert = AppAlert(titleKey: "alert.signInFailed", message: error.localizedDescription)
@@ -1129,6 +1188,10 @@ final class AppModel {
     func signOut(_ kind: StoreKind) async {
         if kind == .epic { try? await EpicProvider(paths: paths).signOut() }
         if kind == .gog { GOGProvider(paths: paths).signOut() }
+        connectionCache = [:]
+        if refreshing { signedOutDuringRefresh.insert(kind) }   // a running refresh mustn't bring the games back
+        syncErrors[kind] = nil
+        lastSynced[kind] = nil
         state.storeGames.removeAll { $0.store == kind }
         persist()
     }
@@ -1137,13 +1200,19 @@ final class AppModel {
     /// and Steam's own play time for each.
     private func steamLibrary() async -> [Game] {
         let directory = steamDirectory
-        let installed = (try? await SteamProvider(paths: paths).refresh()) ?? []
-        let (owned, activity) = await Task.detached { () -> ([Game], [String: SteamAccountLibrary.Activity]) in
+        let installedAll = (try? await SteamProvider(paths: paths).refresh()) ?? []
+        let installedIDs32 = Set(installedAll.compactMap { UInt32($0.storeID) })
+        let (owned, activity, types) = await Task.detached { () -> ([Game], [String: SteamAccountLibrary.Activity], [UInt32: String]) in
             let owned = SteamAccountLibrary.ownedGames(steamDirectory: directory)
             let activity = SteamAccountLibrary.currentAccount(steamDirectory: directory)
                 .map { SteamAccountLibrary.activity(steamDirectory: directory, account: $0) } ?? [:]
-            return (owned, activity)
+            return (owned, activity, SteamAccountLibrary.appTypes(steamDirectory: directory, ids: installedIDs32))
         }.value
+        // Installed tools and apps (Wallpaper Engine, SteamVR, redistributables) aren't games.
+        let installed = installedAll.filter { game in
+            guard let id = UInt32(game.storeID), let type = types[id]?.lowercased() else { return true }
+            return type == "game"
+        }
 
         let ownedByID = Dictionary(owned.map { ($0.storeID, $0) }, uniquingKeysWith: { a, _ in a })
         var result = installed.map { game -> Game in
@@ -1166,6 +1235,10 @@ final class AppModel {
     }
 
     private(set) var lastRefresh: Date?
+    /// When each store last synced successfully, and the error of its last failed sync.
+    private(set) var lastSynced: [StoreKind: Date] = [:]
+    private(set) var syncErrors: [StoreKind: String] = [:]
+    @ObservationIgnored private var signedOutDuringRefresh: Set<StoreKind> = []
     /// Games that appeared in the last refresh, per store ("3 new found").
     private(set) var newGamesFound: [StoreKind: Int] = [:]
 
@@ -1181,11 +1254,16 @@ final class AppModel {
         lastRefresh = Date()
         refreshing = true
         defer { refreshing = false }
+        connectionCache = [:]
+        signedOutDuringRefresh = []
         var games = state.storeGames
         let before = Set(games.map(\.id))
         for kind in StoreKind.allCases where connection(for: kind) == .ready {
             if kind == .steam {
+                // Steam is read from its own files, which can't fail the way a server call can.
                 games = LibraryStore.merged(cached: games, replacing: .steam, with: await steamLibrary())
+                lastSynced[.steam] = Date()
+                syncErrors[.steam] = nil
                 continue
             }
             let provider: any StoreProvider = switch kind {
@@ -1194,14 +1272,22 @@ final class AppModel {
             case .gog: GOGProvider(paths: paths)
             case .ubisoft, .ea: LauncherStore(kind: kind, paths: paths)
             }
-            if var fresh = try? await provider.refresh() {
+            do {
+                var fresh = try await provider.refresh()
                 if kind == .epic {
                     let metadata = paths.legendaryConfig.appendingPathComponent("metadata", isDirectory: true)
                     fresh = fresh.filter { EpicLibraryFilter.isGame(appName: $0.storeID, title: $0.title, metadataFolder: metadata) }
                 }
                 games = LibraryStore.merged(cached: games, replacing: kind, with: fresh)
+                lastSynced[kind] = Date()
+                syncErrors[kind] = nil
+            } catch {
+                // The cached list stays; the Stores page says the sync failed instead of "synced just now".
+                syncErrors[kind] = error.localizedDescription
             }
         }
+        games.removeAll { signedOutDuringRefresh.contains($0.store) }
+        signedOutDuringRefresh = []
         var found: [StoreKind: Int] = [:]
         for game in games where !before.contains(game.id) { found[game.store, default: 0] += 1 }
         if !before.isEmpty { newGamesFound = found }

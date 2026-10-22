@@ -43,7 +43,7 @@ final class InstallScannerTests: XCTestCase {
         try touch("Program Files (x86)/Studio/My Game/tools/editor.exe", size: 300_000_000)
         let result = InstallScanner.scan(before: before, after: InstallScanner.snapshot(driveC: driveC), driveC: driveC)
         XCTAssertEqual(result.candidates.first?.name, "MyGame.exe")
-        XCTAssertEqual(result.installDirectory?.lastPathComponent, "Studio")
+        XCTAssertEqual(result.installDirectory?.lastPathComponent, "My Game")
     }
 
     func testSystemFoldersAreIgnoredAndOlderGamesAreNotOffered() throws {
@@ -53,6 +53,27 @@ final class InstallScannerTests: XCTestCase {
         // An installer that crashed or added nothing must not offer a game installed earlier.
         let result = InstallScanner.scan(before: snap, after: snap, driveC: driveC)
         XCTAssertTrue(result.candidates.isEmpty)
+        XCTAssertNil(result.installDirectory)
+    }
+
+    func testNeverPicksAFolderOtherGamesShare() throws {
+        // An MSI into Program Files\Publisher\Game: the game's folder, not the publisher's (which may hold others).
+        try touch("Program Files/Publisher/Other Game/other.exe")
+        var before = InstallScanner.snapshot(driveC: driveC)
+        try touch("Program Files/Publisher/Game/game.exe", size: 50_000_000)
+        var result = InstallScanner.scan(before: before, after: InstallScanner.snapshot(driveC: driveC), driveC: driveC)
+        XCTAssertEqual(InstallScanner.relativePath(of: try XCTUnwrap(result.installDirectory), in: driveC), "Program Files/Publisher/Game")
+
+        // A per-user install into AppData\Local\Game: that folder, never the Windows user's profile.
+        before = InstallScanner.snapshot(driveC: driveC)
+        try touch("users/me/AppData/Local/Game/Game.exe", size: 30_000_000)
+        result = InstallScanner.scan(before: before, after: InstallScanner.snapshot(driveC: driveC), driveC: driveC)
+        XCTAssertEqual(InstallScanner.relativePath(of: try XCTUnwrap(result.installDirectory), in: driveC), "users/me/AppData/Local/Game")
+
+        // Programs straight in a shared folder: no install folder at all, so uninstalling trashes nothing.
+        before = InstallScanner.snapshot(driveC: driveC)
+        try touch("GOG Games/a.exe"); try touch("Games/b.exe")
+        result = InstallScanner.scan(before: before, after: InstallScanner.snapshot(driveC: driveC), driveC: driveC)
         XCTAssertNil(result.installDirectory)
     }
 

@@ -15,6 +15,22 @@ struct LibraryState: Codable, Equatable {
     var compat: [String: CompatReport]?
 }
 
+extension LibraryState {
+    /// Every field may be missing: a file written by an older (or newer) version still loads instead of being
+    /// set aside as corrupt, which would empty the library.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        customGames = try c.decodeIfPresent([CustomGame].self, forKey: .customGames) ?? []
+        storeGames = try c.decodeIfPresent([Game].self, forKey: .storeGames) ?? []
+        favorites = try c.decodeIfPresent(Set<String>.self, forKey: .favorites) ?? []
+        lastPlayed = try c.decodeIfPresent([String: Date].self, forKey: .lastPlayed) ?? [:]
+        playTime = try c.decodeIfPresent([String: TimeInterval].self, forKey: .playTime) ?? [:]
+        profiles = try c.decodeIfPresent([String: LaunchProfile].self, forKey: .profiles) ?? [:]
+        appliedMacDriver = try c.decodeIfPresent([String: [String: Bool]].self, forKey: .appliedMacDriver)
+        compat = try c.decodeIfPresent([String: CompatReport].self, forKey: .compat)
+    }
+}
+
 /// UniveGame keeps its own folder (`~/Library/Application Support/UniveGame`) with the same layout
 /// UniveEngine expects, so it never touches MaPC's environments.
 enum AppPaths {
@@ -74,6 +90,8 @@ struct LibraryStateStore {
         let target = AppPaths.customArtwork.appendingPathComponent("\(id.uuidString).\(source.pathExtension.lowercased())")
         try? fm.removeItem(at: target)
         try fm.copyItem(at: source, to: target)
+        // Same path as the old cover: drop the cached image so the new one shows right away.
+        ImageCache.shared.removeObject(forKey: target as NSURL)
         return target
     }
 

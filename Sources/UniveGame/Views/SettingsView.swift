@@ -192,11 +192,11 @@ private struct EngineSection: View {
                 Spacer(minLength: 0)
                 if model.engineInstall == nil {
                     if engine == nil {
-                        Button(L("engine.download")) { Task { await model.installEngine() } }
+                        Button(L("engine.download")) { model.startEngineInstall() }
                             .buttonStyle(PrimaryButtonStyle(height: 34, horizontalPadding: 16))
                             .disabled(model.isDemo)
                     } else {
-                        Button(L("engine.update")) { Task { await model.installEngine() } }
+                        Button(L("engine.update")) { model.startEngineInstall() }
                             .buttonStyle(SecondaryButtonStyle(height: 34, horizontalPadding: 14))
                             .disabled(model.isDemo)
                     }
@@ -205,7 +205,7 @@ private struct EngineSection: View {
                 }
             }
             if let progress = model.engineInstall {
-                EngineProgressRow(progress: progress)
+                EngineProgressRow(progress: progress, showsCancel: true)
             }
             if model.engines.count > 1 {
                 VStack(alignment: .leading, spacing: 6) {

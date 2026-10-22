@@ -13,7 +13,7 @@ enum CompatibilityScorer {
 
     static let baseline = 70
     /// Bump when the rules change; stored reports are then re-scored from their saved evidence.
-    static let version = 5
+    static let version = 6
 
     /// Anti-cheats that don't stop a Wine game on macOS (server-side or user-mode).
     static let harmlessAntiCheats: Set<String> = ["vac", "valve anti-cheat", "fairfight", "punkbuster"]
@@ -59,7 +59,9 @@ enum CompatibilityScorer {
         }
 
         // 2. Graphics: the biggest factor for speed on a Mac.
-        let is64 = files.map(\.is64Bit)
+        // Unknown (nil) unless a game binary was actually classified: no files, or only .NET/helper programs,
+        // mustn't read as 32-bit and cost a DirectX 12 game D3DMetal.
+        let is64: Bool? = files.flatMap { $0.has64Bit || $0.has32Bit ? $0.has64Bit : nil }
         var apis = files?.graphics ?? []
         if apis.isEmpty, let dx = online?.directXVersion {
             switch dx {

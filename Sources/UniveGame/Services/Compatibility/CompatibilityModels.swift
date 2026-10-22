@@ -118,6 +118,24 @@ struct FileFindings: Codable, Equatable {
     var is64Bit: Bool { has64Bit }
 }
 
+extension FileFindings {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        analyzedFiles = try c.decodeIfPresent(Int.self, forKey: .analyzedFiles) ?? 0
+        has64Bit = try c.decodeIfPresent(Bool.self, forKey: .has64Bit) ?? false
+        has32Bit = try c.decodeIfPresent(Bool.self, forKey: .has32Bit) ?? false
+        // An API or engine name a later version added shouldn't make the whole report unreadable.
+        graphics = Set((try? c.decodeIfPresent([String].self, forKey: .graphics))??.compactMap(GraphicsAPI.init(rawValue:)) ?? [])
+        engine = (try? c.decodeIfPresent(String.self, forKey: .engine))?.flatMap(GameEngineKind.init(rawValue:))
+        antiCheats = try c.decodeIfPresent([AntiCheatFinding].self, forKey: .antiCheats) ?? []
+        usesDotNet = try c.decodeIfPresent(Bool.self, forKey: .usesDotNet) ?? false
+        usesMediaFoundation = try c.decodeIfPresent(Bool.self, forKey: .usesMediaFoundation) ?? false
+        usesChromium = try c.decodeIfPresent(Bool.self, forKey: .usesChromium) ?? false
+        launcher = try c.decodeIfPresent(String.self, forKey: .launcher)
+        shipsDirectXHelpers = try c.decodeIfPresent(Bool.self, forKey: .shipsDirectXHelpers) ?? false
+    }
+}
+
 /// What stores and community databases say. Produced by `CompatibilitySignals`.
 struct OnlineFindings: Codable, Equatable {
     var steamDeckCategory: Int?          // 1 unsupported, 2 playable, 3 verified
@@ -135,4 +153,24 @@ struct OnlineFindings: Codable, Equatable {
     /// Another company's launcher the store says the game needs (Ubisoft Connect, EA app, Rockstar).
     var thirdPartyLauncher: String?
     var steamAppID: String?
+}
+
+// Stored reports may predate a field: decode what's there, default the rest (a failure here would lose the library).
+extension OnlineFindings {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        steamDeckCategory = try c.decodeIfPresent(Int.self, forKey: .steamDeckCategory)
+        steamDeckAntiCheatIssue = try c.decodeIfPresent(Bool.self, forKey: .steamDeckAntiCheatIssue) ?? false
+        protonTier = try c.decodeIfPresent(String.self, forKey: .protonTier)
+        protonConfidence = try c.decodeIfPresent(String.self, forKey: .protonConfidence)
+        protonReports = try c.decodeIfPresent(Int.self, forKey: .protonReports)
+        antiCheatStatus = try c.decodeIfPresent(String.self, forKey: .antiCheatStatus)
+        antiCheats = try c.decodeIfPresent([String].self, forKey: .antiCheats) ?? []
+        directXVersion = try c.decodeIfPresent(Int.self, forKey: .directXVersion)
+        hasMacVersion = try c.decodeIfPresent(Bool.self, forKey: .hasMacVersion) ?? false
+        releaseYear = try c.decodeIfPresent(Int.self, forKey: .releaseYear)
+        gpuSuggestsDX11 = try c.decodeIfPresent(Bool.self, forKey: .gpuSuggestsDX11)
+        thirdPartyLauncher = try c.decodeIfPresent(String.self, forKey: .thirdPartyLauncher)
+        steamAppID = try c.decodeIfPresent(String.self, forKey: .steamAppID)
+    }
 }

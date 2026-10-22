@@ -130,6 +130,8 @@ private struct StoreRow: View {
             (L("stores.status.syncing"), Theme.Palette.accent, Theme.Palette.accent)
         } else {
             switch c {
+            case .ready where model.syncErrors[kind] != nil:
+                (L("stores.status.syncFailed"), Theme.Palette.warning, Theme.Palette.warning)
             case .ready: (L("stores.status.ready"), Theme.Palette.success, Theme.Palette.success)
             case .needsSignIn: (L("stores.status.signIn"), Theme.Palette.warning, Theme.Palette.warning)
             case .notSetUp: (L("stores.status.notSetUp"), Theme.Palette.segmentSelected, Theme.Palette.textSecondary)
@@ -149,7 +151,7 @@ private struct StoreRow: View {
             if let meta = meta(c) {
                 Text(meta).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary).monospacedDigit()
                     .lineLimit(1)
-                    .help(kind == .steam ? (model.steamAccount.map { L("stores.signedInAs", $0.personaName) } ?? "") : "")
+                    .help(model.syncErrors[kind] ?? (kind == .steam ? (model.steamAccount.map { L("stores.signedInAs", $0.personaName) } ?? "") : ""))
             }
             if syncing || model.isBusy(kind) {
                 IndeterminateBar(height: 3).frame(width: 160)
@@ -166,7 +168,10 @@ private struct StoreRow: View {
                 let found = model.newGamesFound[kind] ?? 0
                 return found > 0 ? "\(L("stores.gameCount", count)) · \(L("stores.meta.found", "\(found)"))" : L("stores.gameCount", count)
             }
-            if let last = model.lastRefresh {
+            if let error = model.syncErrors[kind] {
+                return "\(L("stores.gameCount", count)) · \(error)"
+            }
+            if let last = model.lastSynced[kind] {
                 return L("stores.meta.synced", games, last.formatted(.relative(presentation: .named).locale(locale)))
             }
             return L("stores.gameCount", count)

@@ -73,8 +73,10 @@ struct SteamStoreAPI {
             StoreListing(id: item.id, name: item.name,
                          imageURL: item.tiny_image.flatMap { URL(string: $0.replacingOccurrences(of: "capsule_231x87", with: "header")) },
                          finalPrice: item.price?.final, originalPrice: item.price?.initial,
-                         discountPercent: item.price.map { $0.initial > 0 ? 100 - ($0.final * 100 / $0.initial) : 0 } ?? 0,
-                         currency: item.price?.currency, isFree: item.price == nil)
+                         discountPercent: item.price.map { $0.initial > 0 ? Int((100 - Double($0.final) * 100 / Double($0.initial)).rounded()) : 0 } ?? 0,
+                         // Search results carry no price both for free games and for unreleased ones, so a missing
+                         // price shows as unknown rather than "Free".
+                         currency: item.price?.currency, isFree: false)
         }
     }
 

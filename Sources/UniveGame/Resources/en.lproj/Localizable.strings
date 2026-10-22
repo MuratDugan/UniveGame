@@ -495,3 +495,6 @@
 "installer.error.crashed" = "The installer closed before it could open its window, so it doesn't run in UniveGame's Windows environment. Nothing was installed. Try the game's official release (Steam, GOG…) or another installer. If the game is installed on a Windows PC, copy its folder to your Mac and add the .exe with Add Game.";
 "installer.crashed.title" = "The installer couldn't start";
 "installer.log.extracting" = "The installer didn't work; unpacking the %@ package directly…";
+"uninstall.message.trashFolder" = "The folder %@ will be moved to the Trash. \"Remove from Library\" keeps the game's files.";
+"uninstall.message.keepFiles" = "This game has no folder of its own that's safe to delete; it will only be removed from the library and its files stay where they are.";
+"stores.status.syncFailed" = "Sync failed";

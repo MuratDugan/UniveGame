@@ -80,19 +80,38 @@ enum InstallScanner {
         return InstallScanResult(candidates: candidates, installDirectory: root, uninstaller: uninstaller)
     }
 
-    /// The folder most new programs live under: `C:\Games\S2Rebirth`, `C:\Program Files\Studio\Game`…
+    /// The game's own folder: the deepest folder shared by the new programs in the place most of them went
+    /// (`C:\Games\S2Rebirth`, `C:\Program Files\Studio\Game`). Never a folder other software shares, such as
+    /// `C:\Program Files`, `C:\GOG Games` or a Windows user's profile: uninstalling may move this folder to the Trash.
     static func installRoot(of urls: [URL], driveC: URL) -> URL? {
-        let containers: Set<String> = ["games", "program files", "program files (x86)", "users"]
-        var counts: [String: Int] = [:]
-        for url in urls {
-            var parts = relativePath(of: url, in: driveC).split(separator: "/").map(String.init).dropLast()
-            guard !parts.isEmpty else { continue }
-            var key = [parts.removeFirst()]
-            if containers.contains(key[0].lowercased()), let next = parts.first { key.append(next) }
-            counts[key.joined(separator: "/"), default: 0] += 1
+        let groups = Dictionary(grouping: urls.compactMap { url -> (String, [String])? in
+            let dirs = relativePath(of: url, in: driveC).split(separator: "/").map(String.init).dropLast()
+            guard let top = dirs.first else { return nil }
+            return (top.lowercased(), Array(dirs))
+        }, by: { $0.0 })
+        guard let best = groups.max(by: { $0.value.count != $1.value.count ? $0.value.count < $1.value.count : $0.key > $1.key })
+        else { return nil }
+        var common = best.value[0].1
+        for (_, dirs) in best.value.dropFirst() {
+            common = Array(zip(common, dirs).prefix { $0.lowercased() == $1.lowercased() }.map(\.0))
         }
-        guard let best = counts.max(by: { $0.value != $1.value ? $0.value < $1.value : $0.key > $1.key }) else { return nil }
-        return driveC.appendingPathComponent(best.key, isDirectory: true)
+        guard !common.isEmpty, !isSharedFolder(common) else { return nil }
+        return driveC.appendingPathComponent(common.joined(separator: "/"), isDirectory: true)
+    }
+
+    /// Folders that hold more than one program's files.
+    static func isSharedFolder(_ components: [String]) -> Bool {
+        let c = components.map { $0.lowercased() }
+        let topLevel: Set = ["games", "program files", "program files (x86)", "programdata", "gog games", "windows", "users"]
+        if c.count == 1 { return topLevel.contains(c[0]) }
+        if c[0] == "windows" { return true }
+        guard c[0] == "users" else { return false }
+        // users/<name>, users/<name>/AppData[/Local|Roaming|LocalLow], users/<name>/Documents|Desktop|Saved Games…
+        if c.count == 2 { return true }
+        if c.count == 3 { return true }
+        if c.count == 4, c[2] == "appdata" { return true }
+        if c.count == 4, c[2] == "documents", c[3] == "my games" { return true }
+        return false
     }
 
     static func score(_ url: URL, root: URL?, size: Int64) -> Int {

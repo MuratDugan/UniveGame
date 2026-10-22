@@ -26,7 +26,10 @@ enum SteamAccountLibrary {
     static func currentAccount(steamDirectory: URL) -> Account? {
         guard let text = try? String(contentsOf: steamDirectory.appendingPathComponent("config/loginusers.vdf"), encoding: .utf8),
               let users = (try? VDFParser.parse(text))?.child("users")?.entries, !users.isEmpty else { return nil }
-        let best = users.first { $0.value.child("MostRecent")?.string == "1" } ?? users[0]
+        // Older clients mark the signed-in user `MostRecent`; newer ones only keep a `Timestamp` per user.
+        let best = users.first { $0.value.child("MostRecent")?.string == "1" }
+            ?? users.max { (Int($0.value.child("Timestamp")?.string ?? "") ?? 0) < (Int($1.value.child("Timestamp")?.string ?? "") ?? 0) }
+            ?? users[0]
         return Account(steamID64: best.key, personaName: best.value.child("PersonaName")?.string ?? best.key)
     }
 
@@ -49,6 +52,13 @@ enum SteamAccountLibrary {
                         coverURL: art.cover ?? SteamLibrary.artworkURL(appID: appID, "library_600x900.jpg"),
                         heroURL: art.hero ?? SteamLibrary.artworkURL(appID: appID, "library_hero.jpg"))
         }
+    }
+
+    /// The `appinfo.vdf` type of each app (game, tool, application, demo…), for the ids asked for.
+    static func appTypes(steamDirectory: URL, ids: Set<UInt32>) -> [UInt32: String] {
+        guard !ids.isEmpty, let data = try? Data(contentsOf: steamDirectory.appendingPathComponent("appcache/appinfo.vdf"),
+                                                 options: .mappedIfSafe) else { return [:] }
+        return AppInfoReader.read(data, only: ids).compactMapValues(\.type)
     }
 
     /// Steam stores artwork under hashed sub-folders; pick the portrait capsule and the wide hero.
@@ -129,7 +139,8 @@ enum AppInfoReader {
     private static func stringTable(_ data: Data, at offset: Int) -> [String]? {
         var r = ByteReader(data)
         r.offset = offset
-        guard let count = r.u32() else { return nil }
+        // An untrusted count: a damaged cache must not make the app reserve gigabytes.
+        guard let count = r.u32(), Int(count) <= data.count else { return nil }
         var table: [String] = []
         table.reserveCapacity(Int(count))
         for _ in 0..<count {

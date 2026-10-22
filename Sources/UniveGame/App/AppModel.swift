@@ -147,6 +147,7 @@ final class AppModel {
         }
         pendingDetailID = value(after: "--open")
         if args.contains("--review-disclaimer") { reviewingDisclaimer = true }
+        if args.contains("--install-engine") { Task { await installEngine() } }
         if args.contains("--analyze-all") { Task { await analyzeAll() } }
     }
 
@@ -720,8 +721,10 @@ final class AppModel {
 
     func reloadEngines() {
         var seen = Set<String>()
+        // Newest first: a game takes the first engine that fits it, so an updated engine wins over the old one.
         engines = (EngineLocator(paths: paths).installed() + EngineLocator(paths: AppPaths.sharedEnginePaths).installed())
             .filter { seen.insert($0.version).inserted }
+            .sorted { $0.version.compare($1.version, options: .numeric) == .orderedDescending }
     }
 
     var hasEngine: Bool { !engines.isEmpty }
@@ -744,7 +747,10 @@ final class AppModel {
         do {
             let manager = EngineManager(paths: paths)
             let manifest = try await manager.fetchManifest(from: Self.engineManifestURL)
-            guard let entry = manifest.engines.max(by: { $0.version.compare($1.version, options: .numeric) == .orderedAscending }) else {
+            // The main engine line (DXVK). The D3DMetal line is installed from Settings › DirectX 12.
+            guard let entry = manifest.engines
+                .filter({ ($0.backends ?? ["dxvk"]).contains(GraphicsBackend.dxvk.rawValue) })
+                .max(by: { $0.version.compare($1.version, options: .numeric) == .orderedAscending }) else {
                 throw EngineError.downloadFailed("empty engine list")
             }
             let total = entry.size

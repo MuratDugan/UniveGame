@@ -153,7 +153,7 @@
 "settings.language.help" = "Changes take effect immediately.";
 "settings.engine" = "Engine";
 "settings.engineVersion" = "Engine %@";
-"settings.engine.help" = "Engines come from MaPC's open-source engine list and are checked with SHA-256 before they're installed. Engines MaPC has already downloaded are used too.";
+"settings.engine.help" = "Engines come from UniveEngine's open-source engine list and are checked with SHA-256 before they're installed. Engines already on this Mac (including MaPC's) are used too.";
 "settings.rescan" = "Look Again";
 "settings.data" = "Data folder";
 "settings.openFolder" = "Open in Finder";

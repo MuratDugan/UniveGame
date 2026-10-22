@@ -1,5 +1,5 @@
 import AppKit
-import MacadeKit
+import UniveEngineKit
 import SwiftUI
 
 /// v2 settings: a section list on the left, one section at a time on the right.

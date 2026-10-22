@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-import MacadeKit
+import UniveEngineKit
 
 /// What kind of package a setup file is, read from its bytes (not its name).
 enum InstallerKind: String, Equatable {

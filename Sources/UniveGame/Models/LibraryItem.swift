@@ -1,5 +1,5 @@
 import Foundation
-import MacadeKit
+import UniveEngineKit
 
 /// A Windows program the user added by hand (not from a store).
 struct CustomGame: Codable, Identifiable, Hashable {
@@ -50,7 +50,7 @@ enum GameSource: Hashable {
     }
 }
 
-/// One tile in the library: a store game from MacadeKit or a custom game.
+/// One tile in the library: a store game from UniveEngine or a custom game.
 struct LibraryItem: Identifiable, Hashable {
     enum Backing: Hashable {
         case store(Game)

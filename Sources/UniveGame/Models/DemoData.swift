@@ -1,5 +1,5 @@
 import Foundation
-import MacadeKit
+import UniveEngineKit
 
 /// Sample library for `--demo`: lets the interface be shown and tested without engines or accounts.
 /// Nothing in demo mode is saved.

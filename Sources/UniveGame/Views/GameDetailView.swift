@@ -1,4 +1,4 @@
-import MacadeKit
+import UniveEngineKit
 import SwiftUI
 
 /// v2 game page: cover, the one action and facts on the left; verdict and launch settings on the right.
@@ -388,7 +388,7 @@ struct CompatibilityPanel: View {
     }
 }
 
-/// Per-game Wine options from MacadeKit's `LaunchProfile`.
+/// Per-game Wine options from UniveEngine's `LaunchProfile`.
 struct LaunchSettingsPanel: View {
     let item: LibraryItem
     @Environment(AppModel.self) private var model

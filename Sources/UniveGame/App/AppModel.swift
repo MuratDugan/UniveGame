@@ -1,7 +1,7 @@
 import AppKit
 import UniformTypeIdentifiers
 import Foundation
-import MacadeKit
+import UniveEngineKit
 import Observation
 
 enum SidebarItem: Hashable {
@@ -720,7 +720,7 @@ final class AppModel {
 
     func reloadEngines() {
         var seen = Set<String>()
-        engines = (EngineLocator(paths: paths).installed() + EngineLocator(paths: AppPaths.mapcPaths).installed())
+        engines = (EngineLocator(paths: paths).installed() + EngineLocator(paths: AppPaths.sharedEnginePaths).installed())
             .filter { seen.insert($0.version).inserted }
     }
 
@@ -776,7 +776,7 @@ final class AppModel {
     var stagedD3DMetalLicense: String = ""
     private(set) var importingD3DMetal = false
 
-    /// Downloads the D3DMetal-ready engine from the engine list (checked with SHA-256 by MacadeKit).
+    /// Downloads the D3DMetal-ready engine from the engine list (checked with SHA-256 by UniveEngine).
     func startD3DMetalEngineInstall() {
         guard engineInstall == nil else { return }
         engineInstallTask = Task { await installD3DMetalEngine() }
@@ -872,7 +872,7 @@ final class AppModel {
         persist()
     }
 
-    /// "Automatic" picks D3DMetal for DirectX 12 games when it's ready, otherwise DXVK (MacadeKit's rule).
+    /// "Automatic" picks D3DMetal for DirectX 12 games when it's ready, otherwise DXVK (UniveEngine's rule).
     private func resolvedProfile(_ profile: LaunchProfile, for item: LibraryItem) -> LaunchProfile {
         guard profile.backend == .auto else { return profile }
         var folder: URL?

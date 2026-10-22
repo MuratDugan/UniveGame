@@ -7,13 +7,13 @@ let package = Package(
     platforms: [.macOS(.v15)],
     dependencies: [
         // UniveEngine (Apache 2.0): Wine engines, environments, graphics backends and store integrations.
-        // Our own fork of MacadeKit; pinned to an exact commit so every build uses the same engine code.
-        .package(url: "https://github.com/MuratDugan/UniveEngine.git", revision: "37721818a43a59402e5b91100b4eb2a7529a16c2"),
+        // Our own fork of MaPC's MacadeKit; pinned to an exact commit so every build uses the same engine code.
+        .package(url: "https://github.com/MuratDugan/UniveEngine.git", revision: "c86cf47246e32a962fc2bbb1c2f3154cf792b90f"),
     ],
     targets: [
         .executableTarget(
             name: "UniveGame",
-            dependencies: [.product(name: "MacadeKit", package: "UniveEngine")],
+            dependencies: [.product(name: "UniveEngineKit", package: "UniveEngine")],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),

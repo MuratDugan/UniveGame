@@ -1,8 +1,8 @@
 import Foundation
-import MacadeKit
+import UniveEngineKit
 
 /// The signed-in user's whole Steam library, read from the Steam client's own files inside the bottle.
-/// MacadeKit's `SteamLibrary.scan` only sees installed games; this adds everything the account owns,
+/// UniveEngine's `SteamLibrary.scan` only sees installed games; this adds everything the account owns,
 /// with the artwork and play time Steam already cached. Nothing is sent anywhere.
 enum SteamAccountLibrary {
     struct Account: Equatable {

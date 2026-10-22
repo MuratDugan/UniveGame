@@ -1,5 +1,5 @@
 import Foundation
-import MacadeKit
+import UniveEngineKit
 
 /// Everything UniveGame saves on its own: custom games and per-game library data.
 struct LibraryState: Codable, Equatable {
@@ -16,7 +16,7 @@ struct LibraryState: Codable, Equatable {
 }
 
 /// UniveGame keeps its own folder (`~/Library/Application Support/UniveGame`) with the same layout
-/// MacadeKit expects, so it never touches MaPC's environments.
+/// UniveEngine expects, so it never touches MaPC's environments.
 enum AppPaths {
     static let home: URL = {
         let env = ProcessInfo.processInfo.environment
@@ -52,8 +52,9 @@ enum AppPaths {
     static var stateFile: URL { home.appendingPathComponent("UniveGame.json") }
     static var customArtwork: URL { home.appendingPathComponent("Artwork/custom", isDirectory: true) }
 
-    /// MaPC's folder, read-only: lets UniveGame reuse engines MaPC already downloaded.
-    static let mapcPaths = Paths()
+    /// UniveEngine's shared folder (an existing MaPC folder counts), read-only: engines already downloaded
+    /// there are reused instead of downloaded again.
+    static let sharedEnginePaths = Paths()
 }
 
 struct LibraryStateStore {

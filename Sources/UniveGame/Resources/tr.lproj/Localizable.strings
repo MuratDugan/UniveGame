@@ -491,3 +491,6 @@
 "disclaimer.more" = "Açık kaynak ayrıntıları";
 "disclaimer.reread" = "Yeniden Oku";
 "settings.legal" = "Lisans ve sorumluluk reddi";
+
+"installer.error.crashed" = "Kurulum programı penceresini açamadan kapandı; bu kurulum UniveGame'in Windows ortamında çalışmıyor. Hiçbir şey kurulmadı. Oyunun resmi sürümünü (Steam, GOG…) ya da başka bir kurulum dosyasını dene. Oyun Windows'ta kuruluysa klasörünü Mac'e kopyalayıp .exe dosyasını \"Oyun ekle\" ile ekleyebilirsin.";
+"installer.crashed.title" = "Kurulum açılamadı";

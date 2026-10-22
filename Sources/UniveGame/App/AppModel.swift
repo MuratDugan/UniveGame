@@ -352,6 +352,7 @@ final class AppModel {
             let before = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
 
             session.phase = .running
+            let runStarted = Date()
             let status: Int32 = try await withCheckedThrowingContinuation { continuation in
                 do {
                     // .msi packages go through Windows Installer; everything else runs directly.
@@ -379,7 +380,10 @@ final class AppModel {
             let after = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
             let result = InstallScanner.scan(before: before, after: after, driveC: bottle.driveC)
             if result.candidates.isEmpty {
-                session.phase = .failed(status == 0 ? L10nKey.nothingFound : L10nKey.installerFailed)
+                // An error exit within seconds means the installer never showed its window: it crashed under Wine.
+                let crashed = status != 0 && Date().timeIntervalSince(runStarted) < 20
+                session.phase = .failed(crashed ? L10nKey.installerCrashed
+                                        : (status == 0 ? L10nKey.nothingFound : L10nKey.installerFailed))
                 return
             }
             session.result = result
@@ -1173,6 +1177,7 @@ enum L10nKey {
     static let noEngine = "installer.error.noEngine"
     static let nothingFound = "installer.error.nothingFound"
     static let installerFailed = "installer.error.failed"
+    static let installerCrashed = "installer.error.crashed"
 }
 
 enum UniveGameError: LocalizedError {

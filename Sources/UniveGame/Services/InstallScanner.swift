@@ -56,13 +56,12 @@ enum InstallScanner {
         return result
     }
 
-    /// New or changed executables, ranked best first. Falls back to every non-system program when the
-    /// installer changed nothing we can see (for example, a reinstall over the same files).
+    /// New or changed executables, ranked best first. Empty when the installer added nothing: programs
+    /// that were already there (an earlier game in the same environment) are never offered as its result.
     static func scan(before: Snapshot, after: Snapshot, driveC: URL) -> InstallScanResult {
         // Compare real paths: /tmp vs /private/tmp (or a symlinked home) must not split one folder in two.
         let driveC = driveC.resolvingSymlinksInPath()
-        var changed = after.filter { before[$0.key] != $0.value }.map(\.key)
-        if changed.isEmpty { changed = Array(after.keys) }
+        let changed = after.filter { before[$0.key] != $0.value }.map(\.key)
         let urls = changed.map { URL(fileURLWithPath: $0) }
         let root = installRoot(of: urls, driveC: driveC)
 

@@ -46,12 +46,14 @@ final class InstallScannerTests: XCTestCase {
         XCTAssertEqual(result.installDirectory?.lastPathComponent, "Studio")
     }
 
-    func testSystemFoldersAreIgnoredAndNothingNewFallsBack() throws {
+    func testSystemFoldersAreIgnoredAndOlderGamesAreNotOffered() throws {
         try touch("Games/Old/Old.exe")
         let snap = InstallScanner.snapshot(driveC: driveC)
         XCTAssertFalse(snap.keys.contains { $0.contains("/windows/") || $0.contains("Common Files") })
+        // An installer that crashed or added nothing must not offer a game installed earlier.
         let result = InstallScanner.scan(before: snap, after: snap, driveC: driveC)
-        XCTAssertEqual(result.candidates.map(\.name), ["Old.exe"])
+        XCTAssertTrue(result.candidates.isEmpty)
+        XCTAssertNil(result.installDirectory)
     }
 
     func testDisplayTitle() {

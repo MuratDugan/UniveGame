@@ -343,7 +343,7 @@ struct InstallerFlowView: View {
 
     private func failure(_ reason: String) -> some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
-            NoticeBanner(kind: .destructive, title: L("installer.failed"), message: L(reason))
+            NoticeBanner(kind: .destructive, title: reason == L10nKey.installerCrashed ? L("installer.crashed.title") : L("installer.failed"), message: L(reason))
                 .enterOnAppear()
             HStack(spacing: 8) {
                 Button(L("installer.browse"), action: browse).buttonStyle(SecondaryButtonStyle())

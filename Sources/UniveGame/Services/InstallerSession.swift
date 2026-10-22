@@ -13,6 +13,7 @@ final class InstallerSession: Identifiable {
         case installingRuntime  // Wine Mono (.NET)
         case running            // the installer window is open
         case finishing          // installer closed, waiting for its helper processes
+        case extracting         // the installer didn't work; unpacking its files directly
         case choosing           // pick the game's .exe
         case failed(String)
     }
@@ -35,6 +36,10 @@ final class InstallerSession: Identifiable {
     var result = InstallScanResult(candidates: [], installDirectory: nil, uninstaller: nil)
     var selected: URL?
     var title = ""
+    /// What the setup file is (Inno Setup, NSIS, MSI…), for unpacking it when running it doesn't work.
+    var kind: InstallerKind = .unknown
+    /// Launch options the chosen program needs (e.g. `-game cstrike` for a GoldSrc game).
+    var arguments: [String] = []
 
     /// Lets the user move on while something the installer started (say, the game) keeps running.
     var waitTask: Task<Void, Never>?
@@ -60,12 +65,14 @@ final class InstallerSession: Identifiable {
             log.append(LogLine(key: "installer.log.windowOpen"))
         case .finishing:
             log.append(LogLine(key: "installer.log.finishing"))
+        case .extracting:
+            log.append(LogLine(key: "installer.log.extracting", argument: kind.displayName))
         }
     }
 
     var isBusy: Bool {
         switch phase {
-        case .preparing, .installingRuntime, .running, .finishing: true
+        case .preparing, .installingRuntime, .running, .finishing, .extracting: true
         default: false
         }
     }

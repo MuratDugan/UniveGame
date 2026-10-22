@@ -321,7 +321,27 @@ final class AppModel {
     func beginInstaller(_ setup: URL) {
         guard installer?.isBusy != true else { return }
         showImport = false
-        installer = InstallerSession(setup: setup)
+        let session = InstallerSession(setup: setup)
+        installer = session
+        Task.detached { let kind = InstallerKind.detect(setup); await MainActor.run { session.kind = kind } }
+    }
+
+    /// `C:\Games\<name>` for an unpacked installer: the product's own name, else the setup file's; never reuses a folder.
+    static func extractionFolder(named product: String?, setup: URL, driveC: URL) -> URL {
+        var name = product ?? setup.deletingPathExtension().lastPathComponent
+        for noise in ["setup", "install", "installer", "kurulum", "kur"] {
+            name = name.replacingOccurrences(of: noise, with: "", options: [.caseInsensitive])
+        }
+        name = name.components(separatedBy: CharacterSet(charactersIn: "\\/:*?\"<>|")).joined()
+            .trimmingCharacters(in: .whitespacesAndNewlines.union(CharacterSet(charactersIn: "-_.")))
+        if name.isEmpty { name = "Game" }
+        let games = driveC.appendingPathComponent("Games", isDirectory: true)
+        var folder = games.appendingPathComponent(name, isDirectory: true)
+        var n = 2
+        while FileManager.default.fileExists(atPath: folder.path) {
+            folder = games.appendingPathComponent("\(name) \(n)", isDirectory: true); n += 1
+        }
+        return folder
     }
 
     func cancelInstaller() {
@@ -349,6 +369,10 @@ final class AppModel {
                 session.phase = .installingRuntime
                 try await WineMono(paths: customPaths).ensureInstalled(in: bottle, engine: engine)
             }
+            // A crashing installer would otherwise sit behind Wine's hidden "Program Error" dialog for minutes.
+            _ = try? await ProcessRunner.run(engine.wine, ["reg", "add", #"HKCU\Software\Wine\WineDbg"#, "/v", "ShowCrashDialog",
+                                                           "/t", "REG_DWORD", "/d", "0", "/f"],
+                                             environment: WineRunner.environment(bottle: bottle, profile: LaunchProfile()))
             let before = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
 
             session.phase = .running
@@ -378,7 +402,24 @@ final class AppModel {
             guard installer === session else { return } // cancelled meanwhile
 
             let after = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
-            let result = InstallScanner.scan(before: before, after: after, driveC: bottle.driveC)
+            var result = InstallScanner.scan(before: before, after: after, driveC: bottle.driveC)
+            var unpackedName: String?
+            if result.candidates.isEmpty {
+                // The installer crashed under Wine or put nothing on C:. Unpack its files directly instead.
+                session.phase = .extracting
+                let extractor = InstallerExtractor(paths: customPaths, engine: engine, bottle: bottle)
+                unpackedName = await extractor.productName(of: session.setup, kind: session.kind)
+                let destination = Self.extractionFolder(named: unpackedName, setup: session.setup, driveC: bottle.driveC)
+                do {
+                    try await extractor.extract(session.setup, kind: session.kind, into: destination)
+                    guard installer === session else { return }
+                    let unpacked = await Task.detached { InstallScanner.snapshot(driveC: bottle.driveC) }.value
+                    result = InstallScanner.scan(before: before, after: unpacked, driveC: bottle.driveC)
+                    if result.candidates.isEmpty { try? FileManager.default.removeItem(at: destination) }
+                } catch {
+                    try? FileManager.default.removeItem(at: destination)
+                }
+            }
             if result.candidates.isEmpty {
                 // An error exit within seconds means the installer never showed its window: it crashed under Wine.
                 let crashed = status != 0 && Date().timeIntervalSince(runStarted) < 20
@@ -388,7 +429,8 @@ final class AppModel {
             }
             session.result = result
             session.selected = result.candidates.first?.url
-            session.title = result.installDirectory.map { InstallScanner.displayTitle(fromFolder: $0.lastPathComponent) }
+            session.arguments = result.candidates.first.map { InstallScanner.defaultArguments(for: $0.url) } ?? []
+            session.title = unpackedName ?? result.installDirectory.map { InstallScanner.displayTitle(fromFolder: $0.lastPathComponent) }
                 ?? AppModel.suggestedTitle(for: result.candidates[0].url)
             session.phase = .choosing
         } catch {
@@ -399,7 +441,8 @@ final class AppModel {
     func finishInstaller(_ session: InstallerSession, cover: URL?, suggestion: CoverSuggestion? = nil) {
         guard let exe = session.selected else { return }
         do {
-            try addCustomGame(title: session.title.trimmingCharacters(in: .whitespaces), executable: exe, arguments: [],
+            let arguments = exe == session.result.candidates.first?.url ? session.arguments : InstallScanner.defaultArguments(for: exe)
+            try addCustomGame(title: session.title.trimmingCharacters(in: .whitespaces), executable: exe, arguments: arguments,
                               cover: cover, installDirectory: session.result.installDirectory,
                               uninstaller: session.result.uninstaller, suggestion: suggestion)
             installer = nil

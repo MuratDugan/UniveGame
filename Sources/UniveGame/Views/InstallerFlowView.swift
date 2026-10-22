@@ -71,7 +71,7 @@ struct InstallerFlowView: View {
     private var step: Int {
         switch session.phase {
         case .ready: 0
-        case .preparing, .installingRuntime, .running, .finishing, .failed: 1
+        case .preparing, .installingRuntime, .running, .finishing, .extracting, .failed: 1
         case .choosing: 2
         }
     }
@@ -128,7 +128,7 @@ struct InstallerFlowView: View {
         Group {
             switch session.phase {
             case .ready: intro
-            case .preparing, .installingRuntime, .running, .finishing: progress
+            case .preparing, .installingRuntime, .running, .finishing, .extracting: progress
             case .choosing: chooser
             case .failed(let reason): failure(reason)
             }

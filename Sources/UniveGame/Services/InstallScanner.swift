@@ -27,6 +27,8 @@ enum InstallScanner {
         "unins", "uninstall", "setup", "install", "redist", "vcredist", "vc_redist", "dxsetup", "dxwebsetup",
         "crashreport", "crashhandler", "crashpad", "unitycrashhandler", "cefsharp.browsersubprocess",
         "qtwebengineprocess", "notification_helper", "prereq", "dotnet", "ue4prereqsetup", "easyanticheat_setup",
+        // dedicated servers and modding tools that ship with games
+        "hlds", "hltv", "srcds", "dedicatedserver", "steambackup", "amxxpc", "wincsx", "compile",
     ]
 
     /// Folders Windows itself owns; installers don't put games there.
@@ -109,6 +111,16 @@ enum InstallScanner {
         }
         if size > 0 { score += min(20, Int(log2(Double(size) / 1_000_000 + 1) * 3)) } // bigger binaries lean game
         return score
+    }
+
+    /// Launch options a program needs to start the game rather than a menu or another game. GoldSrc games
+    /// (Counter-Strike 1.6, Day of Defeat…) start through `hl.exe` with `-game <mod folder>`.
+    static func defaultArguments(for exe: URL) -> [String] {
+        guard exe.lastPathComponent.lowercased() == "hl.exe" else { return [] }
+        let folder = exe.deletingLastPathComponent()
+        let mods = ["cstrike", "czero", "dod", "tfc", "dmc", "ricochet", "gearbox", "bshift"]
+        let present = mods.filter { FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path) }
+        return present.first.map { ["-game", $0] } ?? []
     }
 
     static func windowsPath(of url: URL, driveC: URL) -> String {

@@ -10,4 +10,7 @@ UniveGame is an independent project and is not affiliated with or endorsed by St
 At run time UniveGame downloads and uses third-party software under its own licenses, including
 Wine (LGPL 2.1 or later), DXVK (zlib), MoltenVK (Apache 2.0), Wine Mono (MIT, LGPL, GPL),
 Legendary and gogdl (GPL 3.0, run as separate programs). License texts ship inside the engines.
+When an installer can't run, UniveGame downloads 7-Zip for macOS (Igor Pavlov; LGPL 2.1 with the
+unRAR restriction) and innoextract (Daniel Scharrer; zlib licence) on first use, verified by SHA-256,
+to unpack it.
 D3DMetal is Apple software under Apple's license; it is not included or distributed with UniveGame.

@@ -494,3 +494,4 @@
 
 "installer.error.crashed" = "The installer closed before it could open its window, so it doesn't run in UniveGame's Windows environment. Nothing was installed. Try the game's official release (Steam, GOG…) or another installer. If the game is installed on a Windows PC, copy its folder to your Mac and add the .exe with Add Game.";
 "installer.crashed.title" = "The installer couldn't start";
+"installer.log.extracting" = "The installer didn't work; unpacking the %@ package directly…";

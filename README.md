@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/brand/banner.jpg" alt="UniveGame: a free, open-source launcher that plays Windows games from Steam, Epic, GOG, Ubisoft, EA and your own .exe files on Apple Silicon Macs" width="100%">
+  <img src="docs/images/banner.jpg" alt="UniveGame: a free, open-source launcher that plays Windows games from Steam, Epic, GOG, Ubisoft, EA and your own .exe files on Apple Silicon Macs" width="100%">
 </p>
 
 <h1 align="center">UniveGame</h1>
@@ -42,7 +42,7 @@ Setup files are covered too: if an installer won't run under Wine, UniveGame unp
 MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
 
 <p align="center">
-  <img src="docs/screenshots/library.jpg" alt="UniveGame library: a stage for the selected game with its compatibility score, and shelves for games ready to play, worth installing, hard on Mac and not analyzed yet" width="100%">
+  <img src="docs/images/screenshots/library.jpg" alt="UniveGame library: a stage for the selected game with its compatibility score, and shelves for games ready to play, worth installing, hard on Mac and not analyzed yet" width="100%">
 </p>
 
 ## Features
@@ -67,16 +67,16 @@ MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/game.jpg" alt="Game page with an Excellent score, the tier scale, the reasons behind the score and per-game launch settings"></td>
-    <td width="50%"><img src="docs/screenshots/game-blocked.jpg" alt="Game page for a game blocked by anti-cheat, explaining why it won't open on a Mac"></td>
+    <td width="50%"><img src="docs/images/screenshots/game.jpg" alt="Game page with an Excellent score, the tier scale, the reasons behind the score and per-game launch settings"></td>
+    <td width="50%"><img src="docs/images/screenshots/game-blocked.jpg" alt="Game page for a game blocked by anti-cheat, explaining why it won't open on a Mac"></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/discover.jpg" alt="Discover page with Steam's featured games and deals in a bento grid"></td>
-    <td><img src="docs/screenshots/stores.jpg" alt="Store accounts: Steam, Epic Games, GOG, Ubisoft Connect and EA app connection status"></td>
+    <td><img src="docs/images/screenshots/discover.jpg" alt="Discover page with Steam's featured games and deals in a bento grid"></td>
+    <td><img src="docs/images/screenshots/stores.jpg" alt="Store accounts: Steam, Epic Games, GOG, Ubisoft Connect and EA app connection status"></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/add-game.jpg" alt="Add a game: an installed .exe, a setup file or a store account"></td>
-    <td><img src="docs/screenshots/settings-dx12.jpg" alt="DirectX 12 setup with D3DMetal in two steps"></td>
+    <td><img src="docs/images/screenshots/add-game.jpg" alt="Add a game: an installed .exe, a setup file or a store account"></td>
+    <td><img src="docs/images/screenshots/settings-dx12.jpg" alt="DirectX 12 setup with D3DMetal in two steps"></td>
   </tr>
 </table>
 
@@ -126,7 +126,8 @@ to an exact commit. Developer flags: `--section discover|stores|add|settings|dx1
 `--install <setup.exe>`, `-appLanguage en|tr|system`.
 
 Releases are built with `scripts/release.sh` (Developer ID signing, hardened runtime, notarization, stapling, DMG).
-The version lives in [`VERSION`](VERSION). Design specs and assets are in [`design/`](design/README.md).
+The version lives in [`VERSION`](VERSION).
+The app icon and the DMG window live in [`packaging/`](packaging).
 
 ## FAQ
 

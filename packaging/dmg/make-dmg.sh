@@ -1,6 +1,8 @@
 #!/bin/zsh
 # Builds build/UniveGame-<version>.dmg with the UniveGame drag-to-Applications window.
-# Usage (from anywhere): design/dmg/make-dmg.sh [version]
+# background.tiff holds the 1x and 2x renders of background.svg (660x440); to regenerate it:
+#   render background.svg at 660x440 and 1320x880, then: tiffutil -cathidpicheck 1x.png 2x.png -out background.tiff
+# Usage (from anywhere): packaging/dmg/make-dmg.sh [version]
 # Needs: create-dmg (brew install create-dmg) and build/UniveGame.app (scripts/bundle.sh release).
 set -euo pipefail
 
@@ -19,8 +21,8 @@ rm -f "$OUT"
 # The .tiff carries both 1× and 2× backgrounds so the window is sharp on Retina displays.
 create-dmg \
   --volname "UniveGame" \
-  --volicon "$ROOT/design/simge/AppIcon.icns" \
-  --background "$HERE/dmg-background.tiff" \
+  --volicon "$ROOT/packaging/AppIcon.icns" \
+  --background "$HERE/background.tiff" \
   --window-pos 200 120 \
   --window-size 660 468 \
   --icon-size 128 \

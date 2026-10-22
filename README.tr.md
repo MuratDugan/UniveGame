@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/brand/banner.jpg" alt="UniveGame: Steam, Epic, GOG, Ubisoft, EA ve kendi .exe oyunlarını Apple Silicon Mac'lerde çalıştıran ücretsiz, açık kaynak oyun başlatıcı" width="100%">
+  <img src="docs/images/banner.jpg" alt="UniveGame: Steam, Epic, GOG, Ubisoft, EA ve kendi .exe oyunlarını Apple Silicon Mac'lerde çalıştıran ücretsiz, açık kaynak oyun başlatıcı" width="100%">
 </p>
 
 <h1 align="center">UniveGame</h1>
@@ -24,7 +24,7 @@ kütüphane hangi oyunların oynamaya hazır olduğunu, hangilerinin yüklemeye 
 açılmayacağını söyler. Ücretsizdir ve öyle kalacak.
 
 <p align="center">
-  <img src="docs/screenshots/library.jpg" alt="UniveGame kütüphanesi: seçili oyun için uyumluluk puanlı sahne ve raflar" width="100%">
+  <img src="docs/images/screenshots/library.jpg" alt="UniveGame kütüphanesi: seçili oyun için uyumluluk puanlı sahne ve raflar" width="100%">
 </p>
 
 ## Özellikler
@@ -121,7 +121,7 @@ commit'ten indirir. Geliştirme parametreleri: `--section discover|stores|add|se
 | `Sources/UniveGame/Views/` | Rail, kütüphane, oyun sayfası, oyun ekle, kurulum akışı, mağazalar, keşfet, ayarlar |
 | `Sources/UniveGame/Theme/` | Renk, boşluk, yazı ve hareket token'ları |
 | `Sources/UniveGame/Resources/` | Çeviriler (`en`, `tr`) ve uygulama simgesi |
-| `design/` | v2 arayüz handoff'u, simge ve DMG tasarımı |
+| `packaging/` | Uygulama simgesi (SVG kaynağı dahil) ve DMG penceresi |
 | `scripts/` | Paketleme ve release betikleri |
 
 UniveGame kendi klasörünü (`~/Library/Application Support/UniveGame`) kullanır. Kendi eklediğin oyunlar mağaza

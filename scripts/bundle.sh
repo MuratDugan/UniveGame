@@ -29,18 +29,18 @@ cp "$BIN/UniveGame" "$APP/Contents/MacOS/UniveGame"
 cp -R "$BIN/UniveGame_UniveGame.bundle" "$APP/Contents/Resources/"
 for lang in en tr; do mkdir -p "$APP/Contents/Resources/$lang.lproj"; done  # lets macOS localize system menus
 
-# App icon: docs/brand/AppIcon.icns, or built from docs/brand/AppIcon-1024.png when only the PNG exists.
+# App icon: packaging/AppIcon.icns, or built from packaging/AppIcon-1024.png when only the PNG exists.
 ICON_KEY=""
-if [[ ! -f docs/brand/AppIcon.icns && -f docs/brand/AppIcon-1024.png ]]; then
+if [[ ! -f packaging/AppIcon.icns && -f packaging/AppIcon-1024.png ]]; then
   SET="$(mktemp -d)/AppIcon.iconset"; mkdir -p "$SET"
   for s in 16 32 128 256 512; do
-    sips -z $s $s docs/brand/AppIcon-1024.png --out "$SET/icon_${s}x${s}.png" >/dev/null
-    sips -z $((s*2)) $((s*2)) docs/brand/AppIcon-1024.png --out "$SET/icon_${s}x${s}@2x.png" >/dev/null
+    sips -z $s $s packaging/AppIcon-1024.png --out "$SET/icon_${s}x${s}.png" >/dev/null
+    sips -z $((s*2)) $((s*2)) packaging/AppIcon-1024.png --out "$SET/icon_${s}x${s}@2x.png" >/dev/null
   done
-  iconutil -c icns "$SET" -o docs/brand/AppIcon.icns
+  iconutil -c icns "$SET" -o packaging/AppIcon.icns
 fi
-if [[ -f docs/brand/AppIcon.icns ]]; then
-  cp docs/brand/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+if [[ -f packaging/AppIcon.icns ]]; then
+  cp packaging/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
   ICON_KEY="<key>CFBundleIconFile</key><string>AppIcon</string>"
 fi
 

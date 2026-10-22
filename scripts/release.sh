@@ -29,7 +29,7 @@ fi
 echo "Signing UniveGame $VERSION with: $SIGN_IDENTITY"
 
 SIGN_IDENTITY="$SIGN_IDENTITY" scripts/bundle.sh release
-DMG="$(design/dmg/make-dmg.sh "$VERSION" | tail -1)"
+DMG="$(packaging/dmg/make-dmg.sh "$VERSION" | tail -1)"
 codesign --force --timestamp --sign "$SIGN_IDENTITY" "$DMG"
 
 echo "Submitting to Apple for notarization (usually a few minutes)…"

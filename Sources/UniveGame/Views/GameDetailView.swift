@@ -135,6 +135,10 @@ struct GameDetailView: View {
                     .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary).monospacedDigit()
             }
             .frame(height: 44)
+        } else if model.isQueued(item) {
+            Button { model.removeFromQueue(item) } label: { ctaLabel(L("queue.waiting"), "clock") }
+                .buttonStyle(SecondaryButtonStyle(height: 44))
+                .help(L("queue.remove"))
         } else if model.isRunning(item) {
             Button { model.stop(item) } label: { ctaLabel(L("action.stop"), "stop.fill") }
                 .buttonStyle(PrimaryButtonStyle(role: .destructive, height: 44))
@@ -242,7 +246,11 @@ struct GameDetailView: View {
 
     @ViewBuilder private func notice(_ item: LibraryItem) -> some View {
         let (blocker, needsD3DMetal) = state(item)
-        if model.failedLaunches.contains(item.id) {
+        if model.hasUpdate(item), model.installProgress[item.id] == nil {
+            NoticeBanner(kind: .warning, title: L("maintain.update.banner"), message: L("maintain.update.banner.body"),
+                         action: .primary(L("maintain.update")) { Task { await model.maintain(item, .update) } })
+                .enterOnAppear(delay: 0.06)
+        } else if model.failedLaunches.contains(item.id) {
             NoticeBanner(kind: .warning, title: L("diag.failed.title"), message: L("diag.failed.body"),
                          action: .primary(L("diag.failed.action")) { model.reviewLastLaunch(item) })
                 .enterOnAppear(delay: 0.06)
@@ -286,6 +294,7 @@ struct CompatibilityPanel: View {
                 factors(report)
                     .transition(.opacity)
                     .id(report.analyzedAt)
+                CommunityRow(item: item)
             } else {
                 HStack(spacing: Theme.Spacing.md) {
                     if model.isAnalyzing(item) {
@@ -433,11 +442,128 @@ struct LaunchSettingsPanel: View {
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("launch.fpsLimit")).font(.system(size: 13, weight: .medium)).foregroundStyle(Theme.Palette.textPrimary)
+                    Text(L("launch.fpsLimit.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                SegmentedPicker(options: [0, 30, 60, 120], selection: binding.frameRateLimit,
+                                label: { $0 == 0 ? L("launch.fpsLimit.off") : "\($0)" },
+                                accessibilityTitle: L("launch.fpsLimit"))
+                    .fixedSize()
+            }
+            if item.isInstalled { ComponentsRow(item: item) }
         }
         .padding(Theme.Spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
+    }
+}
+
+/// What players reported for the game, and a way to add a report.
+struct CommunityRow: View {
+    let item: LibraryItem
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+
+    var body: some View {
+        let entry = model.communityEntry(for: item)
+        HStack(spacing: 8) {
+            Image(systemName: "person.2").foregroundStyle(Theme.Palette.textSecondary)
+            if let entry, !entry.counts.isEmpty {
+                let parts = CommunityReports.results.compactMap { r in entry.counts[r].map { L("community.\(r)", "\($0)") } }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(parts.joined(separator: " · ")).font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.Palette.textPrimary)
+                    if let last = entry.recent.first {
+                        Text(L("community.last", last.date ?? "", last.mac ?? "?", last.backend ?? "?"))
+                            .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                    }
+                }
+            } else {
+                Text(L("community.none")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+            }
+            Spacer(minLength: 0)
+            Button(L("community.report")) { model.reportingGame = item }
+                .buttonStyle(SecondaryButtonStyle(height: 28, horizontalPadding: 10))
+        }
+    }
+}
+
+/// "How did it run?" before the report form opens in the browser.
+struct ReportSheet: View {
+    let item: LibraryItem
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+    @State private var result = "great"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            Text(L("community.sheet.title", item.title)).font(Theme.Font.title).foregroundStyle(Theme.Palette.textPrimary)
+            Picker(L("community.sheet.result"), selection: $result) {
+                ForEach(CommunityReports.results, id: \.self) { r in Text(L("community.result.\(r)")).tag(r) }
+            }
+            .pickerStyle(.radioGroup)
+            Text(L("community.sheet.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button(L("common.cancel")) { model.reportingGame = nil }.buttonStyle(SecondaryButtonStyle())
+                Button(L("community.sheet.open")) { model.openReportForm(item, result: result) }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(Theme.Spacing.xl)
+        .frame(width: 520)
+        .background(Theme.Palette.surface)
+    }
+}
+
+/// Microsoft runtimes in the game's environment, and the game's recipe when it has one.
+struct ComponentsRow: View {
+    let item: LibraryItem
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+
+    var body: some View {
+        let installed = model.installedComponents(for: item)
+        let progress = model.componentProgress[item.id]
+        VStack(alignment: .leading, spacing: 8) {
+            Rectangle().fill(Theme.Palette.border).frame(height: 1)
+            Text(L("components.title")).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.Palette.textPrimary)
+            if let recipe = model.recipe(for: item) {
+                Label(L("components.recipe", recipe.note ?? ""), systemImage: "wand.and.stars")
+                    .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            ForEach(WindowsComponent.allCases) { component in
+                HStack(spacing: 8) {
+                    Text(component.title).font(Theme.Font.body).foregroundStyle(Theme.Palette.textPrimary)
+                    Spacer(minLength: 0)
+                    if let progress, progress.component == component {
+                        ProgressView(value: progress.fraction).frame(width: 120)
+                        Text(L("components.installing")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                    } else if installed.contains(component) {
+                        Label(L("components.installed"), systemImage: "checkmark")
+                            .font(Theme.Font.caption).foregroundStyle(Theme.Palette.success)
+                        Button(L("components.reinstall")) { Task { await model.installComponent(component, for: item) } }
+                            .buttonStyle(SecondaryButtonStyle(height: 28, horizontalPadding: 10))
+                            .disabled(progress != nil || model.isRunning(item))
+                    } else {
+                        Button(L("components.install.size", "\(component.downloadMegabytes)")) {
+                            Task { await model.installComponent(component, for: item) }
+                        }
+                        .buttonStyle(SecondaryButtonStyle(height: 28, horizontalPadding: 10))
+                        .disabled(progress != nil || model.isRunning(item))
+                    }
+                }
+            }
+            Text(L("components.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

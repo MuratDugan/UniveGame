@@ -23,6 +23,11 @@ struct LibraryState: Codable, Equatable {
     var lastSaveBackup: [String: Date]?
     /// The secret each game's shortcut puts in its link (see `GameLink`).
     var shortcutKeys: [String: String]?
+    /// Collections the player made: name → game ids, in the order they were added.
+    var collections: [String: [String]]?
+    /// When each game's cloud saves were last synced, and GOG's per-location sync times.
+    var lastCloudSync: [String: Date]?
+    var gogCloudTimestamps: [String: [String: String]]?
 }
 
 extension LibraryState {
@@ -43,6 +48,9 @@ extension LibraryState {
         saveSources = try c.decodeIfPresent([String: [SaveSource]].self, forKey: .saveSources)
         lastSaveBackup = try c.decodeIfPresent([String: Date].self, forKey: .lastSaveBackup)
         shortcutKeys = try c.decodeIfPresent([String: String].self, forKey: .shortcutKeys)
+        collections = try c.decodeIfPresent([String: [String]].self, forKey: .collections)
+        lastCloudSync = try c.decodeIfPresent([String: Date].self, forKey: .lastCloudSync)
+        gogCloudTimestamps = try c.decodeIfPresent([String: [String: String]].self, forKey: .gogCloudTimestamps)
     }
 }
 

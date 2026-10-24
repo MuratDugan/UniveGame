@@ -48,6 +48,14 @@ enum GameSource: Hashable {
     case store(StoreKind)
     case custom
 
+    /// Stable name for settings ("steam", "epic"…, "custom").
+    var key: String {
+        switch self {
+        case .store(let kind): kind.rawValue
+        case .custom: "custom"
+        }
+    }
+
     var displayName: String {
         switch self {
         case .store(let kind): kind.displayName
@@ -148,6 +156,8 @@ struct LibraryItem: Identifiable, Hashable {
 enum LibraryFilter: Hashable {
     case all, installed, favorites, recent
     case source(GameSource)
+    /// A collection the player made.
+    case collection(String)
 }
 
 enum LibrarySort: String, CaseIterable, Identifiable {

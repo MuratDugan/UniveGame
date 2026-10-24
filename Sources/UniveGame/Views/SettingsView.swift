@@ -204,6 +204,10 @@ private struct MacIntegrationCard: View {
                 SettingToggle(title: L("mac.awake"), detail: L("mac.awake.help"), isOn: $model.keepsDisplayAwake)
                 Rectangle().fill(Theme.Palette.border).frame(height: 1)
                 SettingToggle(title: L("mac.menuBar"), detail: L("mac.menuBar.help"), isOn: $model.showsMenuBarItem)
+                if DiscordPresence.isAvailable {
+                    Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                    SettingToggle(title: L("discord.setting"), detail: L("discord.setting.help"), isOn: $model.showsDiscordPresence)
+                }
                 Rectangle().fill(Theme.Palette.border).frame(height: 1)
                 Text(L("mac.shortcuts.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -283,7 +287,32 @@ private struct EngineSection: View {
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .enterOnAppear(delay: 0.12)
+            shaderCacheCard.enterOnAppear(delay: 0.16)
         }
+        .task { await model.measureShaderCaches() }
+    }
+
+    private var shaderCacheCard: some View {
+        HStack(spacing: Theme.Spacing.md) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(L("shaders.title")).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.Palette.textPrimary)
+                Text(L("shaders.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            if let size = model.shaderCacheSize {
+                Text(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))
+                    .font(Theme.Font.caption).monospacedDigit().foregroundStyle(Theme.Palette.textSecondary)
+            }
+            if model.clearingShaderCaches { ProgressView().controlSize(.small) }
+            Button(L("shaders.clear")) { Task { await model.clearShaderCaches() } }
+                .buttonStyle(SecondaryButtonStyle(height: 32, horizontalPadding: 12))
+                .disabled(model.clearingShaderCaches || !model.runningGameIDs.isEmpty || model.shaderCacheSize == 0)
+                .help(model.runningGameIDs.isEmpty ? "" : L("shaders.busy"))
+        }
+        .padding(Theme.Spacing.md)
+        .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
     }
 
     private var card: some View {

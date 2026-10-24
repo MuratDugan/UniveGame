@@ -77,6 +77,13 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
+# Discord Rich Presence needs the public application id of the "UniveGame" app on discord.com/developers.
+DISCORD_KEY=""
+if [[ -f packaging/discord-client-id ]]; then
+  DISCORD_ID="$(tr -dc '0-9' < packaging/discord-client-id)"
+  [[ -n "$DISCORD_ID" ]] && DISCORD_KEY="<key>UniveGameDiscordClientID</key><string>$DISCORD_ID</string>"
+fi
+ICON_KEY="$ICON_KEY$DISCORD_KEY"
 /usr/bin/sed -i '' -e "s|ICON_PLACEHOLDER|$ICON_KEY|" -e "s|VERSION_PLACEHOLDER|$VERSION|" -e "s|BUILD_PLACEHOLDER|$BUILD|" \
   "$APP/Contents/Info.plist"
 

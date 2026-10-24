@@ -6,6 +6,7 @@ struct ContentView: View {
     @Environment(Localizer.self) private var L
     @State private var dropTargeted = false
     @State private var windowHeight: CGFloat = 800
+    @State private var collectionName = ""
 
     var body: some View {
         @Bindable var model = model
@@ -50,6 +51,9 @@ struct ContentView: View {
         .sheet(item: $model.launchReview) { review in
             LaunchReviewSheet(review: review)
         }
+        .sheet(item: $model.reportingGame) { item in
+            ReportSheet(item: item)
+        }
         .confirmationDialog(L("uninstall.title", model.pendingUninstall?.title ?? ""),
                             isPresented: Binding(get: { model.pendingUninstall != nil },
                                                  set: { if !$0 { model.pendingUninstall = nil } }),
@@ -75,6 +79,17 @@ struct ContentView: View {
             Button(L("common.cancel"), role: .cancel) {}
         } message: {
             Text(L("steam.repair.message"))
+        }
+        .alert(L("collections.new.title"), isPresented: Binding(get: { model.namingCollectionFor != nil },
+                                                                set: { if !$0 { model.namingCollectionFor = nil } })) {
+            TextField(L("collections.new.placeholder"), text: $collectionName)
+            Button(L("collections.create")) {
+                model.addCollection(collectionName, with: model.namingCollectionFor)
+                collectionName = ""
+                model.namingCollectionFor = nil
+            }
+            .keyboardShortcut(.defaultAction)
+            Button(L("common.cancel"), role: .cancel) { collectionName = ""; model.namingCollectionFor = nil }
         }
         .alert(item: $model.alert) { alert in
             Alert(title: Text(L(alert.titleKey)),

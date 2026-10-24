@@ -19,6 +19,8 @@ struct UniveGameApp: App {
                     appDelegate.onOpenURL = { url in model.open(url) }
                     await model.refreshStores()
                     await model.loadKnownIssues()
+                    await model.loadRecipes()
+                    await model.loadCommunityReports()
                 }
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
                     Task { await model.refreshIfStale() }

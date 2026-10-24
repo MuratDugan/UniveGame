@@ -174,7 +174,7 @@ final class AppModel {
     func item(id: String) -> LibraryItem? { items.first { $0.id == id } }
 
     func visibleItems(for filter: LibraryFilter, locale: Locale) -> [LibraryItem] {
-        var list = items.filter { matches($0, filter) }
+        var list = items.filter { matches($0, filter) && passesViewOptions($0, filter) }
         let query = searchText.trimmingCharacters(in: .whitespaces)
         if !query.isEmpty {
             list = list.filter { $0.title.range(of: query, options: [.caseInsensitive, .diacriticInsensitive], locale: locale) != nil }
@@ -195,7 +195,71 @@ final class AppModel {
         return list
     }
 
-    func count(for filter: LibraryFilter) -> Int { items.filter { matches($0, filter) }.count }
+    func count(for filter: LibraryFilter) -> Int { items.filter { matches($0, filter) && passesViewOptions($0, filter) }.count }
+
+    // MARK: View options and collections
+
+    /// Show only installed games / only favorites (library ••• menu). Off by default.
+    var onlyInstalled: Bool = UserDefaults.standard.bool(forKey: "library.onlyInstalled") {
+        didSet { UserDefaults.standard.set(onlyInstalled, forKey: "library.onlyInstalled") }
+    }
+    var onlyFavorites: Bool = UserDefaults.standard.bool(forKey: "library.onlyFavorites") {
+        didSet { UserDefaults.standard.set(onlyFavorites, forKey: "library.onlyFavorites") }
+    }
+    /// Stores whose games stay out of the library (their chip too). Their accounts stay connected.
+    var hiddenSources: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "library.hiddenSources") ?? []) {
+        didSet { UserDefaults.standard.set(Array(hiddenSources).sorted(), forKey: "library.hiddenSources") }
+    }
+
+    func toggleHidden(_ source: GameSource) {
+        if hiddenSources.contains(source.key) { hiddenSources.remove(source.key) } else { hiddenSources.insert(source.key) }
+        if case .library(.source(source)) = selection ?? .library(.all), hiddenSources.contains(source.key) { selection = .library(.all) }
+    }
+
+    private func passesViewOptions(_ item: LibraryItem, _ filter: LibraryFilter) -> Bool {
+        if hiddenSources.contains(item.source.key), filter != .source(item.source) { return false }
+        if onlyInstalled && !item.isInstalled { return false }
+        if onlyFavorites && !item.isFavorite { return false }
+        return true
+    }
+
+    var collectionNames: [String] {
+        (state.collections ?? [:]).keys.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+
+    func collections(containing item: LibraryItem) -> Set<String> {
+        Set((state.collections ?? [:]).filter { $0.value.contains(item.id) }.keys)
+    }
+
+    func toggle(_ item: LibraryItem, in collection: String) {
+        var all = state.collections ?? [:]
+        var ids = all[collection] ?? []
+        if let i = ids.firstIndex(of: item.id) { ids.remove(at: i) } else { ids.append(item.id) }
+        all[collection] = ids
+        state.collections = all
+        persist()
+    }
+
+    /// Makes a collection (if new) and puts `item` in it.
+    func addCollection(_ name: String, with item: LibraryItem?) {
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, name.count <= 60 else { return }
+        var all = state.collections ?? [:]
+        var ids = all[name] ?? []
+        if let item, !ids.contains(item.id) { ids.append(item.id) }
+        all[name] = ids
+        state.collections = all
+        persist()
+    }
+
+    func removeCollection(_ name: String) {
+        state.collections?[name] = nil
+        persist()
+        if selection == .library(.collection(name)) { selection = .library(.all) }
+    }
+
+    /// Asked from a game's menu: the name of a new collection for it.
+    var namingCollectionFor: LibraryItem?
 
     private func matches(_ item: LibraryItem, _ filter: LibraryFilter) -> Bool {
         switch filter {
@@ -204,6 +268,7 @@ final class AppModel {
         case .favorites: item.isFavorite
         case .recent: item.lastPlayed != nil
         case .source(let s): item.source == s
+        case .collection(let name): state.collections?[name]?.contains(item.id) == true
         }
     }
 
@@ -212,6 +277,9 @@ final class AppModel {
         let present = Set(items.map(\.source))
         return (StoreKind.allCases.map { GameSource.store($0) } + [.custom]).filter(present.contains)
     }
+
+    /// Populated sources the player hasn't hidden: the library's chips.
+    var visibleSources: [GameSource] { populatedSources.filter { !hiddenSources.contains($0.key) } }
 
     func toggleFavorite(_ item: LibraryItem) {
         if state.favorites.contains(item.id) { state.favorites.remove(item.id) } else { state.favorites.insert(item.id) }
@@ -1130,6 +1198,7 @@ final class AppModel {
     /// Custom games count as running until every process in their Windows environment has ended:
     /// a launcher often starts the game and hides or exits, and the game outlives it.
     func isRunning(_ item: LibraryItem) -> Bool { running[item.id] != nil }
+    var runningGameIDs: Set<String> { Set(running.keys) }
 
     /// Engines of running custom games, for stopping their environment.
     private var customEngines: [String: Engine] = [:]
@@ -1147,13 +1216,20 @@ final class AppModel {
             return
         }
         failedLaunches.remove(item.id)
-        let profile = resolvedProfile(profile(for: item), for: item)
+        let recipe = recipe(for: item)
+        let profile = resolvedProfile(recipe?.applied(to: profile(for: item)) ?? profile(for: item), for: item)
         guard let engine = engine(for: profile) else {
             alert = AppAlert(titleKey: "alert.noEngine", message: "")
             return
         }
         launching.insert(item.id)
         defer { launching.remove(item.id) }
+        // The cloud's saves first, so the game starts from the newest ones.
+        if syncsCloudSaves, supportsCloudSaves(item) { await syncCloudSaves(item, .download) }
+        // A recipe's runtimes go in before the first launch that needs them.
+        for component in recipe?.components ?? [] where !installedComponents(for: item).contains(component) {
+            guard await installComponent(component, for: item, engine: engine) else { return }
+        }
 
         do {
             let id = item.id
@@ -1214,6 +1290,7 @@ final class AppModel {
                 return
             }
             running[id] = process
+            if showsDiscordPresence { discord.show(item.title) }
             playStarts[id] = Date()
             persist()
         } catch {
@@ -1244,21 +1321,95 @@ final class AppModel {
             case .ubisoft, .ea:
                 openLauncher(game.store)
             case .epic, .gog:
-                installProgress[id] = 0
-                defer { installProgress[id] = nil }
-                let report: @Sendable (Double) -> Void = { p in
-                    // A late update must not bring back the progress of an install that already ended.
-                    Task { @MainActor [weak self] in
-                        guard let self, self.installProgress[id] != nil else { return }
-                        self.installProgress[id] = p
-                    }
+                try await download(item, game) { report in
+                    if game.store == .epic { try await EpicProvider(paths: self.paths).install(game, onProgress: report) }
+                    else { try await GOGProvider(paths: self.paths).install(game, onProgress: report) }
                 }
-                if game.store == .epic { try await EpicProvider(paths: paths).install(game, onProgress: report) }
-                else { try await GOGProvider(paths: paths).install(game, onProgress: report) }
-                await refreshStores()
             }
         } catch {
             alert = AppAlert(titleKey: "alert.installFailed", message: error.localizedDescription)
+        }
+    }
+
+    // MARK: Downloads (Epic, GOG)
+
+    enum Maintenance { case update, repair }
+
+    /// Epic games with a newer build in the store (checked with each library refresh).
+    private(set) var epicUpdates: Set<String> = []
+    /// Downloads waiting for the one that runs: one at a time, so each gets the whole connection.
+    private(set) var queuedDownloads: [String] = []
+    @ObservationIgnored private var downloadRunning = false
+
+    func hasUpdate(_ item: LibraryItem) -> Bool {
+        if case .store(let game) = item.backing, game.store == .epic { return epicUpdates.contains(game.storeID) }
+        return false
+    }
+
+    func isQueued(_ item: LibraryItem) -> Bool { queuedDownloads.contains(item.id) }
+
+    /// Runs `work` when no other download does, showing its progress on the game.
+    private func download(_ item: LibraryItem, _ game: Game,
+                          _ work: @escaping (@escaping @Sendable (Double) -> Void) async throws -> Void) async throws {
+        let id = item.id
+        guard !queuedDownloads.contains(id) else { return }
+        if downloadRunning {
+            queuedDownloads.append(id)
+            while downloadRunning || queuedDownloads.first != id {
+                try await Task.sleep(for: .milliseconds(500))
+                guard queuedDownloads.contains(id) else { return }   // taken out of the queue
+            }
+            queuedDownloads.removeFirst()
+        }
+        downloadRunning = true
+        installProgress[id] = 0
+        defer { installProgress[id] = nil; downloadRunning = false }
+        let report: @Sendable (Double) -> Void = { p in
+            // A late update must not bring back the progress of a download that already ended.
+            Task { @MainActor [weak self] in
+                guard let self, self.installProgress[id] != nil else { return }
+                self.installProgress[id] = p
+            }
+        }
+        try await work(report)
+        await refreshStores()
+    }
+
+    func removeFromQueue(_ item: LibraryItem) { queuedDownloads.removeAll { $0 == item.id } }
+
+    /// Game menu: update to the newest build, or check every file and fix the damaged ones.
+    func maintain(_ item: LibraryItem, _ action: Maintenance) async {
+        guard case .store(let game) = item.backing, game.store == .epic || game.store == .gog,
+              installProgress[item.id] == nil, !isRunning(item) else { return }
+        do {
+            try await download(item, game) { report in
+                switch (game.store, action) {
+                case (.epic, .update): try await EpicProvider(paths: self.paths).update(game, onProgress: report)
+                case (.epic, .repair): try await EpicProvider(paths: self.paths).repair(game, onProgress: report)
+                case (_, .update): try await GOGProvider(paths: self.paths).update(game, onProgress: report)
+                case (_, .repair): try await GOGProvider(paths: self.paths).repair(game, onProgress: report)
+                }
+            }
+        } catch {
+            alert = AppAlert(titleKey: "maintain.failed", message: error.localizedDescription)
+        }
+    }
+
+    /// Game menu: move an Epic or GOG game's folder to another folder (an external disk, say).
+    func moveGame(_ item: LibraryItem, to folder: URL) async {
+        guard case .store(let game) = item.backing, game.store == .epic || game.store == .gog,
+              installProgress[item.id] == nil, !isRunning(item) else { return }
+        installProgress[item.id] = 0
+        defer { installProgress[item.id] = nil }
+        do {
+            if game.store == .epic { try await EpicProvider(paths: paths).move(game, to: folder) }
+            else {
+                let gog = GOGProvider(paths: paths)
+                try await Task.detached(priority: .userInitiated) { try gog.move(game, to: folder) }.value
+            }
+            await refreshStores()
+        } catch {
+            alert = AppAlert(titleKey: "maintain.moveFailed", message: error.localizedDescription)
         }
     }
 
@@ -1443,6 +1594,193 @@ final class AppModel {
         }
     }
 
+    // MARK: Windows components and recipes
+
+    /// Game recipes from UniveEngine's repository, fetched once per launch (last copy kept for offline starts).
+    private(set) var recipeBook = GameRecipeBook()
+
+    func loadRecipes() async {
+        guard !isDemo else { return }
+        let cache = AppPaths.home.appendingPathComponent("Compatibility/recipes.json")
+        if let (data, response) = try? await URLSession.shared.data(from: GameRecipeBook.url),
+           (response as? HTTPURLResponse)?.statusCode == 200, let book = try? GameRecipeBook.decode(data) {
+            recipeBook = book
+            try? FileManager.default.createDirectory(at: cache.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? data.write(to: cache, options: .atomic)
+        } else if let data = try? Data(contentsOf: cache), let book = try? GameRecipeBook.decode(data) {
+            recipeBook = book
+        }
+    }
+
+    func recipe(for item: LibraryItem) -> GameRecipe? { recipeBook.recipe(for: item.id) }
+
+    /// The Windows environment a game runs in.
+    func bottle(for item: LibraryItem) -> Bottle {
+        switch item.backing {
+        case .custom: customBottle
+        case .store(let game): Bottle(kind: game.store.bottleKind, paths: paths)
+        }
+    }
+
+    /// Install progress (0…1) per game, while a component downloads or installs.
+    private(set) var componentProgress: [String: (component: WindowsComponent, fraction: Double)] = [:]
+    /// Bumped after an install, so views re-read what a bottle has.
+    private(set) var componentRevision = 0
+
+    func installedComponents(for item: LibraryItem) -> Set<WindowsComponent> {
+        _ = componentRevision
+        return WindowsComponents(paths: paths).installed(in: bottle(for: item))
+    }
+
+    /// Downloads (once, checked against Microsoft's pinned SHA-256) and installs a runtime into the game's
+    /// environment. The cache lives in UniveGame's own Tools folder, shared by every environment.
+    @discardableResult
+    func installComponent(_ component: WindowsComponent, for item: LibraryItem, engine: Engine? = nil) async -> Bool {
+        let bottle = bottle(for: item)
+        guard componentProgress[item.id] == nil, bottle.exists,
+              let engine = engine ?? self.engine(for: resolvedProfile(profile(for: item), for: item)) else {
+            if !bottle.exists { alert = AppAlert(titleKey: "components.noBottle", message: "") }
+            return false
+        }
+        let id = item.id
+        componentProgress[id] = (component, 0)
+        defer { componentProgress[id] = nil; componentRevision += 1 }
+        do {
+            try await WindowsComponents(paths: paths).install(component, in: bottle, engine: engine) { fraction in
+                Task { @MainActor [weak self] in
+                    guard let self, let current = self.componentProgress[id], fraction >= current.fraction else { return }
+                    self.componentProgress[id] = (component, fraction)
+                }
+            }
+            return true
+        } catch is CancellationError {
+            return false
+        } catch {
+            alert = AppAlert(titleKey: "components.failed", message: error.localizedDescription)
+            return false
+        }
+    }
+
+    // MARK: Cloud saves (Epic, GOG)
+
+    /// Take the cloud's saves before playing and send this Mac's after. On by default.
+    var syncsCloudSaves: Bool = UserDefaults.standard.object(forKey: "syncsCloudSaves") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(syncsCloudSaves, forKey: "syncsCloudSaves") }
+    }
+    private(set) var cloudSyncing: Set<String> = []
+    private(set) var cloudErrors: [String: String] = [:]
+
+    func supportsCloudSaves(_ item: LibraryItem) -> Bool {
+        guard item.isInstalled, case .store(let game) = item.backing else { return false }
+        switch game.store {
+        case .epic: return EpicProvider(paths: paths).cloudSaveTemplate(game) != nil
+        case .gog: return GOGProvider(paths: paths).clientID(game) != nil
+        default: return false
+        }
+    }
+
+    func lastCloudSync(_ item: LibraryItem) -> Date? { state.lastCloudSync?[item.id] }
+
+    @discardableResult
+    func syncCloudSaves(_ item: LibraryItem, _ direction: CloudSavePath.Direction = .both) async -> Bool {
+        guard case .store(let game) = item.backing, !cloudSyncing.contains(item.id) else { return false }
+        cloudSyncing.insert(item.id)
+        defer { cloudSyncing.remove(item.id) }
+        let bottle = bottle(for: item)
+        do {
+            switch game.store {
+            case .epic:
+                try await EpicProvider(paths: paths).syncSaves(game, bottle: bottle, direction: direction)
+            case .gog:
+                let times = try await GOGProvider(paths: paths).syncSaves(game, bottle: bottle,
+                                                                          timestamps: state.gogCloudTimestamps?[item.id] ?? [:],
+                                                                          direction: direction)
+                state.gogCloudTimestamps = (state.gogCloudTimestamps ?? [:]).merging([item.id: times]) { $1 }
+            default:
+                return false
+            }
+            state.lastCloudSync = (state.lastCloudSync ?? [:]).merging([item.id: Date()]) { $1 }
+            cloudErrors[item.id] = nil
+            persist()
+            return true
+        } catch {
+            cloudErrors[item.id] = error.localizedDescription
+            return false
+        }
+    }
+
+    // MARK: Community reports
+
+    private(set) var communityReports = CommunityReports(games: [:])
+    /// Asked from a game's page: how it ran, before the form opens.
+    var reportingGame: LibraryItem?
+
+    func loadCommunityReports() async {
+        guard !isDemo else { return }
+        let cache = AppPaths.home.appendingPathComponent("Compatibility/compat-reports.json")
+        if let (data, response) = try? await URLSession.shared.data(from: CommunityReports.url),
+           (response as? HTTPURLResponse)?.statusCode == 200, let reports = try? JSONDecoder().decode(CommunityReports.self, from: data) {
+            communityReports = reports
+            try? FileManager.default.createDirectory(at: cache.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? data.write(to: cache, options: .atomic)
+        } else if let data = try? Data(contentsOf: cache), let reports = try? JSONDecoder().decode(CommunityReports.self, from: data) {
+            communityReports = reports
+        }
+    }
+
+    func communityEntry(for item: LibraryItem) -> CommunityReports.Entry? { communityReports.games[item.id] }
+
+    /// Opens the filled-in report form in the browser; the player submits it with their own GitHub account.
+    func openReportForm(_ item: LibraryItem, result: String) {
+        let profile = resolvedProfile(profile(for: item), for: item)
+        let engine = engine(for: profile)
+        let os = ProcessInfo.processInfo.operatingSystemVersion
+        guard let url = CommunityReports.form(gameID: item.id, title: item.title, result: result,
+                                              backend: profile.backend.displayName, engine: engine?.version ?? "",
+                                              mac: Self.macModel, macOS: "\(os.majorVersion).\(os.minorVersion).\(os.patchVersion)",
+                                              app: Self.appVersion) else { return }
+        reportingGame = nil
+        NSWorkspace.shared.open(url)
+    }
+
+    // MARK: Discord
+
+    @ObservationIgnored private let discord = DiscordPresence()
+    /// "Playing <game>" on the player's Discord profile while a game runs. On by default (needs Discord running).
+    var showsDiscordPresence: Bool = UserDefaults.standard.object(forKey: "showsDiscordPresence") as? Bool ?? true {
+        didSet {
+            UserDefaults.standard.set(showsDiscordPresence, forKey: "showsDiscordPresence")
+            if !showsDiscordPresence { discord.show(nil) }
+        }
+    }
+
+    // MARK: Shader caches
+
+    /// Bytes in Wine's Metal shader caches and the DXVK caches in UniveGame's environments (nil until measured).
+    private(set) var shaderCacheSize: Int64?
+    private(set) var clearingShaderCaches = false
+
+    private var shaderCacheLocations: [URL] {
+        ShaderCaches.metalCaches() + ShaderCaches.dxvkCaches(in: paths.bottles) + ShaderCaches.dxvkCaches(in: customPaths.bottles)
+    }
+
+    func measureShaderCaches() async {
+        let paths = self.paths, custom = customPaths
+        shaderCacheSize = await Task.detached(priority: .utility) {
+            ShaderCaches.size(of: ShaderCaches.metalCaches() + ShaderCaches.dxvkCaches(in: paths.bottles) + ShaderCaches.dxvkCaches(in: custom.bottles))
+        }.value
+    }
+
+    /// Settings › Engine: removes them while no game runs; games rebuild them as they play.
+    func clearShaderCaches() async {
+        guard running.isEmpty, !clearingShaderCaches else { return }
+        clearingShaderCaches = true
+        defer { clearingShaderCaches = false }
+        let items = shaderCacheLocations
+        _ = await Task.detached(priority: .utility) { ShaderCaches.clear(items) }.value
+        await measureShaderCaches()
+    }
+
     // MARK: Controllers
 
     /// Show PlayStation pads (DualShock 4, DualSense, Backbone PS) to games as Xbox controllers: many games only
@@ -1466,6 +1804,9 @@ final class AppModel {
 
     private func didExit(_ id: String) {
         running[id] = nil
+        if showsDiscordPresence {
+            discord.show(running.keys.first.flatMap { item(id: $0)?.title })
+        }
         customEngines[id] = nil
         if let start = playStarts.removeValue(forKey: id) {
             let ranFor = Date().timeIntervalSince(start)
@@ -1477,6 +1818,7 @@ final class AppModel {
                     failedLaunches.insert(id)
                 }
                 backUpAfterPlay(item)
+                if syncsCloudSaves, supportsCloudSaves(item) { Task { await syncCloudSaves(item, .upload) } }
             }
         }
     }
@@ -1528,6 +1870,8 @@ final class AppModel {
         case .updateEngine:
             startEngineInstall()
             openSettings(.engine)
+        case .installComponent(let component):
+            Task { await installComponent(component, for: item) }
         case .reportProblem, .none:
             break
         }
@@ -1803,6 +2147,7 @@ final class AppModel {
                     let metadata = paths.legendaryConfig.appendingPathComponent("metadata", isDirectory: true)
                     fresh = fresh.filter { EpicLibraryFilter.isGame(appName: $0.storeID, title: $0.title, metadataFolder: metadata) }
                 }
+                if kind == .epic { epicUpdates = await EpicProvider(paths: paths).availableUpdates() }
                 games = LibraryStore.merged(cached: games, replacing: kind, with: fresh)
                 lastSynced[kind] = Date()
                 syncErrors[kind] = nil

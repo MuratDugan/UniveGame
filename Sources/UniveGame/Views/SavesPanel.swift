@@ -56,6 +56,7 @@ struct SavesPanel: View {
                     .buttonStyle(SecondaryButtonStyle(height: 32, horizontalPadding: 14))
                 if searching { ProgressView().controlSize(.small) }
             }
+            if model.supportsCloudSaves(item) { cloudRow }
             if let error = model.saveErrors[item.id] {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .font(Theme.Font.caption).foregroundStyle(Theme.Palette.warning)
@@ -97,6 +98,27 @@ struct SavesPanel: View {
             Button(L("common.cancel"), role: .cancel) { restoring = nil }
         } message: {
             Text(L("saves.restore.message"))
+        }
+    }
+
+    private var cloudRow: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "icloud").foregroundStyle(Theme.Palette.textSecondary)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(L("cloud.title")).font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.Palette.textPrimary)
+                Group {
+                    if let error = model.cloudErrors[item.id] { Text(error).foregroundStyle(Theme.Palette.warning) }
+                    else if let date = model.lastCloudSync(item) {
+                        Text(L("cloud.synced", date.formatted(.relative(presentation: .named).locale(locale))))
+                    } else { Text(L(model.syncsCloudSaves ? "cloud.auto" : "cloud.manual")) }
+                }
+                .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+            }
+            Spacer(minLength: 0)
+            if model.cloudSyncing.contains(item.id) { ProgressView().controlSize(.small) }
+            Button(L("cloud.syncNow")) { Task { await model.syncCloudSaves(item) } }
+                .buttonStyle(SecondaryButtonStyle(height: 28, horizontalPadding: 10))
+                .disabled(model.cloudSyncing.contains(item.id) || model.isRunning(item))
         }
     }
 
@@ -212,6 +234,8 @@ struct SaveBackupSettingsCard: View {
                 }
                 Rectangle().fill(Theme.Palette.border).frame(height: 1)
                 SettingToggle(title: L("saves.settings.auto"), detail: L("saves.settings.auto.help"), isOn: $model.autoBackupSaves)
+                Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                SettingToggle(title: L("cloud.setting"), detail: L("cloud.setting.help"), isOn: $model.syncsCloudSaves)
             }
             .padding(Theme.Spacing.md)
             .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))

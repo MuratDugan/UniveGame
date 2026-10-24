@@ -73,6 +73,14 @@ MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
   and the display stays awake while you play.
 - **Save backups.** Find a game's save folders, back them up to any folder or iCloud Drive (automatically after
   playing), and restore them, with a safety copy first.
+- **Fixes that apply themselves.** Microsoft runtimes (Visual C++ 2015–2022, DirectX 9) installed into a game's
+  environment in one click, checked against pinned SHA-256s; per-game recipes from UniveEngine's repository applied
+  before launch; a missing runtime in "Why didn't it start?" offers to install it.
+- **Library your way.** Collections, installed-only and favorites-only views, hidden stores.
+- **Epic and GOG, fully.** Update, verify and repair, move a game to another disk, a download queue, and cloud saves
+  synced before and after playing.
+- **Player reports.** "How did it run?" opens a filled-in GitHub form; counted reports show on every game's page.
+- **Tuning.** A frame rate limit per game (cooler, quieter, longer battery) and a shader cache clean-up.
 - **Verified in-app updates.** Settings › About checks GitHub for a new release and installs it only if the download
   matches the release's SHA-256, is signed with UniveGame's Developer ID and is notarized by Apple. No downgrades.
 - **English and Turkish**, switchable without restarting. Made for macOS with SwiftUI: dark, quiet, keyboard-friendly.

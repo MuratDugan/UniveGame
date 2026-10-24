@@ -62,11 +62,19 @@ struct LibraryView: View {
                 select(.all)
             }
             .keyboardShortcut("1", modifiers: .command)
-            ForEach(Array(model.populatedSources.enumerated()), id: \.element) { i, source in
+            ForEach(Array(model.visibleSources.enumerated()), id: \.element) { i, source in
                 let chip = FilterChip(title: source == .custom ? L("source.custom") : source.displayName,
                                       count: model.count(for: .source(source)),
                                       isSelected: filter == .source(source)) { select(.source(source)) }
                 if i < 3 { chip.keyboardShortcut(KeyEquivalent(Character("\(i + 2)")), modifiers: .command) } else { chip }
+            }
+            ForEach(model.collectionNames, id: \.self) { name in
+                FilterChip(title: name, count: model.count(for: .collection(name)), isSelected: filter == .collection(name)) {
+                    select(.collection(name))
+                }
+                .contextMenu {
+                    Button(L("collections.delete"), systemImage: "trash", role: .destructive) { model.removeCollection(name) }
+                }
             }
             Spacer(minLength: Theme.Spacing.md)
             if let progress = model.bulkAnalysis {
@@ -100,6 +108,22 @@ struct LibraryView: View {
                 Text(L("sort.compatibility")).tag(LibrarySort.compatibility)
             }
             .pickerStyle(.inline)
+            Divider()
+            Toggle(L("library.onlyInstalled"), isOn: $model.onlyInstalled)
+            Toggle(L("library.onlyFavorites"), isOn: $model.onlyFavorites)
+            Menu(L("library.hideStores")) {
+                ForEach(model.populatedSources, id: \.self) { source in
+                    Toggle(source == .custom ? L("source.custom") : source.displayName,
+                           isOn: Binding(get: { model.hiddenSources.contains(source.key) }, set: { _ in model.toggleHidden(source) }))
+                }
+            }
+            if !model.collectionNames.isEmpty {
+                Menu(L("collections.manage")) {
+                    ForEach(model.collectionNames, id: \.self) { name in
+                        Button(L("collections.deleteNamed", name), role: .destructive) { model.removeCollection(name) }
+                    }
+                }
+            }
             Divider()
             if model.bulkAnalysis == nil {
                 Button(L("compat.analyzeAll"), systemImage: "waveform.badge.magnifyingglass") { Task { await model.analyzeAll() } }

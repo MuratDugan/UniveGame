@@ -95,6 +95,7 @@ struct LaunchReviewSheet: View {
         case .installExtendedEngine: L("diag.action.extendedEngine")
         case .setUpDirectX12: L("d3dmetal.setUp")
         case .updateEngine: L("diag.action.updateEngine")
+        case .installComponent(let component): L("components.install", component.title)
         case .reportProblem: L("diag.copyReport")
         case .none: nil
         }

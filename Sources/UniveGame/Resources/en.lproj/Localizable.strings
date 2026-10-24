@@ -626,3 +626,80 @@
 "saves.settings.panel" = "Choose the folder for save backups";
 "saves.settings.auto" = "Back up automatically after playing";
 "saves.settings.auto.help" = "When you quit a game whose save folders are set and its saves changed, a backup is made. The last 20 backups of each game are kept.";
+
+/* Windows components */
+"components.title" = "Windows components";
+"components.recipe" = "This game has a fix recipe; it's applied when the game starts. %@";
+"components.installing" = "Installing…";
+"components.installed" = "Installed";
+"components.reinstall" = "Reinstall";
+"components.install" = "Install %@";
+"components.install.size" = "Install (%@ MB)";
+"components.help" = "Some games need these Microsoft runtimes. They're downloaded from Microsoft, checked with SHA-256 and installed into the game's environment; games in the same environment share them.";
+"components.noBottle" = "The game's environment doesn't exist yet. Start the game once, then try again.";
+"components.failed" = "Couldn't install the component";
+
+/* Collections and view options */
+"library.onlyInstalled" = "Installed games only";
+"library.onlyFavorites" = "Favorites only";
+"library.hideStores" = "Hide Stores";
+"collections.addTo" = "Add to Collection";
+"collections.new" = "New Collection…";
+"collections.new.title" = "New collection";
+"collections.new.placeholder" = "Collection name";
+"collections.create" = "Create";
+"collections.manage" = "Collections";
+"collections.delete" = "Delete Collection";
+"collections.deleteNamed" = "Delete \"%@\"";
+
+/* Graphics tuning */
+"shaders.title" = "Shader cache";
+"shaders.help" = "Graphics caches games build as they play. Clear them after broken graphics or crashes following an engine update; the first sessions may stutter a little while they're rebuilt.";
+"shaders.clear" = "Clear";
+"shaders.busy" = "Close running games first.";
+"launch.fpsLimit" = "Frame rate limit";
+"launch.fpsLimit.help" = "Keeps the Mac cooler and quieter and the battery lasting longer. Works with games running on DXVK.";
+"launch.fpsLimit.off" = "Off";
+
+/* Store downloads */
+"maintain.update" = "Update";
+"maintain.update.available" = "Update (new version)";
+"maintain.update.banner" = "Update available";
+"maintain.update.banner.body" = "The store has a newer version of this game. Only the changed files are downloaded.";
+"maintain.repair" = "Verify and Repair Files";
+"maintain.move" = "Move to Another Folder…";
+"maintain.move.panel" = "Choose where to move the game (an external disk, say)";
+"maintain.failed" = "Couldn't finish";
+"maintain.moveFailed" = "Couldn't move the game";
+"queue.waiting" = "Waiting…";
+"queue.remove" = "Remove from Queue";
+
+/* Cloud saves */
+"cloud.title" = "Cloud saves";
+"cloud.synced" = "Last synced %@";
+"cloud.auto" = "Taken from the cloud when the game starts, sent back when it closes.";
+"cloud.manual" = "Automatic sync is off.";
+"cloud.syncNow" = "Sync Now";
+"cloud.setting" = "Sync Epic and GOG cloud saves";
+"cloud.setting.help" = "For Epic and GOG games with cloud saves, saves are taken from the cloud before a game starts and sent back when it closes, so you continue where you left off on your Windows PC.";
+
+/* Community reports */
+"community.great" = "%@ works great";
+"community.playable" = "%@ playable";
+"community.unplayable" = "%@ unplayable";
+"community.broken" = "%@ doesn't start";
+"community.last" = "Last report: %@ · %@ · %@";
+"community.none" = "No player reports yet.";
+"community.report" = "How Did It Run?";
+"community.sheet.title" = "How did %@ run?";
+"community.sheet.result" = "Result";
+"community.result.great" = "Works great";
+"community.result.playable" = "Playable with issues";
+"community.result.unplayable" = "Starts but isn't playable";
+"community.result.broken" = "Doesn't start";
+"community.sheet.help" = "A GitHub form opens in your browser, filled in with the game, engine, graphics option and your Mac model; you submit it with your own account. The report is counted within minutes and shows on everyone's game page. Your user name and files aren't sent.";
+"community.sheet.open" = "Open the Form";
+
+/* Discord */
+"discord.setting" = "Show the game you're playing on Discord";
+"discord.setting.help" = "While Discord is open, your profile shows \"Playing <game>\". It's handed to the Discord app on this Mac; UniveGame sends nothing to the internet.";

@@ -652,3 +652,82 @@
 "saves.settings.panel" = "Kayıt yedeklerinin konacağı klasörü seç";
 "saves.settings.auto" = "Oyundan sonra otomatik yedekle";
 "saves.settings.auto.help" = "Kayıt klasörleri belirlenmiş bir oyundan çıkınca kayıtlar değiştiyse yedek alınır. Her oyun için son 20 yedek tutulur.";
+
+/* Windows components */
+"components.title" = "Windows bileşenleri";
+"components.recipe" = "Bu oyun için hazır bir düzeltme tarifi var; oyun başlarken uygulanır. %@";
+"components.installing" = "Kuruluyor…";
+"components.installed" = "Kurulu";
+"components.reinstall" = "Yeniden Kur";
+"components.install" = "%@ Kur";
+"components.install.size" = "Kur (%@ MB)";
+"components.help" = "Bazı oyunlar Microsoft'un bu çalışma dosyalarını ister. Dosyalar Microsoft'tan indirilir, SHA-256 ile doğrulanır ve oyunun ortamına kurulur; aynı ortamdaki oyunlar ortak kullanır.";
+"components.noBottle" = "Oyunun ortamı henüz yok. Oyunu bir kez başlat, sonra tekrar dene.";
+"components.failed" = "Bileşen kurulamadı";
+"diag.missing-runtime.title" = "Oyun Microsoft'un bir çalışma dosyasını istiyor";
+"diag.missing-runtime.detail" = "Oyunun aradığı DLL (adı aşağıdaki satırda) Microsoft'un Visual C++ ya da DirectX çalışma dosyalarından. Bu ortamda henüz yok; tek tıkla kurabilirsin.";
+
+/* Collections and view options */
+"library.onlyInstalled" = "Sadece yüklü oyunlar";
+"library.onlyFavorites" = "Sadece favoriler";
+"library.hideStores" = "Mağazaları Gizle";
+"collections.addTo" = "Koleksiyona Ekle";
+"collections.new" = "Yeni Koleksiyon…";
+"collections.new.title" = "Yeni koleksiyon";
+"collections.new.placeholder" = "Koleksiyon adı";
+"collections.create" = "Oluştur";
+"collections.manage" = "Koleksiyonlar";
+"collections.delete" = "Koleksiyonu Sil";
+"collections.deleteNamed" = "\"%@\" koleksiyonunu sil";
+
+/* Graphics tuning */
+"shaders.title" = "Gölgelendirici önbelleği";
+"shaders.help" = "Oyunlar oynadıkça hazırladığı grafik önbellekleri. Bozuk görüntü ya da motor güncellemesinden sonra çökme olursa temizle; ilk oyunlarda biraz takılma olabilir, önbellek yeniden oluşur.";
+"shaders.clear" = "Temizle";
+"shaders.busy" = "Önce açık oyunları kapat.";
+"launch.fpsLimit" = "Kare hızı sınırı";
+"launch.fpsLimit.help" = "Mac daha serin ve sessiz çalışır, pil daha uzun gider. DXVK ile çalışan oyunlarda geçerli.";
+"launch.fpsLimit.off" = "Yok";
+
+/* Store downloads */
+"maintain.update" = "Güncelle";
+"maintain.update.available" = "Güncelle (yeni sürüm var)";
+"maintain.update.banner" = "Güncelleme var";
+"maintain.update.banner.body" = "Mağazada bu oyunun daha yeni bir sürümü var. Sadece değişen dosyalar indirilir.";
+"maintain.repair" = "Dosyaları Doğrula ve Onar";
+"maintain.move" = "Başka Klasöre Taşı…";
+"maintain.move.panel" = "Oyunun taşınacağı klasörü seç (örneğin harici bir disk)";
+"maintain.failed" = "İşlem tamamlanamadı";
+"maintain.moveFailed" = "Oyun taşınamadı";
+"queue.waiting" = "Sırada…";
+"queue.remove" = "Sıradan Çıkar";
+
+/* Cloud saves */
+"cloud.title" = "Bulut kayıtları";
+"cloud.synced" = "Son eşitleme: %@";
+"cloud.auto" = "Oyun açılırken buluttan alınır, kapanınca buluta gönderilir.";
+"cloud.manual" = "Otomatik eşitleme kapalı.";
+"cloud.syncNow" = "Şimdi Eşitle";
+"cloud.setting" = "Epic ve GOG bulut kayıtlarını eşitle";
+"cloud.setting.help" = "Bulut kaydı olan Epic ve GOG oyunlarında kayıtlar oyun açılmadan önce buluttan alınır, oyun kapanınca buluta gönderilir. Böylece Windows bilgisayarınla kaldığın yerden devam edersin.";
+
+/* Community reports */
+"community.great" = "%@ sorunsuz";
+"community.playable" = "%@ oynanabilir";
+"community.unplayable" = "%@ oynanamaz";
+"community.broken" = "%@ açılmıyor";
+"community.last" = "Son rapor: %@ · %@ · %@";
+"community.none" = "Henüz oyuncu raporu yok.";
+"community.report" = "Nasıl Çalıştı?";
+"community.sheet.title" = "%@ nasıl çalıştı?";
+"community.sheet.result" = "Sonuç";
+"community.result.great" = "Sorunsuz çalışıyor";
+"community.result.playable" = "Oynanabilir ama sorunları var";
+"community.result.unplayable" = "Açılıyor ama oynanamıyor";
+"community.result.broken" = "Açılmıyor";
+"community.sheet.help" = "Tarayıcıda, oyun, motor, grafik seçeneği ve Mac modelin doldurulmuş bir GitHub formu açılır; kendi hesabınla gönderirsin. Rapor birkaç dakika içinde sayılır ve herkesin oyun sayfasında görünür. Kullanıcı adın ya da dosyaların gönderilmez.";
+"community.sheet.open" = "Formu Aç";
+
+/* Discord */
+"discord.setting" = "Discord'da oynadığın oyunu göster";
+"discord.setting.help" = "Discord açıkken profilinde \"Oynuyor: <oyun>\" görünür. Bilgi Discord uygulamasına bu Mac'in içinden iletilir; UniveGame internete bir şey göndermez.";

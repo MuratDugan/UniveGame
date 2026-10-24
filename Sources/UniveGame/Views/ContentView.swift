@@ -28,12 +28,6 @@ struct ContentView: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { windowHeight = $0 }
         .environment(\.windowHeight, windowHeight)
         .ignoresSafeArea(.container, edges: .top)
-        .toolbar(removing: .title)
-        .toolbarBackground(.hidden, for: .windowToolbar)
-        .toolbar {
-            // Keeps the unified 52 pt title bar so the traffic lights centre on the rail's top band.
-            ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1).accessibilityHidden(true) }
-        }
         .environment(\.windowDropTargeted, dropTargeted)
         .onDrop(of: [.fileURL], isTargeted: $dropTargeted) { providers in
             guard model.installer == nil, let provider = providers.first else { return false }
@@ -49,6 +43,12 @@ struct ContentView: View {
         }
         .sheet(item: $model.editingCustomGame) { game in
             ImportGameSheet(editing: game)
+        }
+        .sheet(item: $model.blockedWarning) { warning in
+            BlockedGameSheet(warning: warning)
+        }
+        .sheet(item: $model.launchReview) { review in
+            LaunchReviewSheet(review: review)
         }
         .confirmationDialog(L("uninstall.title", model.pendingUninstall?.title ?? ""),
                             isPresented: Binding(get: { model.pendingUninstall != nil },
@@ -69,6 +69,12 @@ struct ContentView: View {
                     Text(L("uninstall.message.keepFiles"))
                 }
             }
+        }
+        .confirmationDialog(L("steam.repair.title"), isPresented: $model.confirmingSteamRepair, titleVisibility: .visible) {
+            Button(L("steam.repair.confirm")) { Task { await model.repairSteam() } }
+            Button(L("common.cancel"), role: .cancel) {}
+        } message: {
+            Text(L("steam.repair.message"))
         }
         .alert(item: $model.alert) { alert in
             Alert(title: Text(L(alert.titleKey)),

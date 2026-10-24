@@ -20,6 +20,12 @@ struct GameActionsMenu: View {
         if item.installPath != nil {
             Button(L("action.showInFinder"), systemImage: "folder") { model.revealInFinder(item) }
         }
+        if item.isInstalled || item.customGame != nil {
+            Button(L("diag.menu"), systemImage: "stethoscope") { model.reviewLastLaunch(item) }
+        }
+        if item.isInstalled {
+            Button(L("shortcut.create"), systemImage: "app.badge") { Task { await model.createShortcut(item) } }
+        }
         Button(L("action.openLogs"), systemImage: "doc.text.magnifyingglass") { model.openLogs(item) }
         if let custom = item.customGame {
             Button(L("cover.findOnline"), systemImage: "photo.badge.magnifyingglass") {

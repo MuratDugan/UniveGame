@@ -1,3 +1,4 @@
+import AVFoundation
 import AppKit
 import UniveEngineKit
 import SwiftUI
@@ -112,6 +113,7 @@ private struct SectionTitle: View {
 
 private struct GeneralSection: View {
     @Environment(Localizer.self) private var L
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         @Bindable var L = L
@@ -140,6 +142,128 @@ private struct GeneralSection: View {
                 }
             }
             .enterOnAppear(delay: 0.12)
+            ControllersCard().enterOnAppear(delay: 0.18)
+            MicrophoneCard().enterOnAppear(delay: 0.22)
+            MacIntegrationCard().enterOnAppear(delay: 0.26)
+            SaveBackupSettingsCard().enterOnAppear(delay: 0.3)
+        }
+    }
+}
+
+/// Settings › General: the pads the Mac sees and the PlayStation-as-Xbox switch.
+private struct ControllersCard: View {
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+
+    var body: some View {
+        @Bindable var model = model
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("controllers.title")).font(Theme.Font.section).foregroundStyle(Theme.Palette.textPrimary)
+            VStack(alignment: .leading, spacing: 12) {
+                if model.controllers.isEmpty {
+                    Text(L("controllers.none")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                } else {
+                    ForEach(model.controllers) { pad in
+                        HStack(spacing: 10) {
+                            Image(systemName: "gamecontroller.fill").foregroundStyle(Theme.Palette.textSecondary)
+                            Text(pad.name).font(Theme.Font.body).foregroundStyle(Theme.Palette.textPrimary)
+                            Text(L("controllers.kind.\(pad.kind.rawValue)")).font(Theme.Font.caption)
+                                .foregroundStyle(Theme.Palette.textSecondary)
+                            Spacer(minLength: 0)
+                            if pad.kind == .playStation {
+                                Text(L(model.playStationAsXbox ? "controllers.seenAsXbox" : "controllers.seenAsPlayStation"))
+                                    .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textTertiary)
+                            }
+                        }
+                    }
+                }
+                Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                SettingToggle(title: L("controllers.psAsXbox"), detail: L("controllers.psAsXbox.help"), isOn: $model.playStationAsXbox)
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
+        }
+        .onAppear { model.refreshControllers() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            model.refreshControllers()
+        }
+    }
+}
+
+/// Settings › General: keep-awake while playing and the menu bar shortcut list.
+private struct MacIntegrationCard: View {
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+
+    var body: some View {
+        @Bindable var model = model
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("mac.title")).font(Theme.Font.section).foregroundStyle(Theme.Palette.textPrimary)
+            VStack(alignment: .leading, spacing: 12) {
+                SettingToggle(title: L("mac.awake"), detail: L("mac.awake.help"), isOn: $model.keepsDisplayAwake)
+                Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                SettingToggle(title: L("mac.menuBar"), detail: L("mac.menuBar.help"), isOn: $model.showsMenuBarItem)
+                Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                Text(L("mac.shortcuts.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
+        }
+    }
+}
+
+/// Settings › General: microphone access for games' voice chat. macOS asks on UniveGame's behalf, so allowing it
+/// here once covers every game started from the app.
+private struct MicrophoneCard: View {
+    @Environment(Localizer.self) private var L
+    @State private var status = AVCaptureDevice.authorizationStatus(for: .audio)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("mic.title")).font(Theme.Font.section).foregroundStyle(Theme.Palette.textPrimary)
+            HStack(spacing: Theme.Spacing.md) {
+                Image(systemName: status == .authorized ? "mic.fill" : "mic.slash")
+                    .foregroundStyle(status == .authorized ? Theme.Palette.success : Theme.Palette.textSecondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L(statusKey)).font(Theme.Font.body).foregroundStyle(Theme.Palette.textPrimary)
+                    Text(L("mic.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                switch status {
+                case .notDetermined:
+                    Button(L("mic.allow")) {
+                        AVCaptureDevice.requestAccess(for: .audio) { _ in
+                            Task { @MainActor in status = AVCaptureDevice.authorizationStatus(for: .audio) }
+                        }
+                    }
+                    .buttonStyle(SecondaryButtonStyle(height: 34, horizontalPadding: 14))
+                case .denied, .restricted:
+                    Button(L("mic.openSettings")) {
+                        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")!)
+                    }
+                    .buttonStyle(SecondaryButtonStyle(height: 34, horizontalPadding: 14))
+                default:
+                    EmptyView()
+                }
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            status = AVCaptureDevice.authorizationStatus(for: .audio)
+        }
+    }
+
+    private var statusKey: String {
+        switch status {
+        case .authorized: "mic.status.allowed"
+        case .denied, .restricted: "mic.status.denied"
+        default: "mic.status.notAsked"
         }
     }
 }

@@ -524,3 +524,131 @@
 "update.error.notWritable" = "Bu kopya kendini güncelleyemiyor (Uygulamalar klasöründe değil ya da klasör yazılamıyor). Doğrulanmış disk görüntüsü açıldı: UniveGame'i Uygulamalar'a sürükle.";
 "update.error.failed" = "Güncelleme kurulamadı; mevcut sürüm yerinde duruyor.";
 "update.error.restart" = "Güncelleme kuruldu ama uygulama kendini yeniden başlatamadı. UniveGame'i kapatıp tekrar aç.";
+
+/* Won't-run warning */
+"blocked.title" = "%@ Mac'te çalışmıyor";
+"blocked.antiCheat.body" = "Bu oyunun anti-cheat sistemi Wine'ı ve macOS'u desteklemiyor. Yüklesen de oyun açılmaz ya da çevrim içi moda girmez. Bazı oyunlar bu şekilde açılmayı denemeyi hile sayıp hesabı kapatabilir.";
+"blocked.known.body" = "Bu oyunun bu şekilde çalışmadığı biliniyor. Yüklesen de büyük ihtimalle açılmayacak.";
+"blocked.alternatives" = "Mac'te yine de oynamanın yolları";
+"blocked.cloud.gfn" = "Steam, Epic ya da Ubisoft'taki oyununu NVIDIA'nın bilgisayarlarında oynatır. Ücretsiz katmanı var.";
+"blocked.cloud.xbox" = "Game Pass Ultimate'taki oyunları tarayıcıda oynatır.";
+"blocked.moonlight" = "Evdeki Windows bilgisayarındaki oyunu Mac'ine yayınlar.";
+"blocked.remembered" = "Seçimin bu oyun için hatırlanır.";
+"blocked.installAnyway" = "Yine de Yükle";
+"blocked.startAnyway" = "Yine de Başlat";
+"blocked.opensInBrowser" = "Tarayıcıda açılır";
+
+/* Launch diagnosis */
+"diag.menu" = "Neden Açılmadı?";
+"diag.title" = "%@: son başlatma";
+"diag.ranFor" = "%@ sn sonra kapandı";
+"diag.exit" = "çıkış kodu %@";
+"diag.nothing" = "Bilinen bir sorun bulunamadı";
+"diag.nothing.detail" = "Log'da tanıdığımız bir hata yok. Başka bir Grafik seçeneği dene ya da raporu kopyalayıp GitHub'da paylaş.";
+"diag.copyReport" = "Raporu Kopyala";
+"diag.copyReport.help" = "Kullanıcı adın ve ev klasörün çıkarılmış bir özet panoya kopyalanır. Hiçbir şey otomatik gönderilmez.";
+"diag.copied" = "Kopyalandı";
+"diag.noLog" = "Bu oyun için henüz bir başlatma kaydı yok. Önce bir kez başlat.";
+"diag.action.useBackend" = "%@ ile Dene";
+"diag.action.extendedEngine" = "Genişletilmiş Motoru İndir";
+"diag.action.updateEngine" = "Motoru Güncelle";
+"diag.failed.title" = "Oyun hemen kapandı";
+"diag.failed.body" = "Son başlatmanın kaydında bir sorun bulundu.";
+"diag.failed.action" = "Nedenini Gör";
+"diag.vulkan-32bit.title" = "32-bit DirectX 11 Mac'te Vulkan kullanamıyor";
+"diag.vulkan-32bit.detail" = "Oyun 32-bit ve DirectX 11 için DXVK'yı (Vulkan) kullandı; MoltenVK bunu 32-bit programlarda yapamıyor. DXMT yapabiliyor.";
+"diag.wined3d-level.title" = "WineD3D bu oyunu Mac'te çalıştıramıyor";
+"diag.wined3d-level.detail" = "Wine'ın kendi Direct3D'si OpenGL üzerinde çalışır ve macOS'ta oyunun istediği seviyeye ulaşamaz.";
+"diag.needs-dx12.title" = "Oyun DirectX 12 istiyor";
+"diag.needs-dx12.detail" = "DirectX 12, Apple'ın D3DMetal'ı ile çalışır; bunun için DirectX 12 kurulumu gerekir.";
+"diag.device-lost.title" = "Grafik sürücüsü yanıt vermeyi bıraktı";
+"diag.device-lost.detail" = "Oyunun grafikleri Vulkan altında çöktü. Başka bir Grafik seçeneği daha iyi çalışabilir.";
+"diag.d3d9-shared-video.title" = "Oyunun videoları henüz gösterilemiyor";
+"diag.d3d9-shared-video.detail" = "Oyun video karelerini DirectX 9'dan DirectX 11'e aktarıyor; Wine bunu henüz desteklemiyor. Video başlayınca oyun kapanır; bunu düzelten bir ayar yok.";
+"diag.no-device.title" = "Oyun grafiklerini başlatamadı";
+"diag.no-device.detail" = "Seçili Grafik seçeneğiyle Direct3D cihazı oluşturulamadı. Başka bir seçenek dene.";
+"diag.anti-cheat.title" = "Oyun Mac'te çalışmayan bir anti-cheat kullanıyor";
+"diag.anti-cheat.detail" = "Çekirdek seviyesindeki anti-cheat Windows'un kendisini ister. Bunu düzelten bir ayar yok; GeForce NOW gibi bulut servislerinde oynayabilirsin.";
+"diag.missing-dll.title" = "Oyunun ihtiyaç duyduğu bir Windows dosyası eksik";
+"diag.missing-dll.detail" = "Oyun bir DLL dosyası arıyor ve bulamıyor (adı aşağıdaki satırda). Mağazasında dosyaları doğrulamak ya da yeniden yüklemek çoğu zaman düzeltir.";
+"diag.not-found.title" = "Oyunun programı başlatılamadı";
+"diag.not-found.detail" = "Windows programı bulamadı ya da açamadı. Oyun tam yüklenmemiş olabilir; doğrula ya da yeniden yükle.";
+"diag.engine-superseded.title" = "Bu motorun yerine yenisi geldi";
+"diag.engine-superseded.detail" = "Motor, oyun başlamadan saniyeler içinde durdu. Bu motor artık listede yok; yenisi bu tür sorunları düzeltiyor. Motoru güncelle; oyunların ve ortamların olduğu gibi kalır.";
+"diag.engine-crash.title" = "Motor başlarken çöktü";
+"diag.engine-crash.detail" = "Motorun kendisi, oyun çalışmadan saniyeler içinde durdu. Bu oyunun değil motorun sorunu: Ayarlar › Motor'dan motoru değiştir ve rapor gönder.";
+"diag.crash.title" = "Oyun çöktü";
+"diag.crash.detail" = "Windows bir çökme bildirdi. Oyundan çıkarken olduysa ve ilerlemen kaydedildiyse zararsızdır; değilse başka bir Grafik seçeneği dene.";
+"diag.breakpoint.title" = "Bir program beklenmedik şekilde durdu";
+"diag.breakpoint.detail" = "Bu çoğunlukla Steam'in pencere yardımcısının yeniden başlamasıdır (zararsız) ya da oyunun çıkarken çökmesidir. Oyun hiç açılmadıysa başka bir Grafik seçeneği dene.";
+
+/* Steam repair */
+"steam.repair" = "Onar";
+"steam.repair.title" = "Steam onarılsın mı?";
+"steam.repair.message" = "Steam kapatılır, önbellekleri temizlenir ve dosyaları denetlenerek yeniden açılır. Girişin, oyunların ve kayıtların silinmez. Steam açılışta takılıyorsa ya da boş pencere gösteriyorsa işe yarar.";
+"steam.repair.confirm" = "Steam'i Onar";
+"steam.repair.busy" = "Önce açık Steam oyunlarını kapat.";
+
+/* Controllers */
+"controllers.title" = "Kontrolcüler";
+"controllers.none" = "Bağlı kontrolcü yok. Bluetooth ya da USB ile bağladığında burada görünür.";
+"controllers.kind.playStation" = "PlayStation";
+"controllers.kind.xbox" = "Xbox";
+"controllers.kind.nintendo" = "Nintendo";
+"controllers.kind.other" = "Diğer";
+"controllers.seenAsXbox" = "Oyunlar Xbox kolu olarak görür";
+"controllers.seenAsPlayStation" = "Oyunlar PlayStation kolu olarak görür";
+"controllers.psAsXbox" = "PlayStation kollarını Xbox kolu gibi göster";
+"controllers.psAsXbox.help" = "Birçok oyun yalnızca Xbox kollarını tanır ve DualShock 4, DualSense ya da Backbone'u görmez. Açıkken bu kollar oyunlara Xbox kolu olarak görünür. Değişiklik, oyunun ortamı bir sonraki açılışında geçerli olur.";
+
+/* Microphone */
+"mic.title" = "Mikrofon";
+"mic.status.allowed" = "Oyunlar mikrofonu kullanabilir";
+"mic.status.denied" = "Mikrofon izni kapalı";
+"mic.status.notAsked" = "Mikrofon izni henüz verilmedi";
+"mic.help" = "Oyunlardaki sesli sohbet için. macOS izni UniveGame adına sorar; burada bir kez verince UniveGame'den açtığın tüm oyunlar kullanabilir.";
+"mic.allow" = "İzin Ver";
+"mic.openSettings" = "Sistem Ayarları'nı Aç";
+
+/* Mac integration */
+"shortcut.create" = "Kısayol Oluştur (Dock, Spotlight)";
+"shortcut.failed" = "Kısayol oluşturulamadı";
+"menubar.empty" = "Henüz oynanan oyun yok";
+"menubar.open" = "UniveGame'i Aç";
+"mac.title" = "Mac ile çalışma";
+"mac.awake" = "Oyun açıkken ekranı uyanık tut";
+"mac.awake.help" = "Sadece kontrolcüyle oynarken Mac ekranı karartıp uykuya geçmez.";
+"mac.menuBar" = "Son oyunları menü çubuğunda göster";
+"mac.menuBar.help" = "Menü çubuğundaki kumanda simgesinden son oynadığın oyunları tek tıkla başlatırsın.";
+"mac.shortcuts.help" = "Bir oyunun menüsündeki \"Kısayol Oluştur\" ile ~/Uygulamalar/UniveGame Games klasörüne o oyunu başlatan bir uygulama eklenir. Dock'a sürükleyebilir, Spotlight ve Launchpad'den açabilirsin.";
+
+/* Saves */
+"saves.title" = "Kayıtlar";
+"saves.unknown" = "Bu oyunun kayıtlarının nerede durduğunu henüz bilmiyoruz. \"Kayıt Klasörlerini Bul\" ile önerilere bak ya da klasörü kendin seç.";
+"saves.removeFolder" = "Bu klasörü yedeklemeden çıkar";
+"saves.backUpNow" = "Şimdi Yedekle";
+"saves.find" = "Kayıt Klasörlerini Bul";
+"saves.addFolder" = "Klasör Seç…";
+"saves.addFolder.panel" = "Oyunun kayıtlarının durduğu klasörü seç";
+"saves.outside" = "Bu klasör oyunun Windows ortamında değil. Ortamın içindeki bir klasörü seç.";
+"saves.restore" = "Geri Yükle";
+"saves.restore.title" = "Bu yedek geri yüklensin mi?";
+"saves.restore.message" = "Aynı adlı kayıt dosyalarının üzerine yazılır; hiçbir dosya silinmez. Önce şu anki kayıtların bir güvenlik yedeği alınır.";
+"saves.kind.manual" = "Elle alındı";
+"saves.kind.automatic" = "Oyundan sonra";
+"saves.kind.beforeRestore" = "Geri yüklemeden önce";
+"saves.candidates.title" = "%@: kayıt klasörleri";
+"saves.candidates.help" = "Bu klasörler kayıt gibi görünüyor. Doğru olanları işaretle; işaretlediklerin yedeklenir.";
+"saves.candidates.none" = "Kayıt gibi görünen bir klasör bulunamadı. Oyunu oynayıp kaydettikten sonra tekrar dene ya da klasörü kendin seç.";
+"saves.candidates.save" = "Seçilenleri Kaydet";
+"saves.reason.steamCloud" = "Steam Cloud klasörü";
+"saves.reason.nameMatch" = "Oyunun adını taşıyor";
+"saves.reason.installFolder" = "Oyun klasöründe";
+"saves.reason.recentlyChanged" = "Son oyunda değişti";
+"saves.files" = "%@ dosya";
+"saves.settings.title" = "Kayıt yedekleri";
+"saves.settings.iCloud" = "iCloud Drive";
+"saves.settings.change" = "Değiştir…";
+"saves.settings.panel" = "Kayıt yedeklerinin konacağı klasörü seç";
+"saves.settings.auto" = "Oyundan sonra otomatik yedekle";
+"saves.settings.auto.help" = "Kayıt klasörleri belirlenmiş bir oyundan çıkınca kayıtlar değiştiyse yedek alınır. Her oyun için son 20 yedek tutulur.";

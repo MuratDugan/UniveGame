@@ -28,6 +28,11 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/UniveGame" "$APP/Contents/MacOS/UniveGame"
 cp -R "$BIN/UniveGame_UniveGame.bundle" "$APP/Contents/Resources/"
 for lang in en tr; do mkdir -p "$APP/Contents/Resources/$lang.lproj"; done  # lets macOS localize system menus
+# The microphone prompt's text, in the user's language (games ask for it for voice chat).
+printf '"NSMicrophoneUsageDescription" = "Games you start from UniveGame can use the microphone for voice chat.";\n' \
+  > "$APP/Contents/Resources/en.lproj/InfoPlist.strings"
+printf '"NSMicrophoneUsageDescription" = "UniveGame’den başlattığın oyunlar sesli sohbet için mikrofonu kullanabilir.";\n' \
+  > "$APP/Contents/Resources/tr.lproj/InfoPlist.strings"
 
 # App icon: packaging/AppIcon.icns, or built from packaging/AppIcon-1024.png when only the PNG exists.
 ICON_KEY=""
@@ -62,6 +67,11 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>LSMinimumSystemVersion</key><string>15.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.games</string>
   <key>NSHighResolutionCapable</key><true/>
+  <key>CFBundleURLTypes</key><array><dict>
+    <key>CFBundleURLName</key><string>dev.univegame.play</string>
+    <key>CFBundleURLSchemes</key><array><string>univegame</string></array>
+  </dict></array>
+  <key>NSMicrophoneUsageDescription</key><string>Games you start from UniveGame can use the microphone for voice chat.</string>
   ICON_PLACEHOLDER
 </dict>
 </plist>
@@ -70,12 +80,13 @@ PLIST
 /usr/bin/sed -i '' -e "s|ICON_PLACEHOLDER|$ICON_KEY|" -e "s|VERSION_PLACEHOLDER|$VERSION|" -e "s|BUILD_PLACEHOLDER|$BUILD|" \
   "$APP/Contents/Info.plist"
 
+ENTITLEMENTS="$ROOT/packaging/UniveGame.entitlements"
 if [[ "$SIGN_IDENTITY" == "-" ]]; then
-  codesign --force --sign - "$APP" >/dev/null
+  codesign --force --entitlements "$ENTITLEMENTS" --sign - "$APP" >/dev/null
 else
-  # Hardened runtime is required for notarization. The app needs no exceptions: Wine runs as separate
-  # processes with their own signatures, and nothing is loaded into UniveGame itself.
-  codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$APP"
+  # Hardened runtime is required for notarization. Its one exception is microphone access, for games' voice chat:
+  # Wine runs as separate processes, but macOS asks on UniveGame's behalf. Nothing is loaded into UniveGame itself.
+  codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --sign "$SIGN_IDENTITY" "$APP"
   codesign --verify --strict --deep "$APP"
 fi
 echo "$APP"

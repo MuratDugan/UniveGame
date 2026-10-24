@@ -63,6 +63,16 @@ MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
   Command-as-Control.
 - **Covers found for you.** Add a game by hand and UniveGame looks up its cover and artwork by name, in your language.
 - **Discover.** Steam's featured games and deals in a grid, with Mac scores for games you own.
+- **Honest before you download.** Games whose anti-cheat can't run on a Mac get a warning before install or launch,
+  with GeForce NOW, Xbox Cloud Gaming or Moonlight as ways to play them anyway.
+- **"Why didn't it start?"** Reads the last launch's log, explains the problem and offers a one-click fix; copies a
+  report with your user name and home folder taken out.
+- **Steam repair, controllers, voice chat.** Repair Steam without losing logins, games or saves; PlayStation pads show
+  up as Xbox controllers; microphone access for in-game voice chat.
+- **Feels like a Mac app.** Dock/Spotlight shortcuts for each game (`univegame://` links), recent games in the menu bar,
+  and the display stays awake while you play.
+- **Save backups.** Find a game's save folders, back them up to any folder or iCloud Drive (automatically after
+  playing), and restore them, with a safety copy first.
 - **Verified in-app updates.** Settings › About checks GitHub for a new release and installs it only if the download
   matches the release's SHA-256, is signed with UniveGame's Developer ID and is notarized by Apple. No downgrades.
 - **English and Turkish**, switchable without restarting. Made for macOS with SwiftUI: dark, quiet, keyboard-friendly.

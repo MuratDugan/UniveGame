@@ -83,7 +83,9 @@ final class AppModel {
     var pendingUninstall: CustomGame?
 
     private(set) var engines: [Engine] = []
-    private(set) var running: [String: RunningProcess] = [:]
+    private(set) var running: [String: RunningProcess] = [:] {
+        didSet { updateAwake() }
+    }
     private(set) var launching: Set<String> = []
     private(set) var refreshing = false
     private(set) var busyStores: Set<StoreKind> = []
@@ -147,6 +149,9 @@ final class AppModel {
             if args.contains("--start"), let session = installer { Task { await runInstaller(session) } }
         }
         pendingDetailID = value(after: "--open")
+        if args.contains("--review-launch"), let id = pendingDetailID, let item = items.first(where: { $0.id == id }) {
+            reviewLastLaunch(item)
+        }
         if args.contains("--review-disclaimer") { reviewingDisclaimer = true }
         if args.contains("--install-engine") { startEngineInstall() }
         if args.contains("--analyze-all") { Task { await analyzeAll() } }
@@ -752,6 +757,48 @@ final class AppModel {
         persist()
     }
 
+    // MARK: Won't-run warnings
+
+    /// Shown before installing or starting a game the analysis says can't run on a Mac (kernel anti-cheat, a known
+    /// issue), with ways to play it in the cloud instead.
+    struct BlockedGameWarning: Identifiable {
+        enum Action { case install, play }
+        let id = UUID()
+        let item: LibraryItem
+        let reason: CompatFactor
+        let action: Action
+    }
+    var blockedWarning: BlockedGameWarning?
+
+    /// Where a blocked game can still be played: on someone else's Windows PC, so anti-cheat doesn't matter.
+    static let cloudServices: [(name: String, url: URL)] = [
+        ("GeForce NOW", URL(string: "https://play.geforcenow.com")!),
+        ("Xbox Cloud Gaming", URL(string: "https://www.xbox.com/play")!),
+    ]
+    /// Streams from the player's own Windows PC.
+    static let moonlight = URL(string: "https://moonlight-stream.org")!
+
+    /// The blocker the analysis found, unless the player already chose to go ahead with this game.
+    private func unacceptedBlocker(_ item: LibraryItem) -> CompatFactor? {
+        guard !(state.acceptedRisks ?? []).contains(item.id) else { return nil }
+        return compatReport(for: item)?.factors.first { $0.kind == .blocker }
+    }
+
+    /// "Try anyway": remembered for this game, then the install or launch goes on.
+    func continueDespiteWarning(_ warning: BlockedGameWarning) {
+        var accepted = state.acceptedRisks ?? []
+        accepted.insert(warning.item.id)
+        state.acceptedRisks = accepted
+        persist()
+        blockedWarning = nil
+        Task {
+            switch warning.action {
+            case .install: await install(warning.item)
+            case .play: await play(warning.item)
+            }
+        }
+    }
+
     // MARK: App updates
 
     /// A newer UniveGame on GitHub, found by the last check.
@@ -1095,6 +1142,11 @@ final class AppModel {
             alert = AppAlert(titleKey: "alert.demoTitle", message: "")
             return
         }
+        if let reason = unacceptedBlocker(item) {
+            blockedWarning = BlockedGameWarning(item: item, reason: reason, action: .play)
+            return
+        }
+        failedLaunches.remove(item.id)
         let profile = resolvedProfile(profile(for: item), for: item)
         guard let engine = engine(for: profile) else {
             alert = AppAlert(titleKey: "alert.noEngine", message: "")
@@ -1176,6 +1228,13 @@ final class AppModel {
     func install(_ item: LibraryItem) async {
         guard case .store(let game) = item.backing, installProgress[item.id] == nil else { return }
         guard !isDemo else { alert = AppAlert(titleKey: "alert.demoTitle", message: ""); return }
+        // Know before downloading gigabytes: an analysis of a game that isn't installed only asks Steam, ProtonDB
+        // and AreWeAntiCheatYet, which takes a moment.
+        if compatReport(for: item) == nil { await analyze(item) }
+        if let reason = unacceptedBlocker(item) {
+            blockedWarning = BlockedGameWarning(item: item, reason: reason, action: .install)
+            return
+        }
         let id = item.id
         do {
             switch game.store {
@@ -1207,10 +1266,187 @@ final class AppModel {
     /// (a running Steam keeps its current mode until it restarts). UniveEngine reads the registry and
     /// writes only what differs. The graphics card games are told about (`GPUIdentity`) is added then too.
     private func applyRetina(_ retina: Bool, runner: WineRunner, engine: Engine, bottle: Bottle) async {
-        guard bottle.exists, !(await runner.isBottleActive(engine: engine, bottle: bottle)) else { return }
-        await runner.syncMacDriver(["RetinaMode": retina], engine: engine, bottle: bottle)
+        guard bottle.exists else { return }
+        if !(await runner.isBottleActive(engine: engine, bottle: bottle)) {
+            await runner.syncMacDriver(["RetinaMode": retina], engine: engine, bottle: bottle)
+            // Wine reads controller options when its device service starts, so like Retina only while idle.
+            let key = bottle.url.path
+            if state.appliedControllerMode?[key] != playStationAsXbox {
+                await runner.applyControllerCompatibility(playStationAsXbox: playStationAsXbox, engine: engine, bottle: bottle)
+                state.appliedControllerMode = (state.appliedControllerMode ?? [:]).merging([key: playStationAsXbox]) { $1 }
+                persist()
+            }
+        }
         await runner.syncGPUIdentity(engine: engine, bottle: bottle)
     }
+
+    // MARK: Mac integration
+
+    /// Keep the display awake while a game runs: controller-only games send no keyboard or mouse input, so the
+    /// Mac would otherwise dim and sleep mid-game. On by default.
+    var keepsDisplayAwake: Bool = UserDefaults.standard.object(forKey: "keepsDisplayAwake") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(keepsDisplayAwake, forKey: "keepsDisplayAwake"); updateAwake() }
+    }
+    @ObservationIgnored private var awakeActivity: NSObjectProtocol?
+
+    private func updateAwake() {
+        let wanted = keepsDisplayAwake && !running.isEmpty
+        if wanted, awakeActivity == nil {
+            awakeActivity = ProcessInfo.processInfo.beginActivity(options: [.idleDisplaySleepDisabled, .userInitiated],
+                                                                  reason: "A game is running")
+        } else if !wanted, let activity = awakeActivity {
+            ProcessInfo.processInfo.endActivity(activity)
+            awakeActivity = nil
+        }
+    }
+
+    /// Recently played games in the menu bar. Off by default.
+    var showsMenuBarItem: Bool = UserDefaults.standard.bool(forKey: "showsMenuBarItem") {
+        didSet { UserDefaults.standard.set(showsMenuBarItem, forKey: "showsMenuBarItem") }
+    }
+
+    /// Installed games, most recently played first (the menu bar shows a few).
+    var recentGames: [LibraryItem] {
+        items.filter { $0.isInstalled && $0.lastPlayed != nil }.sorted { ($0.lastPlayed ?? .distantPast) > ($1.lastPlayed ?? .distantPast) }
+    }
+
+    /// `univegame://play?game=…` from a game shortcut (Dock, Spotlight, Shortcuts): show the game and start it.
+    func open(_ url: URL) {
+        guard let id = GameLink.gameID(from: url), let item = items.first(where: { $0.id == id }) else { return }
+        selection = .library(.all)
+        pendingDetailID = id
+        NSApp.activate(ignoringOtherApps: true)
+        if item.isInstalled { Task { await play(item) } }
+    }
+
+    /// A small app in ~/Applications/UniveGame Games that starts the game: for the Dock, Launchpad and Spotlight.
+    func createShortcut(_ item: LibraryItem) async {
+        let work = FileManager.default.temporaryDirectory.appendingPathComponent("UniveGame-icon-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: work) }
+        var icon: URL?
+        if let cover = item.coverURL, let data = cover.isFileURL ? try? Data(contentsOf: cover) : try? await URLSession.shared.data(from: cover).0 {
+            icon = await ShortcutIcon.make(from: data, in: work)
+        }
+        do {
+            let app = try ShortcutApp.create(title: item.title, gameID: item.id, in: ShortcutApp.defaultFolder, icon: icon)
+            NSWorkspace.shared.activateFileViewerSelecting([app])
+        } catch {
+            alert = AppAlert(titleKey: "shortcut.failed", message: error.localizedDescription)
+        }
+    }
+
+    // MARK: Saves
+
+    /// Where save backups go (a "UniveGame Saves" folder is made inside): UniveGame's own folder by default, or
+    /// any folder the player picks, such as iCloud Drive.
+    var saveBackupFolder: URL {
+        get {
+            _ = saveBackupRevision   // observed: views update when it changes
+            return UserDefaults.standard.string(forKey: "saveBackupFolder").map { URL(fileURLWithPath: $0, isDirectory: true) } ?? AppPaths.home
+        }
+        set { UserDefaults.standard.set(newValue.path, forKey: "saveBackupFolder"); saveBackupRevision += 1 }
+    }
+    /// Back up a game's saves after each session in which they changed. On by default.
+    var autoBackupSaves: Bool = UserDefaults.standard.object(forKey: "autoBackupSaves") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(autoBackupSaves, forKey: "autoBackupSaves") }
+    }
+    /// Bumped when backups change, so views re-read the list from disk.
+    private(set) var saveBackupRevision = 0
+    private(set) var savesBusy: Set<String> = []
+    /// The last backup or restore problem, per game.
+    private(set) var saveErrors: [String: String] = [:]
+
+    private var saveStore: SaveBackupStore { SaveBackupStore(destination: saveBackupFolder) }
+
+    /// The Windows environment folders a game's saves are relative to.
+    func saveRoots(for item: LibraryItem) -> SaveRoots? {
+        switch item.backing {
+        case .custom: SaveRoots(bottle: customBottle, installPath: item.installPath)
+        case .store(let game): SaveRoots(bottle: Bottle(kind: game.store.bottleKind, paths: paths), installPath: item.installPath)
+        }
+    }
+
+    func saveSources(for item: LibraryItem) -> [SaveSource] { state.saveSources?[item.id] ?? [] }
+
+    func setSaveSources(_ sources: [SaveSource], for item: LibraryItem) {
+        state.saveSources = (state.saveSources ?? [:]).merging([item.id: sources]) { $1 }
+        persist()
+    }
+
+    /// Folders that probably hold the game's saves, for the player to confirm.
+    func saveCandidates(for item: LibraryItem) async -> [SaveCandidate] {
+        guard let roots = saveRoots(for: item) else { return [] }
+        let title = item.title
+        let steamID: String? = if case .store(let g) = item.backing, g.store == .steam { g.storeID } else { nil }
+        let since = item.lastPlayed.map { $0.addingTimeInterval(-300) }
+        return await Task.detached(priority: .userInitiated) {
+            SaveLocator.candidates(title: title, steamAppID: steamID, roots: roots, changedSince: since)
+        }.value
+    }
+
+    /// A folder the player picked, if it's inside the game's environment.
+    func saveSource(for folder: URL, item: LibraryItem) -> SaveSource? { saveRoots(for: item)?.source(for: folder) }
+
+    func saveBackups(for item: LibraryItem) -> [SaveBackupInfo] {
+        _ = saveBackupRevision
+        return saveStore.list(gameID: item.id, title: item.title)
+    }
+
+    @discardableResult
+    func backUpSaves(_ item: LibraryItem, kind: SaveBackupInfo.Kind = .manual) async -> Bool {
+        let sources = saveSources(for: item)
+        guard !sources.isEmpty, let roots = saveRoots(for: item), !savesBusy.contains(item.id) else { return false }
+        savesBusy.insert(item.id)
+        defer { savesBusy.remove(item.id); saveBackupRevision += 1 }
+        let store = saveStore, id = item.id, title = item.title
+        do {
+            try await Task.detached(priority: .utility) { try store.create(gameID: id, title: title, sources: sources, roots: roots, kind: kind) }.value
+            state.lastSaveBackup = (state.lastSaveBackup ?? [:]).merging([id: Date()]) { $1 }
+            saveErrors[id] = nil
+            persist()
+            return true
+        } catch {
+            saveErrors[id] = error.localizedDescription
+            return false
+        }
+    }
+
+    func restoreSaves(_ backup: SaveBackupInfo, for item: LibraryItem) async {
+        guard let roots = saveRoots(for: item), !savesBusy.contains(item.id), !isRunning(item) else { return }
+        savesBusy.insert(item.id)
+        defer { savesBusy.remove(item.id); saveBackupRevision += 1 }
+        let store = saveStore, id = item.id
+        do {
+            try await Task.detached(priority: .userInitiated) { _ = try store.restore(backup, roots: roots) }.value
+            saveErrors[id] = nil
+        } catch {
+            saveErrors[id] = error.localizedDescription
+        }
+    }
+
+    /// After a session: a backup when the saves changed since the last one.
+    private func backUpAfterPlay(_ item: LibraryItem) {
+        let sources = saveSources(for: item)
+        guard autoBackupSaves, !sources.isEmpty, let roots = saveRoots(for: item) else { return }
+        let since = state.lastSaveBackup?[item.id] ?? .distantPast
+        Task {
+            let changed = await Task.detached(priority: .utility) {
+                SaveBackupStore.hasChanges(sources: sources, roots: roots, since: since)
+            }.value
+            if changed { await backUpSaves(item, kind: .automatic) }
+        }
+    }
+
+    // MARK: Controllers
+
+    /// Show PlayStation pads (DualShock 4, DualSense, Backbone PS) to games as Xbox controllers: many games only
+    /// read Xbox (XInput) pads and see nothing otherwise. On by default.
+    var playStationAsXbox: Bool = UserDefaults.standard.object(forKey: "playStationAsXbox") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(playStationAsXbox, forKey: "playStationAsXbox") }
+    }
+    /// Pads the Mac sees now (Settings › General), read without opening them.
+    private(set) var controllers: [ControllerSupport.Connected] = []
+    func refreshControllers() { controllers = ControllerSupport.connected() }
 
     func stop(_ item: LibraryItem) {
         if item.customGame != nil, let engine = customEngines[item.id] {
@@ -1226,9 +1462,110 @@ final class AppModel {
         running[id] = nil
         customEngines[id] = nil
         if let start = playStarts.removeValue(forKey: id) {
-            state.playTime[id, default: 0] += Date().timeIntervalSince(start)
+            let ranFor = Date().timeIntervalSince(start)
+            state.playTime[id, default: 0] += ranFor
             persist()
+            if let item = items.first(where: { $0.id == id }) {
+                // A game that closes within a minute usually didn't start: say so on its page when the log shows why.
+                if ranFor < 60, let review = review(of: item), review.diagnosis.findings.contains(where: { $0.id != "breakpoint" }) {
+                    failedLaunches.insert(id)
+                }
+                backUpAfterPlay(item)
+            }
         }
+    }
+
+    // MARK: Launch diagnosis
+
+    /// The last launch of a game, read from its log by `LogDiagnosis`: what went wrong and what to do.
+    struct LaunchReview: Identifiable {
+        let id = UUID()
+        let item: LibraryItem
+        let diagnosis: LogDiagnosis
+        let log: URL
+    }
+    var launchReview: LaunchReview?
+    /// Games whose last run ended within a minute with a problem the log names.
+    private(set) var failedLaunches: Set<String> = []
+
+    func review(of item: LibraryItem) -> LaunchReview? {
+        let store = LogStore(paths: item.customGame != nil ? customPaths : paths)
+        guard let log = store.logs(for: item.id).first, let text = LogDiagnosis.read(log) else { return nil }
+        var folder: URL?
+        if let custom = item.customGame { folder = custom.installDirectory ?? custom.workingDirectory }
+        else if item.isInstalled { folder = item.installPath }
+        let diagnosis = LogDiagnosis(log: text, probe: folder.map { GraphicsProbe.scan($0) },
+                                     dxmtAvailable: engines.contains { $0.supports(.dxmt) }, d3dMetalAvailable: d3dMetalReady)
+        return LaunchReview(item: item, diagnosis: diagnosis, log: log)
+    }
+
+    /// The game's menu and page: "Why didn't it start?".
+    func reviewLastLaunch(_ item: LibraryItem) {
+        failedLaunches.remove(item.id)
+        if let review = review(of: item) { launchReview = review }
+        else { alert = AppAlert(titleKey: "diag.noLog", message: "") }
+    }
+
+    /// The button under a finding.
+    func apply(_ action: LogDiagnosis.Action, for item: LibraryItem) {
+        launchReview = nil
+        switch action {
+        case .useBackend(let backend):
+            var profile = profile(for: item)
+            profile.backend = backend
+            setProfile(profile, for: item)
+        case .installExtendedEngine:
+            startD3DMetalEngineInstall()
+            openSettings(.engine)
+        case .setUpDirectX12:
+            openSettings(.dx12)
+        case .updateEngine:
+            startEngineInstall()
+            openSettings(.engine)
+        case .reportProblem, .none:
+            break
+        }
+    }
+
+    /// A report to paste into an issue or a message: the launch, the findings and the log lines that matter, with
+    /// this Mac's user name and home folder taken out.
+    static func problemReport(_ review: LaunchReview) -> String {
+        let d = review.diagnosis
+        let os = ProcessInfo.processInfo.operatingSystemVersion
+        var lines = ["UniveGame \(appVersion) · macOS \(os.majorVersion).\(os.minorVersion).\(os.patchVersion) · \(Self.macModel)",
+                     "Game: \(review.item.title) (\(review.item.id))"]
+        if let l = d.launch {
+            lines.append("Engine \(l.engine ?? "?") · backend \(l.backend ?? "?") · environment \(l.environment ?? "?")"
+                         + (l.status.map { " · exit \($0)" } ?? "") + (l.bySignal ? " (signal)" : "")
+                         + (l.seconds.map { " · \(Int($0)) s" } ?? ""))
+        }
+        if !d.findings.isEmpty {
+            lines.append("")
+            lines += d.findings.map { "- \($0.title): \($0.detail)" }
+        }
+        if !d.excerpt.isEmpty {
+            lines.append("")
+            lines.append("Log:")
+            lines += d.excerpt
+        }
+        return redact(lines.joined(separator: "\n"))
+    }
+
+    /// Replaces the home folder and the user's names with placeholders.
+    static func redact(_ text: String) -> String {
+        var out = text.replacingOccurrences(of: NSHomeDirectory(), with: "~")
+        for name in Set([NSUserName(), NSFullUserName()]) where name.count >= 3 {
+            out = out.replacingOccurrences(of: name, with: "<user>")
+        }
+        return out
+    }
+
+    static var macModel: String {
+        var size = 0
+        sysctlbyname("hw.model", nil, &size, nil, 0)
+        var model = [CChar](repeating: 0, count: max(size, 1))
+        sysctlbyname("hw.model", &model, &size, nil, 0)
+        return String(cString: model)
     }
 
     func revealInFinder(_ item: LibraryItem) {
@@ -1300,6 +1637,40 @@ final class AppModel {
         } catch {
             connectionCache = [:]
             alert = AppAlert(titleKey: "alert.storeFailed", message: error.localizedDescription)
+        }
+    }
+
+    /// Asked before `repairSteam`.
+    var confirmingSteamRepair = false
+
+    /// Stores › Steam › Repair: quits Steam, clears its caches (never logins, games or saves), and starts it again
+    /// checking the client's own files. Fixes a Steam that hangs on its splash or opens a blank window.
+    func repairSteam() async {
+        confirmingSteamRepair = false
+        guard let engine = engine(for: LaunchProfile()) else { alert = AppAlert(titleKey: "alert.noEngine", message: ""); return }
+        guard !running.keys.contains(where: { $0.hasPrefix("steam:") }) else {
+            alert = AppAlert(titleKey: "steam.repair.busy", message: "")
+            return
+        }
+        busyStores.insert(.steam)
+        defer { busyStores.remove(.steam) }
+        let steam = SteamProvider(paths: paths)
+        let runner = WineRunner(paths: paths)
+        if await runner.isBottleActive(engine: engine, bottle: steam.bottle) {
+            _ = try? steam.shutdown(engine: engine)
+            for _ in 0..<40 {   // up to 20 s for Steam to close by itself
+                guard await runner.isBottleActive(engine: engine, bottle: steam.bottle) else { break }
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+            await runner.killAll(engine: engine, bottle: steam.bottle)
+        }
+        steam.clearCaches()
+        do {
+            try steam.launchSteam(engine: engine, verifyFiles: true) { _ in
+                Task { @MainActor [weak self] in await self?.refreshStores() }
+            }
+        } catch {
+            alert = AppAlert(titleKey: "alert.launchFailed", message: error.localizedDescription)
         }
     }
 

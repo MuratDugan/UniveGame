@@ -33,7 +33,6 @@ struct GameDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Theme.Palette.background)
-        .toolbar(removing: .title)
     }
 
     // MARK: Top bar
@@ -234,12 +233,20 @@ struct GameDetailView: View {
                 .enterOnAppear(delay: 0.12)
             LaunchSettingsPanel(item: item)
                 .enterOnAppear(delay: 0.18)
+            if item.isInstalled {
+                SavesPanel(item: item)
+                    .enterOnAppear(delay: 0.22)
+            }
         }
     }
 
     @ViewBuilder private func notice(_ item: LibraryItem) -> some View {
         let (blocker, needsD3DMetal) = state(item)
-        if let blocker {
+        if model.failedLaunches.contains(item.id) {
+            NoticeBanner(kind: .warning, title: L("diag.failed.title"), message: L("diag.failed.body"),
+                         action: .primary(L("diag.failed.action")) { model.reviewLastLaunch(item) })
+                .enterOnAppear(delay: 0.06)
+        } else if let blocker {
             let titleKey = blocker.key + ".title"
             let title = L(titleKey) == titleKey ? L("compat.notice.blocked")
                 : (blocker.args.isEmpty ? L(titleKey) : String(format: L(titleKey), locale: locale, arguments: blocker.args.map { $0 as CVarArg }))

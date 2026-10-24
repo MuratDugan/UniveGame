@@ -16,6 +16,7 @@ struct UniveGameApp: App {
                 .preferredColorScheme(.dark)
                 .frame(minWidth: 980, minHeight: 620)
                 .task {
+                    appDelegate.onOpenURL = { url in model.open(url) }
                     await model.refreshStores()
                     await model.loadKnownIssues()
                 }
@@ -24,7 +25,9 @@ struct UniveGameApp: App {
                 }
         }
         .defaultSize(width: 1280, height: 800)
-        .windowToolbarStyle(.unified(showsTitle: false))
+        // No toolbar: an (even empty) window toolbar takes every click in the top 52 pt, where the back button,
+        // the filters and the search field are. The title bar stays, transparent, for the traffic lights.
+        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandGroup(after: .newItem) {
                 Button(localizer("menu.import")) { model.selection = .addGame }
@@ -39,10 +42,36 @@ struct UniveGameApp: App {
                     .keyboardShortcut(",", modifiers: .command)
             }
         }
+
+        MenuBarExtra("UniveGame", systemImage: "gamecontroller", isInserted: $model.showsMenuBarItem) {
+            ForEach(model.recentGames.prefix(8)) { item in
+                Button(item.title) { Task { await model.play(item) } }
+                    .disabled(model.isRunning(item))
+            }
+            if model.recentGames.isEmpty { Text(localizer("menubar.empty")) }
+            Divider()
+            Button(localizer("menubar.open")) {
+                NSApp.activate(ignoringOtherApps: true)
+                NSApp.windows.first { $0.canBecomeMain }?.makeKeyAndOrderFront(nil)
+            }
+        }
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    /// Set once the window exists; links that arrive earlier (a shortcut that started the app) wait for it.
+    var onOpenURL: ((URL) -> Void)? {
+        didSet { if let onOpenURL { pendingURLs.forEach(onOpenURL); pendingURLs = [] } }
+    }
+    private var pendingURLs: [URL] = []
+
+    /// `univegame://play?game=…` from a game shortcut. Handled here so SwiftUI doesn't open a second window for it.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            if let onOpenURL { onOpenURL(url) } else { pendingURLs.append(url) }
+        }
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Needed when started with `swift run` (no .app bundle around the executable).
         NSApp.setActivationPolicy(.regular)

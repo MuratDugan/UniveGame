@@ -197,11 +197,13 @@ private struct StoreRow: View {
                     }
                 case (.needsSignIn, .steam):
                     button(L("stores.steam.signIn"), primary: isPrimary) { model.openLauncher(.steam) }
+                    button(L("steam.repair")) { model.confirmingSteamRepair = true }
                 case (.needsSignIn, _):
                     button(L("stores.signIn"), primary: isPrimary, action: onSignIn)
                 case (.ready, .steam), (.ready, .ubisoft), (.ready, .ea):
                     button(L("stores.openLauncher", kind.displayName)) { model.openLauncher(kind) }
                     if !syncing { button(L("action.refresh")) { Task { await model.refreshStores() } } }
+                    if kind == .steam { button(L("steam.repair")) { model.confirmingSteamRepair = true } }
                 case (.ready, _):
                     if !syncing { button(L("action.refresh")) { Task { await model.refreshStores() } } }
                     button(L("stores.signOut")) { Task { await model.signOut(kind) } }

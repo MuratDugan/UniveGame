@@ -524,3 +524,105 @@
 "update.error.notWritable" = "This copy can't update itself (it isn't in Applications, or that folder isn't writable). The verified disk image is open: drag UniveGame to Applications.";
 "update.error.failed" = "The update couldn't be installed; the current version is still in place.";
 "update.error.restart" = "The update is installed, but the app couldn't restart itself. Quit UniveGame and open it again.";
+
+/* Won't-run warning */
+"blocked.title" = "%@ doesn't run on a Mac";
+"blocked.antiCheat.body" = "This game's anti-cheat doesn't support Wine or macOS. Even installed, it won't start or won't let you online. Some games treat trying as cheating and can ban the account.";
+"blocked.known.body" = "This game is known not to work this way. Even installed, it most likely won't start.";
+"blocked.alternatives" = "Ways to play it on your Mac anyway";
+"blocked.cloud.gfn" = "Plays your Steam, Epic or Ubisoft copy on NVIDIA's computers. Has a free tier.";
+"blocked.cloud.xbox" = "Plays Game Pass Ultimate games in the browser.";
+"blocked.moonlight" = "Streams the game from your own Windows PC to your Mac.";
+"blocked.remembered" = "Your choice is remembered for this game.";
+"blocked.installAnyway" = "Install Anyway";
+"blocked.startAnyway" = "Start Anyway";
+"blocked.opensInBrowser" = "Opens in the browser";
+
+/* Launch diagnosis */
+"diag.menu" = "Why Didn't It Start?";
+"diag.title" = "%@: last launch";
+"diag.ranFor" = "closed after %@ s";
+"diag.exit" = "exit code %@";
+"diag.nothing" = "No known problem found";
+"diag.nothing.detail" = "The log has no error we recognize. Try another Graphics option, or copy the report and share it on GitHub.";
+"diag.copyReport" = "Copy Report";
+"diag.copyReport.help" = "Copies a summary without your user name and home folder. Nothing is sent automatically.";
+"diag.copied" = "Copied";
+"diag.noLog" = "There's no launch record for this game yet. Start it once first.";
+"diag.action.useBackend" = "Try %@";
+"diag.action.extendedEngine" = "Download the Extended Engine";
+"diag.action.updateEngine" = "Update the Engine";
+"diag.failed.title" = "The game closed right away";
+"diag.failed.body" = "The last launch's log shows a problem.";
+"diag.failed.action" = "See Why";
+
+/* Steam repair */
+"steam.repair" = "Repair";
+"steam.repair.title" = "Repair Steam?";
+"steam.repair.message" = "Steam is closed, its caches are cleared and it opens again checking its files. Your login, games and saves stay. Helps when Steam hangs on start or shows a blank window.";
+"steam.repair.confirm" = "Repair Steam";
+"steam.repair.busy" = "Close running Steam games first.";
+
+/* Controllers */
+"controllers.title" = "Controllers";
+"controllers.none" = "No controller connected. Connect one over Bluetooth or USB and it shows up here.";
+"controllers.kind.playStation" = "PlayStation";
+"controllers.kind.xbox" = "Xbox";
+"controllers.kind.nintendo" = "Nintendo";
+"controllers.kind.other" = "Other";
+"controllers.seenAsXbox" = "Games see an Xbox controller";
+"controllers.seenAsPlayStation" = "Games see a PlayStation controller";
+"controllers.psAsXbox" = "Show PlayStation controllers as Xbox controllers";
+"controllers.psAsXbox.help" = "Many games only recognize Xbox controllers and don't see a DualShock 4, DualSense or Backbone. When on, those pads appear to games as Xbox controllers. Takes effect the next time the game's environment starts.";
+
+/* Microphone */
+"mic.title" = "Microphone";
+"mic.status.allowed" = "Games can use the microphone";
+"mic.status.denied" = "Microphone access is off";
+"mic.status.notAsked" = "Microphone access not given yet";
+"mic.help" = "For voice chat in games. macOS asks on UniveGame's behalf; allow it here once and every game you start from UniveGame can use it.";
+"mic.allow" = "Allow";
+"mic.openSettings" = "Open System Settings";
+
+/* Mac integration */
+"shortcut.create" = "Create Shortcut (Dock, Spotlight)";
+"shortcut.failed" = "Couldn't create the shortcut";
+"menubar.empty" = "No games played yet";
+"menubar.open" = "Open UniveGame";
+"mac.title" = "Mac integration";
+"mac.awake" = "Keep the display awake while a game runs";
+"mac.awake.help" = "When you play with a controller only, the Mac doesn't dim the screen or go to sleep.";
+"mac.menuBar" = "Show recent games in the menu bar";
+"mac.menuBar.help" = "Start a recently played game with one click from the controller icon in the menu bar.";
+"mac.shortcuts.help" = "\"Create Shortcut\" in a game's menu adds an app that starts it to ~/Applications/UniveGame Games. Drag it to the Dock, or open it from Spotlight and Launchpad.";
+
+/* Saves */
+"saves.title" = "Saves";
+"saves.unknown" = "We don't know where this game keeps its saves yet. \"Find Save Folders\" suggests some, or choose the folder yourself.";
+"saves.removeFolder" = "Stop backing up this folder";
+"saves.backUpNow" = "Back Up Now";
+"saves.find" = "Find Save Folders";
+"saves.addFolder" = "Choose Folder…";
+"saves.addFolder.panel" = "Choose the folder where the game keeps its saves";
+"saves.outside" = "That folder isn't in the game's Windows environment. Choose a folder inside it.";
+"saves.restore" = "Restore";
+"saves.restore.title" = "Restore this backup?";
+"saves.restore.message" = "Save files with the same names are overwritten; nothing is deleted. A safety backup of the current saves is made first.";
+"saves.kind.manual" = "Manual";
+"saves.kind.automatic" = "After playing";
+"saves.kind.beforeRestore" = "Before a restore";
+"saves.candidates.title" = "%@: save folders";
+"saves.candidates.help" = "These folders look like saves. Tick the right ones; those are backed up.";
+"saves.candidates.none" = "No folder that looks like saves was found. Play and save the game, then try again, or choose the folder yourself.";
+"saves.candidates.save" = "Save Selection";
+"saves.reason.steamCloud" = "Steam Cloud folder";
+"saves.reason.nameMatch" = "Named like the game";
+"saves.reason.installFolder" = "In the game's folder";
+"saves.reason.recentlyChanged" = "Changed in the last session";
+"saves.files" = "%@ files";
+"saves.settings.title" = "Save backups";
+"saves.settings.iCloud" = "iCloud Drive";
+"saves.settings.change" = "Change…";
+"saves.settings.panel" = "Choose the folder for save backups";
+"saves.settings.auto" = "Back up automatically after playing";
+"saves.settings.auto.help" = "When you quit a game whose save folders are set and its saves changed, a backup is made. The last 20 backups of each game are kept.";

@@ -13,6 +13,14 @@ struct LibraryState: Codable, Equatable {
     var appliedMacDriver: [String: [String: Bool]]?
     /// Compatibility analyses by library id.
     var compat: [String: CompatReport]?
+    /// Games the player chose to install or start despite the "won't run on a Mac" warning.
+    var acceptedRisks: Set<String>?
+    /// The PlayStation-as-Xbox setting last written to each environment (keyed by its folder).
+    var appliedControllerMode: [String: Bool]?
+    /// The folders that hold each game's saves, as the player confirmed them.
+    var saveSources: [String: [SaveSource]]?
+    /// When each game's saves were last backed up.
+    var lastSaveBackup: [String: Date]?
 }
 
 extension LibraryState {
@@ -28,6 +36,10 @@ extension LibraryState {
         profiles = try c.decodeIfPresent([String: LaunchProfile].self, forKey: .profiles) ?? [:]
         appliedMacDriver = try c.decodeIfPresent([String: [String: Bool]].self, forKey: .appliedMacDriver)
         compat = try c.decodeIfPresent([String: CompatReport].self, forKey: .compat)
+        acceptedRisks = try c.decodeIfPresent(Set<String>.self, forKey: .acceptedRisks)
+        appliedControllerMode = try c.decodeIfPresent([String: Bool].self, forKey: .appliedControllerMode)
+        saveSources = try c.decodeIfPresent([String: [SaveSource]].self, forKey: .saveSources)
+        lastSaveBackup = try c.decodeIfPresent([String: Date].self, forKey: .lastSaveBackup)
     }
 }
 

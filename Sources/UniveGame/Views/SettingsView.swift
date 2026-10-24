@@ -359,9 +359,7 @@ private struct AboutSection: View {
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
     }
 
-    static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
-    }
+    static var version: String { AppModel.appVersion }
 }
 
 /// Settings › About: checks GitHub for a newer UniveGame and installs it after verifying it.

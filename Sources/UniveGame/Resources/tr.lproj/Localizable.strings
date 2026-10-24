@@ -523,3 +523,4 @@
 "update.error.untrusted" = "İndirilen uygulama UniveGame'in imzasını veya Apple onayını taşımıyor; kurulmadı.";
 "update.error.notWritable" = "Bu kopya kendini güncelleyemiyor (Uygulamalar klasöründe değil ya da klasör yazılamıyor). Doğrulanmış disk görüntüsü açıldı: UniveGame'i Uygulamalar'a sürükle.";
 "update.error.failed" = "Güncelleme kurulamadı; mevcut sürüm yerinde duruyor.";
+"update.error.restart" = "Güncelleme kuruldu ama uygulama kendini yeniden başlatamadı. UniveGame'i kapatıp tekrar aç.";

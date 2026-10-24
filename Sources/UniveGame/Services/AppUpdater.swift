@@ -1,5 +1,4 @@
 import AppKit
-import CryptoKit
 import Foundation
 import Security
 import UniveEngineKit
@@ -29,6 +28,8 @@ enum AppUpdateError: Error, Equatable, LocalizedError {
     /// This copy can't replace itself (read-only folder, or macOS runs it from a translocated copy).
     case notWritable
     case failed(String)
+    /// Installed, but the app couldn't restart itself.
+    case restart
 
     /// Localization key of the explanation (`update.error.<key>`).
     var key: String {
@@ -38,13 +39,14 @@ enum AppUpdateError: Error, Equatable, LocalizedError {
         case .untrusted: "untrusted"
         case .notWritable: "notWritable"
         case .failed: "failed"
+        case .restart: "restart"
         }
     }
 
     var detail: String {
         switch self {
         case .server(let m), .damaged(let m), .untrusted(let m), .failed(let m): m
-        case .notWritable: ""
+        case .notWritable, .restart: ""
         }
     }
 
@@ -72,6 +74,8 @@ struct AppUpdater: Sendable {
         + #" and certificate leaf[subject.OU] = "T23H2VU6YK""#
     /// Larger than any UniveGame disk image will be; a bigger answer isn't ours.
     static let maximumSize: Int64 = 200 << 20
+    /// HTTPS to GitHub's release hosts only, every redirect included, and no larger than `maximumSize`.
+    static let downloadPolicy = DownloadPolicy(hosts: downloadHosts, maximumSize: maximumSize)
 
     // MARK: Checking
 
@@ -146,7 +150,13 @@ struct AppUpdater: Sendable {
         guard update.download.absoluteString.hasPrefix(Self.downloadPrefix) else { throw AppUpdateError.untrusted("download address") }
         let dmg = work.appendingPathComponent("UniveGame-\(update.version).dmg")
         progress(.downloading(0))
-        try await UpdateDownload.run(update.download, to: dmg, maximum: Self.maximumSize) { progress(.downloading($0)) }
+        do {
+            try await EngineManager.download(update.download, to: dmg, policy: Self.downloadPolicy) { progress(.downloading($0)) }
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw AppUpdateError.server(error.localizedDescription)
+        }
         progress(.verifying)
         let app = try await Self.verify(dmg: dmg, update: update, current: current, mountAt: work.appendingPathComponent("mnt"))
         return (dmg, app)
@@ -157,7 +167,7 @@ struct AppUpdater: Sendable {
         let size = (try? fm.attributesOfItem(atPath: dmg.path)[.size] as? Int64) ?? -1
         guard size == update.size else { throw AppUpdateError.damaged("size \(size), expected \(update.size)") }
         if let expected = update.sha256 {
-            guard try FileDigest.sha256(of: dmg) == expected else { throw AppUpdateError.damaged("SHA-256 doesn't match the release") }
+            guard try EngineManager.sha256(of: dmg) == expected else { throw AppUpdateError.damaged("SHA-256 doesn't match the release") }
         }
         try fm.createDirectory(at: mount, withIntermediateDirectories: true)
         let attach = try await ProcessRunner.run(URL(fileURLWithPath: "/usr/bin/hdiutil"),
@@ -171,7 +181,7 @@ struct AppUpdater: Sendable {
         guard let version = info["CFBundleShortVersionString"] as? String, version == update.version,
               isNewer(version, than: current) else { throw AppUpdateError.damaged("version doesn't match the release") }
         try checkSignature(of: app)
-        try await checkNotarized(app)
+        try await checkNotarized(dmg: dmg, app: app)
         return app
     }
 
@@ -192,12 +202,18 @@ struct AppUpdater: Sendable {
         }
     }
 
-    /// Gatekeeper's verdict: accepted, as notarized Developer ID software.
-    static func checkNotarized(_ app: URL) async throws {
-        let r = try await ProcessRunner.run(URL(fileURLWithPath: "/usr/sbin/spctl"), ["--assess", "--type", "execute", "-vv", app.path])
-        guard r.succeeded, r.output.contains("source=Notarized Developer ID"), r.output.contains("(\(teamID))") else {
-            throw AppUpdateError.untrusted("not notarized by Apple")
+    /// Gatekeeper's verdict: notarized Developer ID software of UniveGame's team. The disk image carries Apple's
+    /// ticket (stapled), so it's checked first and needs no network; the app inside is only asked about online
+    /// when that fails.
+    static func checkNotarized(dmg: URL, app: URL) async throws {
+        let spctl = URL(fileURLWithPath: "/usr/sbin/spctl")
+        func accepted(_ args: [String]) async -> Bool {
+            guard let r = try? await ProcessRunner.run(spctl, ["--assess", "-vv"] + args) else { return false }
+            return r.succeeded && r.output.contains("source=Notarized Developer ID") && r.output.contains("(\(teamID))")
         }
+        if await accepted(["--type", "open", "--context", "context:primary-signature", dmg.path]) { return }
+        if await accepted(["--type", "execute", app.path]) { return }
+        throw AppUpdateError.untrusted("not notarized by Apple")
     }
 
     // MARK: Installing
@@ -231,100 +247,14 @@ struct AppUpdater: Sendable {
         try? fm.removeItem(at: old)
     }
 
-    /// Opens `bundle` once this process has quit, then quits.
-    @MainActor static func relaunch(_ bundle: URL) {
+    /// Opens `bundle` once this process has quit, then quits. When the helper that reopens it can't start, the app
+    /// stays open (the new version is already in place) and the caller asks for a manual restart.
+    @MainActor static func relaunch(_ bundle: URL) throws {
         let helper = Process()
         helper.executableURL = URL(fileURLWithPath: "/bin/sh")
         helper.arguments = ["-c", #"while /bin/kill -0 "$1" 2>/dev/null; do /bin/sleep 0.2; done; /usr/bin/open "$2""#,
                             "sh", "\(ProcessInfo.processInfo.processIdentifier)", bundle.path]
-        try? helper.run()
+        do { try helper.run() } catch { throw AppUpdateError.restart }
         NSApp.terminate(nil)
-    }
-}
-
-/// SHA-256 of a file, read in chunks.
-enum FileDigest {
-    static func sha256(of file: URL) throws -> String {
-        let handle = try FileHandle(forReadingFrom: file)
-        defer { try? handle.close() }
-        var hasher = SHA256()
-        while let chunk = try handle.read(upToCount: 4 << 20), !chunk.isEmpty { hasher.update(data: chunk) }
-        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
-    }
-}
-
-enum UpdateDownloadHosts {
-    /// HTTPS to one of GitHub's release hosts, nothing else.
-    static func allowed(_ url: URL?) -> Bool {
-        guard let url, url.scheme == "https", let host = url.host?.lowercased() else { return false }
-        return AppUpdater.downloadHosts.contains(host)
-    }
-}
-
-/// One HTTPS download with progress that only follows redirects to `AppUpdater.downloadHosts`.
-private final class UpdateDownload: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
-    let destination: URL
-    let maximum: Int64
-    let onProgress: @Sendable (Double) -> Void
-    var continuation: CheckedContinuation<Void, Error>?
-    private var failure: Error?
-
-    init(destination: URL, maximum: Int64, onProgress: @escaping @Sendable (Double) -> Void) {
-        self.destination = destination
-        self.maximum = maximum
-        self.onProgress = onProgress
-    }
-
-    static func run(_ url: URL, to destination: URL, maximum: Int64, onProgress: @escaping @Sendable (Double) -> Void) async throws {
-        let delegate = UpdateDownload(destination: destination, maximum: maximum, onProgress: onProgress)
-        let session = URLSession(configuration: .ephemeral, delegate: delegate, delegateQueue: nil)
-        defer { session.finishTasksAndInvalidate() }
-        let task = session.downloadTask(with: url)
-        try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { (c: CheckedContinuation<Void, Error>) in
-                delegate.continuation = c
-                task.resume()
-            }
-        } onCancel: { task.cancel() }
-    }
-
-    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                    newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        if UpdateDownloadHosts.allowed(request.url) { completionHandler(request) } else {
-            failure = AppUpdateError.untrusted("redirect to \(request.url?.host ?? "?")")
-            completionHandler(nil)
-        }
-    }
-
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData _: Int64,
-                    totalBytesWritten written: Int64, totalBytesExpectedToWrite total: Int64) {
-        if written > maximum || total > maximum {
-            failure = AppUpdateError.damaged("larger than expected")
-            downloadTask.cancel()
-            return
-        }
-        if total > 0 { onProgress(Double(written) / Double(total)) }
-    }
-
-    // The temporary file is deleted when this returns, so it's moved into place here.
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        guard failure == nil else { return }
-        guard let http = downloadTask.response as? HTTPURLResponse, http.statusCode == 200, UpdateDownloadHosts.allowed(http.url) else {
-            failure = AppUpdateError.server("HTTP \((downloadTask.response as? HTTPURLResponse)?.statusCode ?? 0)")
-            return
-        }
-        do {
-            try? FileManager.default.removeItem(at: destination)
-            try FileManager.default.moveItem(at: location, to: destination)
-        } catch { failure = AppUpdateError.failed(error.localizedDescription) }
-    }
-
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        let result: Error?
-        if let failure { result = failure }
-        else if let error = error as? URLError, error.code == .cancelled { result = CancellationError() }
-        else { result = error.map { AppUpdateError.server($0.localizedDescription) } }
-        if let result { continuation?.resume(throwing: result) } else { continuation?.resume() }
-        continuation = nil
     }
 }

@@ -523,3 +523,4 @@
 "update.error.untrusted" = "The downloaded app isn't signed by UniveGame or notarized by Apple; it wasn't installed.";
 "update.error.notWritable" = "This copy can't update itself (it isn't in Applications, or that folder isn't writable). The verified disk image is open: drag UniveGame to Applications.";
 "update.error.failed" = "The update couldn't be installed; the current version is still in place.";
+"update.error.restart" = "The update is installed, but the app couldn't restart itself. Quit UniveGame and open it again.";

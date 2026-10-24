@@ -59,9 +59,11 @@ final class AppUpdaterTests: XCTestCase {
     }
 
     func testRedirectsStayOnGitHub() {
-        XCTAssertTrue(UpdateDownloadHosts.allowed(URL(string: "https://release-assets.githubusercontent.com/x")))
-        XCTAssertFalse(UpdateDownloadHosts.allowed(URL(string: "http://release-assets.githubusercontent.com/x")))
-        XCTAssertFalse(UpdateDownloadHosts.allowed(URL(string: "https://githubusercontent.com.evil.example/x")))
+        let policy = AppUpdater.downloadPolicy
+        XCTAssertTrue(policy.allows(URL(string: "https://release-assets.githubusercontent.com/x")))
+        XCTAssertFalse(policy.allows(URL(string: "http://release-assets.githubusercontent.com/x")))
+        XCTAssertFalse(policy.allows(URL(string: "https://githubusercontent.com.evil.example/x")))
+        XCTAssertEqual(policy.maximumSize, AppUpdater.maximumSize)
     }
 
     func testAnUnsignedOrForeignAppIsRejected() throws {

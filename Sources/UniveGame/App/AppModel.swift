@@ -775,7 +775,7 @@ final class AppModel {
 
     /// The check at start (at most hourly, well within GitHub's limits), silent when it fails.
     func checkForUpdateIfDue() async {
-        Self.removeOldUpdateFolders()
+        Task.detached(priority: .utility) { Self.removeOldUpdateFolders() }
         guard !isDemo, checksForUpdates,
               lastUpdateCheck.map({ Date().timeIntervalSince($0) > 3600 }) ?? true else { return }
         await checkForUpdate(userInitiated: false)
@@ -835,7 +835,7 @@ final class AppModel {
                 await Self.detach(mount)
                 try? FileManager.default.removeItem(at: work)
                 persist()
-                AppUpdater.relaunch(bundle)
+                try AppUpdater.relaunch(bundle)
                 return
             }
             // Read-only or translocated copy: hand over the verified disk image.
@@ -854,7 +854,7 @@ final class AppModel {
     }
 
     /// Work folders from earlier updates; one is kept when its disk image was handed to Finder.
-    private static func removeOldUpdateFolders() {
+    nonisolated private static func removeOldUpdateFolders() {
         let fm = FileManager.default
         let tmp = fm.temporaryDirectory
         for name in (try? fm.contentsOfDirectory(atPath: tmp.path)) ?? [] where name.hasPrefix("UniveGame-update-") {
@@ -886,6 +886,7 @@ final class AppModel {
     // MARK: Engines
 
     func reloadEngines() {
+        engineCheckUpToDate = false   // the engines changed (or were looked at again): the last check's answer is old
         var seen = Set<String>()
         // Newest first: a game takes the first engine that fits it, so an updated engine wins over the old one.
         engines = (EngineLocator(paths: paths).installed() + EngineLocator(paths: AppPaths.sharedEnginePaths).installed())

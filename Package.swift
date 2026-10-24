@@ -8,7 +8,7 @@ let package = Package(
     dependencies: [
         // UniveEngine (Apache 2.0): Wine engines, environments, graphics backends and store integrations.
         // Derived from MacadeKit (Apache 2.0); pinned to an exact commit so every build uses the same engine code.
-        .package(url: "https://github.com/MuratDugan/UniveEngine.git", revision: "53c1cdf828b581f4239867db5fe0f68866343e4f"),
+        .package(url: "https://github.com/MuratDugan/UniveEngine.git", revision: "e3aedbdc69890d9383858045df69c8756083ef9b"),
     ],
     targets: [
         .executableTarget(

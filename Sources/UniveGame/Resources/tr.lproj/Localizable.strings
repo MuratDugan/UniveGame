@@ -152,6 +152,7 @@
 "settings.language" = "Dil";
 "settings.language.help" = "Değişiklik hemen uygulanır.";
 "settings.engine" = "Motor";
+"engine.upToDate" = "Motorlar güncel: yeni bir sürüm yok.";
 "settings.engineVersion" = "Motor %@";
 "settings.engine.help" = "Motorlar UniveEngine'in açık kaynak motor listesinden gelir ve kurulmadan önce SHA-256 ile doğrulanır. Daha önce indirilmiş motorlar (MaPC'ninkiler dahil) da kullanılır.";
 "settings.rescan" = "Yeniden Tara";
@@ -374,6 +375,7 @@
 "compat.notice.track" = "Durumu takip et";
 "compat.notice.d3d" = "Önce D3DMetal'i kur";
 "compat.notice.d3d.body" = "Bu oyun DirectX 12 kullanıyor. Motor yaklaşık 290 MB; Apple'ın Game Porting Toolkit'i de gerekir.";
+"launch.backend.wined3d" = "WineD3D elle seçildi: Wine'ın kendi Direct3D'si, DirectX 9 ve öncesi için. macOS'ta DirectX 10 ve 11 çalıştıramaz, bu oyunlar yine DXVK ile açılır.";
 "launch.backend.manual" = "%@ elle seçildi. Sorun olursa Otomatik'e dön.";
 
 /* v2 — Oyun ekle */

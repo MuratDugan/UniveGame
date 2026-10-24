@@ -186,7 +186,8 @@ private struct EngineSection: View {
                     if let engine {
                         Text("\(engine.info.wineDescription) · \(engine.info.backends.map { $0.uppercased() }.joined(separator: " · "))")
                             .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
-                            .lineLimit(1)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 Spacer(minLength: 0)
@@ -206,6 +207,13 @@ private struct EngineSection: View {
             }
             if let progress = model.engineInstall {
                 EngineProgressRow(progress: progress, showsCancel: true)
+            } else if model.engineCheckUpToDate {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark").font(.system(size: 11, weight: .bold))
+                    Text(L("engine.upToDate"))
+                }
+                .font(Theme.Font.caption).foregroundStyle(Theme.Palette.success)
+                .transition(.opacity)
             }
             if model.engines.count > 1 {
                 VStack(alignment: .leading, spacing: 6) {

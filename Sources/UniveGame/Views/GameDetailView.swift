@@ -407,7 +407,9 @@ struct LaunchSettingsPanel: View {
                                 accessibilityTitle: L("launch.backend"))
                     .fixedSize()
             }
-            Text(backend == .auto ? L("launch.backend.help") : L("launch.backend.manual", backend.displayName))
+            Text(backend == .auto ? L("launch.backend.help")
+                 : backend == .wined3d ? L("launch.backend.wined3d")
+                 : L("launch.backend.manual", backend.displayName))
                 .font(Theme.Font.caption)
                 .foregroundStyle(Theme.Palette.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

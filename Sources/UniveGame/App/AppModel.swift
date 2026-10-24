@@ -762,6 +762,8 @@ final class AppModel {
     }
 
     var hasEngine: Bool { !engines.isEmpty }
+    /// The last "check for a new engine" found nothing newer to install.
+    private(set) var engineCheckUpToDate = false
 
     /// D3DMetal games get the CrossOver-based engine; everything else keeps the DXVK engine it was set up
     /// with, so installing the D3DMetal engine doesn't move existing games (and their environments) onto it.
@@ -790,30 +792,50 @@ final class AppModel {
         engineInstallTask = Task { await installEngine() }
     }
 
+    /// Settings › Engine: installs the newest DXVK-line engine (the first engine, when there is none) and, when a
+    /// D3DMetal engine is installed, the newest D3DMetal engine. Versions already installed aren't downloaded again,
+    /// so a running game's engine folder is never replaced: a new version goes into its own folder.
     func installEngine() async {
         guard engineInstall == nil else { return }
+        engineCheckUpToDate = false
         engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0)
         defer { engineInstall = nil; engineInstallTask = nil }
         do {
-            let manager = EngineManager(paths: paths)
-            let manifest = try await manager.fetchManifest(from: Self.engineManifestURL)
-            // The main engine line (DXVK). The D3DMetal line is installed from Settings › DirectX 12.
-            guard let entry = manifest.engines
-                .filter({ ($0.backends ?? ["dxvk"]).contains(GraphicsBackend.dxvk.rawValue) })
-                .max(by: { $0.version.compare($1.version, options: .numeric) == .orderedAscending }) else {
-                throw EngineError.downloadFailed("empty engine list")
-            }
-            let total = entry.size
-            let started = Date()
-            engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0, totalBytes: total, startedAt: started)
-            try await manager.install(entry) { phase, fraction in
-                Task { @MainActor [weak self] in self?.showEngineInstall(phase, fraction, totalBytes: total, startedAt: started) }
-            }
-            reloadEngines()
+            let manifest = try await EngineManager(paths: paths).fetchManifest(from: Self.engineManifestURL)
+                .usable(byApp: Self.appVersion)
+            let installed = Set(engines.map(\.version))
+            guard let main = manifest.latest(supporting: .dxvk) else { throw EngineError.downloadFailed("empty engine list") }
+            var wanted = [main]
+            if hasD3DMetalEngine, let metal = manifest.latest(supporting: .d3dMetal) { wanted.append(metal) }
+            wanted = wanted.filter { !installed.contains($0.version) }
+            guard !wanted.isEmpty else { engineCheckUpToDate = true; return }
+            for entry in wanted { try await download(entry) }
+            finishEngineInstall()
         } catch {
             if Task.isCancelled || error is CancellationError || (error as? URLError)?.code == .cancelled { return }
             alert = AppAlert(titleKey: "alert.engineFailed", message: error.localizedDescription)
         }
+    }
+
+    static var appVersion: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0" }
+
+    /// Downloads, checks and installs one engine, showing its progress.
+    private func download(_ entry: EngineManifest.Entry) async throws {
+        let total = entry.size
+        let started = Date()
+        engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0, totalBytes: total, startedAt: started)
+        try await EngineManager(paths: paths).install(entry) { phase, fraction in
+            Task { @MainActor [weak self] in self?.showEngineInstall(phase, fraction, totalBytes: total, startedAt: started) }
+        }
+    }
+
+    /// After new engines: list them, link an already imported D3DMetal into the D3DMetal ones, rescore games.
+    private func finishEngineInstall() {
+        reloadEngines()
+        let store = D3DMetalStore(paths: paths)
+        for engine in engines where D3DMetalStore.canUse(engine) { try? store.link(into: engine) }
+        reloadEngines()
+        rescoreAll()
     }
 
     // MARK: DirectX 12 (D3DMetal)
@@ -847,25 +869,13 @@ final class AppModel {
         engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0)
         defer { engineInstall = nil; engineInstallTask = nil }
         do {
-            let manager = EngineManager(paths: paths)
-            let manifest = try await manager.fetchManifest(from: Self.engineManifestURL)
-            guard let entry = manifest.engines
-                .filter({ ($0.backends ?? []).contains(GraphicsBackend.d3dMetal.rawValue) })
-                .max(by: { $0.version.compare($1.version, options: .numeric) == .orderedAscending }) else {
+            let manifest = try await EngineManager(paths: paths).fetchManifest(from: Self.engineManifestURL)
+                .usable(byApp: Self.appVersion)
+            guard let entry = manifest.latest(supporting: .d3dMetal) else {
                 throw EngineError.downloadFailed("no D3DMetal engine in the list")
             }
-            let total = entry.size
-            let started = Date()
-            engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0, totalBytes: total, startedAt: started)
-            try await manager.install(entry) { phase, fraction in
-                Task { @MainActor [weak self] in self?.showEngineInstall(phase, fraction, totalBytes: total, startedAt: started) }
-            }
-            reloadEngines()
-            // Link an already imported D3DMetal into the new engine.
-            let store = D3DMetalStore(paths: paths)
-            for engine in engines where D3DMetalStore.canUse(engine) { try? store.link(into: engine) }
-            reloadEngines()
-            rescoreAll()
+            if !engines.contains(where: { $0.version == entry.version }) { try await download(entry) }
+            finishEngineInstall()
         } catch {
             if Task.isCancelled || error is CancellationError || (error as? URLError)?.code == .cancelled { return }
             alert = AppAlert(titleKey: "alert.engineFailed", message: error.localizedDescription)
@@ -1062,10 +1072,11 @@ final class AppModel {
 
     /// Wine reads Retina mode when its server starts, so it's synced only while the environment is idle
     /// (a running Steam keeps its current mode until it restarts). UniveEngine reads the registry and
-    /// writes only what differs.
+    /// writes only what differs. The graphics card games are told about (`GPUIdentity`) is added then too.
     private func applyRetina(_ retina: Bool, runner: WineRunner, engine: Engine, bottle: Bottle) async {
         guard bottle.exists, !(await runner.isBottleActive(engine: engine, bottle: bottle)) else { return }
         await runner.syncMacDriver(["RetinaMode": retina], engine: engine, bottle: bottle)
+        await runner.syncGPUIdentity(engine: engine, bottle: bottle)
     }
 
     func stop(_ item: LibraryItem) {

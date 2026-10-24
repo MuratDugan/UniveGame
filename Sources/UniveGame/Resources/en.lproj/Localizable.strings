@@ -152,6 +152,7 @@
 "settings.language" = "Language";
 "settings.language.help" = "Changes take effect immediately.";
 "settings.engine" = "Engine";
+"engine.upToDate" = "Engines are up to date: there is no newer version.";
 "settings.engineVersion" = "Engine %@";
 "settings.engine.help" = "Engines come from UniveEngine's open-source engine list and are checked with SHA-256 before they're installed. Engines already on this Mac (including MaPC's) are used too.";
 "settings.rescan" = "Look Again";
@@ -374,6 +375,7 @@
 "compat.notice.track" = "Track status";
 "compat.notice.d3d" = "Set up D3DMetal first";
 "compat.notice.d3d.body" = "This game uses DirectX 12. The engine is about 290 MB, and Apple's Game Porting Toolkit is also needed.";
+"launch.backend.wined3d" = "WineD3D chosen manually: Wine's own Direct3D, for DirectX 9 and older. It can't run DirectX 10 or 11 on macOS, so those games still use DXVK.";
 "launch.backend.manual" = "%@ chosen manually. If anything breaks, switch back to Automatic.";
 
 /* v2 — Add game */

@@ -774,6 +774,16 @@ final class AppModel {
         return engines.first { $0.info.backends.contains(GraphicsBackend.dxvk.rawValue) } ?? engines.first
     }
 
+    /// Progress arrives in tasks that may run out of order: never step back to an earlier phase or a smaller
+    /// fraction (a late "downloading" update would otherwise show the download again while it unpacks).
+    private func showEngineInstall(_ phase: EnginePhase, _ fraction: Double, totalBytes: Int64, startedAt: Date) {
+        guard let current = engineInstall else { return }
+        let order: [EnginePhase] = [.downloading, .verifying, .extracting, .finishing]
+        let now = order.firstIndex(of: current.phase) ?? 0, next = order.firstIndex(of: phase) ?? 0
+        guard next > now || (next == now && fraction >= current.fraction) else { return }
+        engineInstall = EngineInstallProgress(phase: phase, fraction: fraction, totalBytes: totalBytes, startedAt: startedAt)
+    }
+
     /// Starts the main engine download so Settings' Cancel can stop it.
     func startEngineInstall() {
         guard engineInstall == nil else { return }
@@ -797,10 +807,7 @@ final class AppModel {
             let started = Date()
             engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0, totalBytes: total, startedAt: started)
             try await manager.install(entry) { phase, fraction in
-                Task { @MainActor [weak self] in
-                    guard self?.engineInstall != nil else { return }
-                    self?.engineInstall = EngineInstallProgress(phase: phase, fraction: fraction, totalBytes: total, startedAt: started)
-                }
+                Task { @MainActor [weak self] in self?.showEngineInstall(phase, fraction, totalBytes: total, startedAt: started) }
             }
             reloadEngines()
         } catch {
@@ -851,10 +858,7 @@ final class AppModel {
             let started = Date()
             engineInstall = EngineInstallProgress(phase: .downloading, fraction: 0, totalBytes: total, startedAt: started)
             try await manager.install(entry) { phase, fraction in
-                Task { @MainActor [weak self] in
-                    guard self?.engineInstall != nil else { return }
-                    self?.engineInstall = EngineInstallProgress(phase: phase, fraction: fraction, totalBytes: total, startedAt: started)
-                }
+                Task { @MainActor [weak self] in self?.showEngineInstall(phase, fraction, totalBytes: total, startedAt: started) }
             }
             reloadEngines()
             // Link an already imported D3DMetal into the new engine.

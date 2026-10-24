@@ -500,3 +500,26 @@
 "uninstall.message.trashFolder" = "The folder %@ will be moved to the Trash. \"Remove from Library\" keeps the game's files.";
 "uninstall.message.keepFiles" = "This game has no folder of its own that's safe to delete; it will only be removed from the library and its files stay where they are.";
 "stores.status.syncFailed" = "Sync failed";
+
+/* App updates */
+"update.title" = "Updates";
+"update.available" = "UniveGame %@ is available";
+"update.availableDetail" = "You're on %@. The update is downloaded and verified, then the app restarts.";
+"update.upToDate" = "UniveGame is up to date (%@). Last checked: %@";
+"update.lastChecked" = "Version %@. Last checked: %@";
+"update.never" = "Not checked yet.";
+"update.checking" = "Checking GitHub…";
+"update.check" = "Check for Updates";
+"update.install" = "Update Now";
+"update.notes" = "Release Notes";
+"update.phase.downloading" = "Downloading";
+"update.phase.verifying" = "Verifying the signature and Apple notarization";
+"update.phase.installing" = "Installing";
+"update.busy" = "Finish running games, installers or engine downloads first: updating restarts the app.";
+"update.auto" = "Check for updates automatically";
+"update.trust" = "Looks at the latest GitHub release when the app starts. An update is installed only if its SHA-256 matches, it's signed with UniveGame's Developer ID (Murat Duğan, T23H2VU6YK) and it's notarized by Apple. It never goes back to an older version.";
+"update.error.server" = "Couldn't get update information. Check your internet connection and try again.";
+"update.error.damaged" = "The download doesn't match the release; nothing was changed.";
+"update.error.untrusted" = "The downloaded app isn't signed by UniveGame or notarized by Apple; it wasn't installed.";
+"update.error.notWritable" = "This copy can't update itself (it isn't in Applications, or that folder isn't writable). The verified disk image is open: drag UniveGame to Applications.";
+"update.error.failed" = "The update couldn't be installed; the current version is still in place.";

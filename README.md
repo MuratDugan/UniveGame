@@ -63,6 +63,8 @@ MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
   Command-as-Control.
 - **Covers found for you.** Add a game by hand and UniveGame looks up its cover and artwork by name, in your language.
 - **Discover.** Steam's featured games and deals in a grid, with Mac scores for games you own.
+- **Verified in-app updates.** Settings › About checks GitHub for a new release and installs it only if the download
+  matches the release's SHA-256, is signed with UniveGame's Developer ID and is notarized by Apple. No downgrades.
 - **English and Turkish**, switchable without restarting. Made for macOS with SwiftUI: dark, quiet, keyboard-friendly.
 
 <table>
@@ -88,7 +90,7 @@ MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
 
 The app is signed with a Developer ID and notarized by Apple, so it opens without Gatekeeper warnings. It needs
 **macOS 15 or later on an Apple Silicon Mac** (M1, M2, M3, M4) and downloads its Wine engine (about 140 MB) the
-first time it runs.
+first time it runs. From 1.0.4 on it updates itself (Settings › About); 1.0.3 and older need one manual download.
 
 ## How the compatibility score works
 

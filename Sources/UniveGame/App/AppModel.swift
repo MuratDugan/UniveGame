@@ -120,6 +120,7 @@ final class AppModel {
         reloadEngines()
         rescoreOutdatedReports()
         applyLaunchArguments()
+        if !demo { Task { await checkForUpdateIfDue() } }
     }
 
     /// `--section discover|stores|settings|import`, `--open <game id>`.
@@ -749,6 +750,137 @@ final class AppModel {
             state.profiles[item.id] = profile
         }
         persist()
+    }
+
+    // MARK: App updates
+
+    /// A newer UniveGame on GitHub, found by the last check.
+    private(set) var availableUpdate: AppUpdate?
+    /// What a running update is doing (nil when none runs).
+    private(set) var updatePhase: AppUpdatePhase?
+    private(set) var checkingForUpdate = false
+    /// The last check (or update) failed this way.
+    private(set) var updateError: AppUpdateError?
+    /// When the last check finished, successfully.
+    private(set) var lastUpdateCheck: Date? = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date
+    private var updateTask: Task<Void, Never>?
+
+    /// Check GitHub when the app starts (Settings › About).
+    var checksForUpdates: Bool = UserDefaults.standard.object(forKey: "checksForUpdates") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(checksForUpdates, forKey: "checksForUpdates") }
+    }
+
+    /// This run checked and knows the answer (`availableUpdate` isn't kept between runs).
+    private(set) var checkedForUpdateThisRun = false
+
+    /// The check at start (at most hourly, well within GitHub's limits), silent when it fails.
+    func checkForUpdateIfDue() async {
+        Self.removeOldUpdateFolders()
+        guard !isDemo, checksForUpdates,
+              lastUpdateCheck.map({ Date().timeIntervalSince($0) > 3600 }) ?? true else { return }
+        await checkForUpdate(userInitiated: false)
+    }
+
+    func checkForUpdate(userInitiated: Bool = true) async {
+        guard !checkingForUpdate, updatePhase == nil else { return }
+        checkingForUpdate = true
+        defer { checkingForUpdate = false }
+        if userInitiated { updateError = nil }
+        do {
+            availableUpdate = try await AppUpdater().check(current: Self.appVersion)
+            checkedForUpdateThisRun = true
+            lastUpdateCheck = Date()
+            UserDefaults.standard.set(lastUpdateCheck, forKey: "lastUpdateCheck")
+        } catch let error as AppUpdateError {
+            if userInitiated { updateError = error }
+        } catch {
+            if userInitiated { updateError = .server(error.localizedDescription) }
+        }
+    }
+
+    /// Something that quitting the app would cut short: a game, an installer, an engine download.
+    var updateBlockedByActivity: Bool { !running.isEmpty || installer != nil || engineInstall != nil || !launching.isEmpty }
+
+    func startAppUpdate() {
+        guard updateTask == nil, let update = availableUpdate, !updateBlockedByActivity else { return }
+        updateTask = Task { await installAppUpdate(update) }
+    }
+
+    func cancelAppUpdate() {
+        updateTask?.cancel()
+    }
+
+    /// Downloads and verifies `update` (see `AppUpdater`), then swaps it in and restarts. When this copy can't
+    /// replace itself, the verified disk image is opened in Finder instead, to drag into Applications.
+    private func installAppUpdate(_ update: AppUpdate) async {
+        updateError = nil
+        updatePhase = .downloading(0)
+        let work = FileManager.default.temporaryDirectory.appendingPathComponent("UniveGame-update-\(UUID().uuidString)", isDirectory: true)
+        let mount = work.appendingPathComponent("mnt")
+        defer {
+            updatePhase = nil
+            updateTask = nil
+        }
+        var keepDiskImage = false
+        do {
+            try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
+            let (dmg, app) = try await AppUpdater().fetch(update, current: Self.appVersion, into: work) { phase in
+                Task { @MainActor [weak self] in self?.showUpdatePhase(phase) }
+            }
+            updatePhase = .installing
+            try Task.checkCancellation()
+            let bundle = Bundle.main.bundleURL
+            if AppUpdater.canReplace(bundle) {
+                try await AppUpdater.replace(bundle, with: app)
+                await Self.detach(mount)
+                try? FileManager.default.removeItem(at: work)
+                persist()
+                AppUpdater.relaunch(bundle)
+                return
+            }
+            // Read-only or translocated copy: hand over the verified disk image.
+            await Self.detach(mount)
+            keepDiskImage = true
+            NSWorkspace.shared.open(dmg)
+            updateError = .notWritable
+        } catch is CancellationError {
+        } catch let error as AppUpdateError {
+            updateError = error
+        } catch {
+            updateError = .failed(error.localizedDescription)
+        }
+        await Self.detach(mount)
+        if !keepDiskImage { try? FileManager.default.removeItem(at: work) }
+    }
+
+    /// Work folders from earlier updates; one is kept when its disk image was handed to Finder.
+    private static func removeOldUpdateFolders() {
+        let fm = FileManager.default
+        let tmp = fm.temporaryDirectory
+        for name in (try? fm.contentsOfDirectory(atPath: tmp.path)) ?? [] where name.hasPrefix("UniveGame-update-") {
+            let url = tmp.appendingPathComponent(name)
+            let modified = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? .distantPast
+            if Date().timeIntervalSince(modified) > 24 * 3600 { try? fm.removeItem(at: url) }
+        }
+    }
+
+    /// Progress arrives in tasks that may run out of order: never step back to an earlier phase or a smaller fraction.
+    private func showUpdatePhase(_ phase: AppUpdatePhase) {
+        func rank(_ p: AppUpdatePhase) -> (Int, Double) {
+            switch p {
+            case .downloading(let f): (0, f)
+            case .verifying: (1, 0)
+            case .installing: (2, 0)
+            }
+        }
+        guard let current = updatePhase else { return }
+        let (a, b) = (rank(current), rank(phase))
+        if b.0 > a.0 || (b.0 == a.0 && b.1 >= a.1) { updatePhase = phase }
+    }
+
+    private static func detach(_ mount: URL) async {
+        guard FileManager.default.fileExists(atPath: mount.appendingPathComponent("UniveGame.app").path) else { return }
+        _ = try? await ProcessRunner.run(URL(fileURLWithPath: "/usr/bin/hdiutil"), ["detach", "-quiet", "-force", mount.path])
     }
 
     // MARK: Engines

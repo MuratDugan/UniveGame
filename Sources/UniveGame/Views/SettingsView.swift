@@ -49,7 +49,7 @@ private struct SectionNav: View {
             row(.general, "globe", L("settings.section.general"))
             row(.engine, "cpu", L("settings.section.engine"), flag: !model.hasEngine && !model.isDemo)
             row(.dx12, "square.stack.3d.up", L("settings.section.dx12"), flag: !model.d3dMetalReady)
-            row(.about, "info.circle", L("settings.section.about"))
+            row(.about, "info.circle", L("settings.section.about"), flag: model.availableUpdate != nil)
             Spacer(minLength: 0)
         }
         .padding(.top, Theme.Layout.pageTitleTop)
@@ -323,7 +323,8 @@ private struct AboutSection: View {
                     .padding(.top, 8)
             }
             .enterOnAppear()
-            legalCard.enterOnAppear(delay: 0.08)
+            UpdateCard().enterOnAppear(delay: 0.06)
+            legalCard.enterOnAppear(delay: 0.1)
         }
         .sheet(isPresented: $model.reviewingDisclaimer) {
             DisclaimerView(mode: .review, windowHeight: windowHeight)
@@ -360,5 +361,147 @@ private struct AboutSection: View {
 
     static var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+    }
+}
+
+/// Settings › About: checks GitHub for a newer UniveGame and installs it after verifying it.
+private struct UpdateCard: View {
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+
+    var body: some View {
+        @Bindable var model = model
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: Theme.Spacing.md) {
+                Image(systemName: model.availableUpdate == nil ? "arrow.triangle.2.circlepath" : "arrow.down.circle")
+                    .font(.system(size: 17))
+                    .foregroundStyle(model.availableUpdate == nil ? Theme.Palette.textPrimary : Theme.Palette.accent)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.Palette.elevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.Palette.textPrimary)
+                    Text(subtitle).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                actions
+            }
+            if let phase = model.updatePhase { progress(phase) }
+            if let update = model.availableUpdate, model.updatePhase == nil, !update.notes.isEmpty {
+                ScrollView {
+                    Text(Self.notes(update.notes))
+                        .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                        .lineSpacing(3)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 160)
+                .padding(12)
+                .background(Theme.Palette.background, in: RoundedRectangle(cornerRadius: Theme.Radius.md))
+            }
+            if let error = model.updateError {
+                Label {
+                    Text(L("update.error.\(error.key)") + (error.detail.isEmpty ? "" : " (\(error.detail))"))
+                        .fixedSize(horizontal: false, vertical: true)
+                } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+                .font(Theme.Font.caption)
+                .foregroundStyle(error == .notWritable ? Theme.Palette.warning : Theme.Palette.destructive)
+            }
+            if model.availableUpdate != nil, model.updatePhase == nil, model.updateBlockedByActivity {
+                Text(L("update.busy")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.warning)
+            }
+            Rectangle().fill(Theme.Palette.border).frame(height: 1)
+            SettingToggle(title: L("update.auto"), detail: L("update.trust"), isOn: $model.checksForUpdates)
+        }
+        .padding(Theme.Spacing.md)
+        .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
+        .animation(Theme.Motion.quick, value: model.updatePhase)
+        .animation(Theme.Motion.quick, value: model.availableUpdate)
+    }
+
+    private var title: String {
+        if let update = model.availableUpdate { return L("update.available", update.version) }
+        return L("update.title")
+    }
+
+    private var subtitle: String {
+        if model.checkingForUpdate { return L("update.checking") }
+        if model.availableUpdate != nil { return L("update.availableDetail", AboutSection.version) }
+        guard let date = model.lastUpdateCheck else { return L("update.never") }
+        let when = date.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(L.locale))
+        return model.checkedForUpdateThisRun ? L("update.upToDate", AboutSection.version, when)
+            : L("update.lastChecked", AboutSection.version, when)
+    }
+
+    @ViewBuilder private var actions: some View {
+        if let phase = model.updatePhase {
+            if case .downloading = phase {
+                Button(L("common.cancel")) { model.cancelAppUpdate() }
+                    .buttonStyle(SecondaryButtonStyle(height: 34, horizontalPadding: 14))
+            }
+        } else if let update = model.availableUpdate {
+            HStack(spacing: 8) {
+                Button(L("update.notes")) { NSWorkspace.shared.open(update.page) }
+                    .buttonStyle(SecondaryButtonStyle(height: 34, horizontalPadding: 14))
+                Button(L("update.install")) { model.startAppUpdate() }
+                    .buttonStyle(PrimaryButtonStyle(height: 34, horizontalPadding: 16))
+                    .disabled(model.updateBlockedByActivity)
+            }
+        } else {
+            HStack(spacing: 8) {
+                if model.checkingForUpdate { ProgressView().controlSize(.small) }
+                Button(L("update.check")) { Task { await model.checkForUpdate() } }
+                    .buttonStyle(SecondaryButtonStyle(height: 34, horizontalPadding: 14))
+                    .disabled(model.checkingForUpdate || model.isDemo)
+            }
+        }
+    }
+
+    @ViewBuilder private func progress(_ phase: AppUpdatePhase) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Circle().fill(Theme.Palette.accent).frame(width: 8, height: 8).pulsing()
+                Text(phaseText(phase)).font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.Palette.textPrimary)
+                Spacer(minLength: 0)
+                if case .downloading(let f) = phase, let update = model.availableUpdate {
+                    let mb = Double(update.size) / 1_048_576
+                    Text(verbatim: String(format: "%.1f / %.1f MB", mb * f, mb))
+                        .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary).monospacedDigit()
+                }
+            }
+            if case .downloading(let f) = phase {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Theme.Palette.elevated)
+                        Capsule().fill(Theme.Palette.accent).frame(width: geo.size.width * f)
+                    }
+                }
+                .frame(height: 6)
+            } else {
+                IndeterminateBar(height: 6)
+            }
+        }
+    }
+
+    private func phaseText(_ phase: AppUpdatePhase) -> String {
+        switch phase {
+        case .downloading: L("update.phase.downloading")
+        case .verifying: L("update.phase.verifying")
+        case .installing: L("update.phase.installing")
+        }
+    }
+
+    /// Release notes are Markdown: inline styling, headings as plain lines and list items as bullets.
+    static func notes(_ markdown: String) -> AttributedString {
+        let lines = markdown.replacingOccurrences(of: "\r\n", with: "\n").split(separator: "\n", omittingEmptySubsequences: false).map { line in
+            let trimmed = line.drop { $0 == " " }
+            if trimmed.hasPrefix("#") { return String(trimmed.drop { $0 == "#" }.drop { $0 == " " }) }
+            if trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") { return "•  " + trimmed.dropFirst(2) }
+            return String(line)
+        }
+        let text = lines.joined(separator: "\n")
+        return (try? AttributedString(markdown: text, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+            ?? AttributedString(text)
     }
 }

@@ -500,3 +500,26 @@
 "uninstall.message.trashFolder" = "%@ klasörü Çöp Sepeti'ne taşınacak. \"Kütüphaneden Kaldır\" seçeneği oyunun dosyalarını korur.";
 "uninstall.message.keepFiles" = "Bu oyunun güvenle silinebilecek kendi klasörü bulunamadı; yalnızca kütüphaneden kaldırılacak, dosyalar yerinde kalacak.";
 "stores.status.syncFailed" = "Eşitlenemedi";
+
+/* App updates */
+"update.title" = "Güncellemeler";
+"update.available" = "UniveGame %@ hazır";
+"update.availableDetail" = "Şu an %@ kullanıyorsun. Güncelleme indirilir, doğrulanır ve uygulama yeniden başlar.";
+"update.upToDate" = "UniveGame güncel (%@). Son denetim: %@";
+"update.lastChecked" = "Sürüm %@. Son denetim: %@";
+"update.never" = "Henüz denetlenmedi.";
+"update.checking" = "GitHub denetleniyor…";
+"update.check" = "Güncellemeleri Denetle";
+"update.install" = "Şimdi Güncelle";
+"update.notes" = "Sürüm Notları";
+"update.phase.downloading" = "İndiriliyor";
+"update.phase.verifying" = "İmza ve Apple onayı doğrulanıyor";
+"update.phase.installing" = "Kuruluyor";
+"update.busy" = "Önce açık oyunları, kurulumu veya motor indirmesini bitir: güncelleme uygulamayı yeniden başlatır.";
+"update.auto" = "Güncellemeleri otomatik denetle";
+"update.trust" = "Uygulama açılınca GitHub'daki son sürüme bakar. Bir güncelleme ancak SHA-256'sı tutuyorsa, UniveGame'in Developer ID'siyle (Murat Duğan, T23H2VU6YK) imzalıysa ve Apple tarafından onaylanmışsa (notarized) kurulur. Eski bir sürüme asla dönülmez.";
+"update.error.server" = "Güncelleme bilgisi alınamadı. İnternet bağlantını kontrol edip tekrar dene.";
+"update.error.damaged" = "İndirilen dosya sürümle uyuşmuyor; hiçbir şey değiştirilmedi.";
+"update.error.untrusted" = "İndirilen uygulama UniveGame'in imzasını veya Apple onayını taşımıyor; kurulmadı.";
+"update.error.notWritable" = "Bu kopya kendini güncelleyemiyor (Uygulamalar klasöründe değil ya da klasör yazılamıyor). Doğrulanmış disk görüntüsü açıldı: UniveGame'i Uygulamalar'a sürükle.";
+"update.error.failed" = "Güncelleme kurulamadı; mevcut sürüm yerinde duruyor.";

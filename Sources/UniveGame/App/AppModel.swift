@@ -1310,13 +1310,16 @@ final class AppModel {
         items.filter { $0.isInstalled && $0.lastPlayed != nil }.sorted { ($0.lastPlayed ?? .distantPast) > ($1.lastPlayed ?? .distantPast) }
     }
 
-    /// `univegame://play?game=…` from a game shortcut (Dock, Spotlight, Shortcuts): show the game and start it.
+    /// `univegame://play?game=…`: shows the game. It starts only when the link carries the key this app gave the
+    /// game's own shortcut, since any web page or program can open a `univegame://` link.
     func open(_ url: URL) {
         guard let id = GameLink.gameID(from: url), let item = items.first(where: { $0.id == id }) else { return }
         selection = .library(.all)
         pendingDetailID = id
         NSApp.activate(ignoringOtherApps: true)
-        if item.isInstalled { Task { await play(item) } }
+        if item.isInstalled, let key = GameLink.key(from: url), key == state.shortcutKeys?[id] {
+            Task { await play(item) }
+        }
     }
 
     /// A small app in ~/Applications/UniveGame Games that starts the game: for the Dock, Launchpad and Spotlight.
@@ -1328,7 +1331,10 @@ final class AppModel {
             icon = await ShortcutIcon.make(from: data, in: work)
         }
         do {
-            let app = try ShortcutApp.create(title: item.title, gameID: item.id, in: ShortcutApp.defaultFolder, icon: icon)
+            let key = state.shortcutKeys?[item.id] ?? GameLink.newKey()
+            let app = try ShortcutApp.create(title: item.title, gameID: item.id, in: ShortcutApp.defaultFolder, icon: icon, key: key)
+            state.shortcutKeys = (state.shortcutKeys ?? [:]).merging([item.id: key]) { $1 }
+            persist()
             NSWorkspace.shared.activateFileViewerSelecting([app])
         } catch {
             alert = AppAlert(titleKey: "shortcut.failed", message: error.localizedDescription)

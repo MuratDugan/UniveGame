@@ -21,6 +21,8 @@ struct LibraryState: Codable, Equatable {
     var saveSources: [String: [SaveSource]]?
     /// When each game's saves were last backed up.
     var lastSaveBackup: [String: Date]?
+    /// The secret each game's shortcut puts in its link (see `GameLink`).
+    var shortcutKeys: [String: String]?
 }
 
 extension LibraryState {
@@ -40,6 +42,7 @@ extension LibraryState {
         appliedControllerMode = try c.decodeIfPresent([String: Bool].self, forKey: .appliedControllerMode)
         saveSources = try c.decodeIfPresent([String: [SaveSource]].self, forKey: .saveSources)
         lastSaveBackup = try c.decodeIfPresent([String: Date].self, forKey: .lastSaveBackup)
+        shortcutKeys = try c.decodeIfPresent([String: String].self, forKey: .shortcutKeys)
     }
 }
 

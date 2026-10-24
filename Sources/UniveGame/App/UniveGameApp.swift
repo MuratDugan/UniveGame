@@ -25,6 +25,8 @@ struct UniveGameApp: App {
                 }
         }
         .defaultSize(width: 1280, height: 800)
+        // `univegame://` links go to the app delegate and the open window, never to a new window.
+        .handlesExternalEvents(matching: [])
         // No toolbar: an (even empty) window toolbar takes every click in the top 52 pt, where the back button,
         // the filters and the search field are. The title bar stays, transparent, for the traffic lights.
         .windowStyle(.hiddenTitleBar)

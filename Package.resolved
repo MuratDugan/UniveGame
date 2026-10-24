@@ -1,12 +1,12 @@
 {
-  "originHash" : "d11c3ed4547269985a3e24f3f7183a806644e39096e557a8dadc15a8d2e9a9d9",
+  "originHash" : "961a660f40bbb41a13ca21166bb77d7826bee77f05d3f042595239c6804c79b2",
   "pins" : [
     {
       "identity" : "univeengine",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/MuratDugan/UniveEngine.git",
       "state" : {
-        "revision" : "c5da102bb3518084a5d3cf1283d1cbd2ecf6583d"
+        "revision" : "572d1712fb491d4c40334d0c7a4f610fc662c9e9"
       }
     }
   ],

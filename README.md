@@ -70,7 +70,7 @@ MSI, 7z, ZIP, RAR, CAB) and you pick the game's program.
 - **Steam repair, controllers, voice chat.** Repair Steam without losing logins, games or saves; PlayStation pads show
   up as Xbox controllers; microphone access for in-game voice chat.
 - **Feels like a Mac app.** Dock/Spotlight shortcuts for each game (`univegame://` links), recent games in the menu bar,
-  and the display stays awake while you play.
+  the display stays awake while you play, and Discord shows the game you're playing (Settings › General).
 - **Save backups.** Find a game's save folders, back them up to any folder or iCloud Drive (automatically after
   playing), and restore them, with a safety copy first.
 - **Fixes that apply themselves.** Microsoft runtimes (Visual C++ 2015–2022, DirectX 9) installed into a game's

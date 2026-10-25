@@ -23,6 +23,19 @@ final class CompatibilityScorerTests: XCTestCase {
         XCTAssertNotEqual(CompatibilityScorer.score(files: nil, online: o, context: .init()).tier, .broken)
     }
 
+    func testAccountRiskWarnsWithoutBreakingTheScore() {
+        var o = OnlineFindings(); o.antiCheats = ["VAC"]; o.directXVersion = 11; o.steamDeckCategory = 3
+        let plain = CompatibilityScorer.score(files: nil, online: o, context: .init())
+        let risky = CompatibilityScorer.score(files: nil, online: o, context: .init(accountRisk: true))
+        XCTAssertEqual(risky.score, plain.score)
+        XCTAssertNotEqual(risky.tier, .broken)
+        XCTAssertTrue(risky.factors.contains { $0.key == CompatFactor.accountRiskKey })
+        // A game that won't run at all only shows why it won't run.
+        o.antiCheats = ["BattlEye"]
+        XCTAssertFalse(CompatibilityScorer.score(files: nil, online: o, context: .init(accountRisk: true))
+            .factors.contains { $0.key == CompatFactor.accountRiskKey })
+    }
+
     func testDX11DeckVerifiedPlatinumIsExcellent() {
         var f = FileFindings(); f.analyzedFiles = 10; f.has64Bit = true; f.graphics = [.d3d11]; f.engine = .unity
         var o = OnlineFindings(); o.steamDeckCategory = 3; o.protonTier = "platinum"; o.protonReports = 300; o.protonConfidence = "strong"

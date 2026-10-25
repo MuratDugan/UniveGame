@@ -131,7 +131,7 @@ struct GameDetailView: View {
                     }
                 }
                 .frame(height: 6)
-                Text(L("status.installing", Int(progress * 100)))
+                Text(L(model.progressLabelKey(item), Int(progress * 100)))
                     .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary).monospacedDigit()
             }
             .frame(height: 44)
@@ -261,6 +261,9 @@ struct GameDetailView: View {
             let antiCheat = ["compat.f.onlineAC", "compat.f.kernelAC", "compat.f.acLinuxOnly", "compat.f.deckAC"].contains(blocker.key)
             NoticeBanner(kind: .destructive, title: title, message: L("compat.notice.blocked.body"),
                          action: antiCheat ? .link(L("compat.notice.track"), Self.antiCheatPage(item.title)) : nil)
+                .enterOnAppear(delay: 0.06)
+        } else if model.compatReport(for: item)?.factors.contains(where: { $0.key == CompatFactor.accountRiskKey }) == true {
+            NoticeBanner(kind: .warning, title: L("blocked.risk.title", item.title), message: L("compat.notice.risk.body"))
                 .enterOnAppear(delay: 0.06)
         } else if needsD3DMetal {
             NoticeBanner(kind: .warning, title: L("compat.notice.d3d"), message: L("compat.notice.d3d.body"),

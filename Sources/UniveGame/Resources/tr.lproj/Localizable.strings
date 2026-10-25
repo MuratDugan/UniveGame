@@ -346,7 +346,7 @@
 "shelf.install" = "Yükle ve oyna";
 "shelf.install.hint" = "Mac'te iyi çalışanlar";
 "shelf.hard" = "Mac'te zor";
-"shelf.hard.hint" = "Engel ya da bilinen sorun var";
+"shelf.hard.hint" = "Puanı düşük ya da bir engeli var";
 "shelf.unknown" = "Henüz incelenmedi";
 "shelf.unknown.hint" = "Puan için oyunu incele";
 "stage.playtime" = "%@ oynandı";
@@ -731,3 +731,15 @@
 /* Discord */
 "discord.setting" = "Discord'da oynadığın oyunu göster";
 "discord.setting.help" = "Discord açıkken profilinde \"Oynuyor: <oyun>\" görünür. Bilgi Discord uygulamasına bu Mac'in içinden iletilir; UniveGame internete bir şey göndermez.";
+
+/* Account risk */
+"compat.f.accountRisk" = "Açılır, ama yapımcısı Wine gibi çeviri katmanlarını desteklemiyor: çevrim içi oynamak hesabın için risk.";
+"blocked.risk.title" = "%@ çalışır, ama hesabın risk altında olabilir";
+"blocked.risk.body" = "Oyun Mac'te açılır. Yapımcısı ise Wine gibi çeviri katmanlarıyla oynamayı desteklemiyor ve anti-cheat sistemi bunu hile sanabilir. Çevrim içi maçlarda hesabının kapatılma riski var; tek başına ya da botlarla oynamak daha güvenli.";
+"blocked.risk.alternatives" = "Hesabını riske atmadan oynamanın yolları";
+"compat.notice.risk.body" = "Çevrim içi oynamak hesabının kapatılmasına yol açabilir. Tek başına ya da botlarla oynamak daha güvenli.";
+
+/* Progress labels */
+"status.updating" = "Güncelleniyor %%%ld";
+"status.repairing" = "Onarılıyor %%%ld";
+"status.moving" = "Taşınıyor";

@@ -74,7 +74,7 @@ struct LibraryStage: View {
         if model.isRunning(item) {
             parts.append(L("status.running"))
         } else if let p = model.installProgress[item.id] ?? item.installProgress {
-            parts.append(L("status.installing", Int(p * 100)))
+            parts.append(L(model.progressLabelKey(item), Int(p * 100)))
         } else {
             parts.append(item.isInstalled ? L("filter.installed") : L("status.notInstalled"))
         }

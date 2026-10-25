@@ -633,7 +633,7 @@ final class AppModel {
         // Store and community evidence
         let signals = compatSignals
         let db: [CompatibilitySignals.AntiCheatEntry]
-        if let antiCheatDB { db = antiCheatDB } else { db = await signals.antiCheatDatabase() }
+        if let antiCheatDB { db = antiCheatDB } else { db = withRemoteAntiCheat(await signals.antiCheatDatabase()) }
         var online = OnlineFindings()
         var steamID: String?
         var epicNamespace: String?
@@ -684,6 +684,13 @@ final class AppModel {
         persist()
     }
 
+    /// Waits for an analysis already running for the game (a second click, the bulk analysis), then analyzes it if
+    /// there is still no result, so a warning is never skipped because the answer wasn't in yet.
+    private func ensureAnalyzed(_ item: LibraryItem) async {
+        while analyzing.contains(item.id) { try? await Task.sleep(for: .milliseconds(200)) }
+        if compatReport(for: item) == nil { await analyze(item) }
+    }
+
     /// Analyzes every game that has no recent result. Steam's store API is rate-limited, so it goes slowly.
     func analyzeAll() async {
         guard bulkAnalysis == nil else { return }
@@ -695,7 +702,7 @@ final class AppModel {
         bulkCancelled = false
         bulkAnalysis = (0, pending.count)
         defer { bulkAnalysis = nil }
-        let db = await compatSignals.antiCheatDatabase()
+        let db = withRemoteAntiCheat(await compatSignals.antiCheatDatabase())
         let info = isDemo ? [:] : AppInfoReaderCache.load(steamDirectory: steamDirectory)
         for (i, item) in pending.enumerated() {
             if bulkCancelled { break }
@@ -738,15 +745,16 @@ final class AppModel {
     /// The anti-cheat list from the last analysis (no download).
     private var cachedAntiCheatDB: [CompatibilitySignals.AntiCheatEntry] {
         let file = AppPaths.home.appendingPathComponent("Compatibility/arewe-anticheat.json")
-        guard let data = try? Data(contentsOf: file) else { return [] }
-        return (try? JSONDecoder().decode([CompatibilitySignals.AntiCheatEntry].self, from: data)) ?? []
+        let cached = (try? Data(contentsOf: file)).flatMap { try? JSONDecoder().decode([CompatibilitySignals.AntiCheatEntry].self, from: $0) }
+        return withRemoteAntiCheat(cached ?? [])
     }
 
     private func scoringContext(for item: LibraryItem) -> CompatibilityScorer.Context {
         CompatibilityScorer.Context(
             d3dMetalAvailable: engines.contains { $0.supports(.d3dMetal) },
             storeLauncher: { if case .store(let g) = item.backing, g.store.usesLauncher, g.store != .steam { return g.store.displayName }; return nil }(),
-            knownIssue: knownIssue(for: item))
+            knownIssue: knownIssue(for: item),
+            accountRisk: hasAccountRisk(item))
     }
 
     /// Add Game's "first look": a quick local scan of the chosen .exe's folder, scored without online sources.
@@ -758,10 +766,13 @@ final class AppModel {
     }
 
     /// Reports from older rules are recomputed from their saved evidence (no network needed).
-    private func rescoreOutdatedReports() {
+    private func rescoreOutdatedReports() { rescoreReports(all: false) }
+
+    /// Recomputes reports from their saved evidence: outdated ones, or `all` after the engine list's notes arrive.
+    private func rescoreReports(all everything: Bool) {
         guard var all = state.compat, !isDemo else { return }
         var changed = false
-        let outdated = items.filter { all[$0.id].map { $0.version != CompatibilityScorer.version } ?? false }
+        let outdated = items.filter { all[$0.id].map { everything || $0.version != CompatibilityScorer.version } ?? false }
         guard !outdated.isEmpty else { return }
         let db = cachedAntiCheatDB
         let info = AppInfoReaderCache.load(steamDirectory: steamDirectory)
@@ -774,7 +785,7 @@ final class AppModel {
             all[item.id] = fresh
             changed = true
         }
-        if changed { state.compat = all; persist() }
+        if changed && all != state.compat { state.compat = all; persist() }
     }
 
     /// Epic's namespace (to match AreWeAntiCheatYet) and the third-party launcher it declares, if any.
@@ -793,13 +804,33 @@ final class AppModel {
 
     /// Notes from the engine list (`knownIssues`), fetched once per launch.
     private(set) var remoteKnownIssues: [String: String] = [:]
+    /// Anti-cheat entries for games AreWeAntiCheatYet doesn't list yet (`antiCheat`, same format).
+    private(set) var remoteAntiCheat: [CompatibilitySignals.AntiCheatEntry] = []
+    /// Games that run but can cost the player their account online (`accountRisks`).
+    private(set) var remoteAccountRisks: Set<String> = []
 
     func loadKnownIssues() async {
-        guard !isDemo, remoteKnownIssues.isEmpty,
+        guard !isDemo, !loadedRemoteNotes,
               let (data, _) = try? await URLSession.shared.data(from: Self.engineManifestURL),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let issues = json["knownIssues"] as? [String: String] else { return }
-        remoteKnownIssues = issues
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+        loadedRemoteNotes = true
+        remoteKnownIssues = json["knownIssues"] as? [String: String] ?? [:]
+        remoteAccountRisks = Set(json["accountRisks"] as? [String] ?? [])
+        if let entries = json["antiCheat"], let raw = try? JSONSerialization.data(withJSONObject: entries) {
+            remoteAntiCheat = (try? JSONDecoder().decode([CompatibilitySignals.AntiCheatEntry].self, from: raw)) ?? []
+        }
+        rescoreReports(all: true)
+    }
+    @ObservationIgnored private var loadedRemoteNotes = false
+
+    /// AreWeAntiCheatYet with the engine list's additions.
+    private func withRemoteAntiCheat(_ db: [CompatibilitySignals.AntiCheatEntry]) -> [CompatibilitySignals.AntiCheatEntry] {
+        db + remoteAntiCheat
+    }
+
+    func hasAccountRisk(_ item: LibraryItem) -> Bool {
+        guard case .store(let game) = item.backing else { return false }
+        return KnownIssues.hasAccountRisk(game, remote: remoteAccountRisks)
     }
 
     /// A plain-language warning for games known not to work (e.g. kernel anti-cheat).
@@ -849,7 +880,7 @@ final class AppModel {
     /// The blocker the analysis found, unless the player already chose to go ahead with this game.
     private func unacceptedBlocker(_ item: LibraryItem) -> CompatFactor? {
         guard !(state.acceptedRisks ?? []).contains(item.id) else { return nil }
-        return compatReport(for: item)?.factors.first { $0.kind == .blocker }
+        return compatReport(for: item)?.factors.first { $0.kind == .blocker || $0.key == CompatFactor.accountRiskKey }
     }
 
     /// "Try anyway": remembered for this game, then the install or launch goes on.
@@ -1203,6 +1234,23 @@ final class AppModel {
     /// Engines of running custom games, for stopping their environment.
     private var customEngines: [String: Engine] = [:]
     private var customBottle: Bottle { Bottle(kind: .gog, paths: customPaths) }
+    /// Engines of running Epic and GOG games, for stopping their environment.
+    private var storeEngines: [String: Engine] = [:]
+
+    /// Returns once nothing runs in `bottle` any more: the game and whatever it started.
+    nonisolated static func waitUntilQuiet(runner: WineRunner, engine: Engine, bottle: Bottle) async {
+        let env = WineRunner.environment(bottle: bottle, profile: LaunchProfile())
+        // Wine brings its server up a moment after the launch; `-w` before that returns at once.
+        for _ in 0..<40 {
+            if await runner.isBottleActive(engine: engine, bottle: bottle) { break }
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        // A server can stop and start again between programs (launcher → game), so check again.
+        repeat {
+            _ = try? await ProcessRunner.run(engine.wineserver, ["-w"], environment: env)
+            try? await Task.sleep(for: .seconds(2))
+        } while await runner.isBottleActive(engine: engine, bottle: bottle)
+    }
     func isLaunching(_ item: LibraryItem) -> Bool { launching.contains(item.id) }
 
     func play(_ item: LibraryItem) async {
@@ -1211,6 +1259,11 @@ final class AppModel {
             alert = AppAlert(titleKey: "alert.demoTitle", message: "")
             return
         }
+        // Launching from here on, so a second click while the analysis runs can't skip the warning or start it twice.
+        launching.insert(item.id)
+        defer { launching.remove(item.id) }
+        // A game installed outside UniveGame may never have been analyzed: find out before it starts.
+        await ensureAnalyzed(item)
         if let reason = unacceptedBlocker(item) {
             blockedWarning = BlockedGameWarning(item: item, reason: reason, action: .play)
             return
@@ -1222,10 +1275,12 @@ final class AppModel {
             alert = AppAlert(titleKey: "alert.noEngine", message: "")
             return
         }
-        launching.insert(item.id)
-        defer { launching.remove(item.id) }
-        // The cloud's saves first, so the game starts from the newest ones.
-        if syncsCloudSaves, supportsCloudSaves(item) { await syncCloudSaves(item, .download) }
+        // The cloud's saves first, so the game starts from the newest ones. Into the store's environment as its
+        // engine creates it: which Windows user folder the game uses depends on that engine.
+        if syncsCloudSaves, supportsCloudSaves(item) {
+            if case .store(let game) = item.backing { _ = try? await BottleManager(paths: paths).prepareForPlay(game.store, engine: engine) }
+            await syncCloudSaves(item, .download)
+        }
         // A recipe's runtimes go in before the first launch that needs them.
         for component in recipe?.components ?? [] where !installedComponents(for: item).contains(component) {
             guard await installComponent(component, for: item, engine: engine) else { return }
@@ -1257,19 +1312,8 @@ final class AppModel {
                     extraOverrides: NativeDLLPolicy.overrides(for: folders) + (game.dllOverrides ?? []), logID: id, onExit: nil)
                 customEngines[id] = engine
                 // Done when the environment goes quiet, not when the launcher process exits.
-                let env = WineRunner.environment(bottle: bottle, profile: LaunchProfile())
-                let wineserver = engine.wineserver
                 Task.detached { [weak self] in
-                    // Wine brings its server up a moment after the launch; `-w` before that returns at once.
-                    for _ in 0..<40 {
-                        if await runner.isBottleActive(engine: engine, bottle: bottle) { break }
-                        try? await Task.sleep(for: .milliseconds(250))
-                    }
-                    // A server can stop and start again between programs (launcher → game), so check again.
-                    repeat {
-                        _ = try? await ProcessRunner.run(wineserver, ["-w"], environment: env)
-                        try? await Task.sleep(for: .seconds(2))
-                    } while await runner.isBottleActive(engine: engine, bottle: bottle)
+                    await Self.waitUntilQuiet(runner: runner, engine: engine, bottle: bottle)
                     await self?.didExit(id)
                 }
             case .store(let game):
@@ -1278,8 +1322,20 @@ final class AppModel {
                                   bottle: Bottle(kind: game.store.bottleKind, paths: paths))
                 switch game.store {
                 case .steam: process = try SteamProvider(paths: paths).play(game, engine: engine, profile: profile, onExit: onExit)
-                case .epic: process = try EpicProvider(paths: paths).play(game, engine: engine, profile: profile, onExit: onExit)
-                case .gog: process = try GOGProvider(paths: paths).play(game, engine: engine, profile: profile, onExit: onExit)
+                // Legendary and gogdl start the game and return: it's over when the store's environment goes quiet.
+                case .epic, .gog:
+                    let runner = WineRunner(paths: paths)
+                    let bottle = Bottle(kind: game.store.bottleKind, paths: paths)
+                    let untilQuiet: @Sendable (Int32) -> Void = { _ in
+                        Task.detached { [weak self] in
+                            await Self.waitUntilQuiet(runner: runner, engine: engine, bottle: bottle)
+                            await self?.didExit(id)
+                        }
+                    }
+                    process = game.store == .epic
+                        ? try EpicProvider(paths: paths).play(game, engine: engine, profile: profile, onExit: untilQuiet)
+                        : try GOGProvider(paths: paths).play(game, engine: engine, profile: profile, onExit: untilQuiet)
+                    storeEngines[id] = engine
                 case .ubisoft, .ea: process = try LauncherStore(kind: game.store, paths: paths).play(game, engine: engine, profile: profile, onExit: onExit)
                 }
             }
@@ -1307,7 +1363,7 @@ final class AppModel {
         guard !isDemo else { alert = AppAlert(titleKey: "alert.demoTitle", message: ""); return }
         // Know before downloading gigabytes: an analysis of a game that isn't installed only asks Steam, ProtonDB
         // and AreWeAntiCheatYet, which takes a moment.
-        if compatReport(for: item) == nil { await analyze(item) }
+        await ensureAnalyzed(item)
         if let reason = unacceptedBlocker(item) {
             blockedWarning = BlockedGameWarning(item: item, reason: reason, action: .install)
             return
@@ -1334,6 +1390,14 @@ final class AppModel {
     // MARK: Downloads (Epic, GOG)
 
     enum Maintenance { case update, repair }
+
+    /// What a game's progress bar is doing, for its label ("Updating 40%" rather than "Installing").
+    private(set) var progressWork: [String: String] = [:]
+
+    /// The label for `item`'s progress: installing unless an update, repair or move is running.
+    func progressLabelKey(_ item: LibraryItem) -> String {
+        progressWork[item.id].map { "status.\($0)" } ?? "status.installing"
+    }
 
     /// Epic games with a newer build in the store (checked with each library refresh).
     private(set) var epicUpdates: Set<String> = []
@@ -1381,6 +1445,8 @@ final class AppModel {
     func maintain(_ item: LibraryItem, _ action: Maintenance) async {
         guard case .store(let game) = item.backing, game.store == .epic || game.store == .gog,
               installProgress[item.id] == nil, !isRunning(item) else { return }
+        progressWork[item.id] = action == .update ? "updating" : "repairing"
+        defer { progressWork[item.id] = nil }
         do {
             try await download(item, game) { report in
                 switch (game.store, action) {
@@ -1400,7 +1466,8 @@ final class AppModel {
         guard case .store(let game) = item.backing, game.store == .epic || game.store == .gog,
               installProgress[item.id] == nil, !isRunning(item) else { return }
         installProgress[item.id] = 0
-        defer { installProgress[item.id] = nil }
+        progressWork[item.id] = "moving"
+        defer { installProgress[item.id] = nil; progressWork[item.id] = nil }
         do {
             if game.store == .epic { try await EpicProvider(paths: paths).move(game, to: folder) }
             else {
@@ -1797,6 +1864,11 @@ final class AppModel {
             // Ends the launcher and everything it started (the game, helpers, anti-cheat).
             let bottle = customBottle
             Task { await WineRunner(paths: customPaths).killAll(engine: engine, bottle: bottle) }
+        } else if case .store(let game) = item.backing, let engine = storeEngines[item.id] {
+            // Epic and GOG games outlive the process that started them. All of a store's games share one
+            // environment, so this also ends another game of that store running at the same time.
+            let bottle = Bottle(kind: game.store.bottleKind, paths: paths)
+            Task { await WineRunner(paths: paths).killAll(engine: engine, bottle: bottle) }
         } else {
             running[item.id]?.terminate()
         }
@@ -1808,6 +1880,7 @@ final class AppModel {
             discord.show(running.keys.first.flatMap { item(id: $0)?.title })
         }
         customEngines[id] = nil
+        storeEngines[id] = nil
         if let start = playStarts.removeValue(forKey: id) {
             let ranFor = Date().timeIntervalSince(start)
             state.playTime[id, default: 0] += ranFor

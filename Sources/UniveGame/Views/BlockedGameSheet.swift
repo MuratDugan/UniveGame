@@ -1,8 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Before installing or starting a game the analysis says can't run on a Mac: why, what it risks, and how to play
-/// it anyway (in the cloud or streamed from a PC). "Try anyway" is remembered for that game.
+/// Before installing or starting a game the analysis says can't run on a Mac, or that runs but can cost the account:
+/// why, what it risks, and how to play it anyway (in the cloud or streamed from a PC). "Try anyway" is remembered
+/// for that game.
 struct BlockedGameSheet: View {
     let warning: AppModel.BlockedGameWarning
     @Environment(AppModel.self) private var model
@@ -13,16 +14,18 @@ struct BlockedGameSheet: View {
         ["compat.f.onlineAC", "compat.f.kernelAC", "compat.f.acLinuxOnly", "compat.f.deckAC"].contains(warning.reason.key)
     }
 
+    private var isAccountRisk: Bool { warning.reason.key == CompatFactor.accountRiskKey }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             HStack(alignment: .top, spacing: Theme.Spacing.md) {
-                Image(systemName: isAntiCheat ? "exclamationmark.shield.fill" : "exclamationmark.triangle.fill")
+                Image(systemName: isAntiCheat || isAccountRisk ? "exclamationmark.shield.fill" : "exclamationmark.triangle.fill")
                     .font(.system(size: 22))
-                    .foregroundStyle(Theme.Palette.destructive)
+                    .foregroundStyle(isAccountRisk ? Theme.Palette.warning : Theme.Palette.destructive)
                     .frame(width: 44, height: 44)
                     .background(Theme.Palette.elevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md))
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L("blocked.title", warning.item.title)).font(Theme.Font.title)
+                    Text(L(isAccountRisk ? "blocked.risk.title" : "blocked.title", warning.item.title)).font(Theme.Font.title)
                         .foregroundStyle(Theme.Palette.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(warning.reason.text(L, locale: locale)).font(Theme.Font.body)
@@ -30,13 +33,13 @@ struct BlockedGameSheet: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            Text(L(isAntiCheat ? "blocked.antiCheat.body" : "blocked.known.body"))
+            Text(L(isAccountRisk ? "blocked.risk.body" : (isAntiCheat ? "blocked.antiCheat.body" : "blocked.known.body")))
                 .font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(L("blocked.alternatives")).font(.system(size: 13, weight: .semibold))
+                Text(L(isAccountRisk ? "blocked.risk.alternatives" : "blocked.alternatives")).font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.Palette.textPrimary)
                 ForEach(AppModel.cloudServices, id: \.name) { service in
                     alternative(service.name, L("blocked.cloud.\(service.name == "GeForce NOW" ? "gfn" : "xbox")"),

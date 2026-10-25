@@ -32,6 +32,9 @@ struct CompatFactor: Codable, Hashable, Identifiable {
     var impact: Int = 0
 
     var id: String { key + args.joined(separator: "|") }
+
+    /// The game runs, but playing it online this way can cost the account (shown before it starts, like a blocker).
+    static let accountRiskKey = "compat.f.accountRisk"
 }
 
 struct CompatReport: Codable, Equatable {

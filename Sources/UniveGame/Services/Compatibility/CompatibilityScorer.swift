@@ -9,11 +9,13 @@ enum CompatibilityScorer {
         var d3dMetalAvailable = false
         var storeLauncher: String?       // Ubisoft Connect / EA app for those stores
         var knownIssue: String?
+        /// Runs, but the publisher may ban accounts that play through Wine.
+        var accountRisk = false
     }
 
     static let baseline = 70
     /// Bump when the rules change; stored reports are then re-scored from their saved evidence.
-    static let version = 6
+    static let version = 7
 
     /// Anti-cheats that don't stop a Wine game on macOS (server-side or user-mode).
     static let harmlessAntiCheats: Set<String> = ["vac", "valve anti-cheat", "fairfight", "punkbuster"]
@@ -57,6 +59,8 @@ enum CompatibilityScorer {
             }
             if online.antiCheats.contains(where: { $0.lowercased() == "punkbuster" }) { add(.negative, "compat.f.punkbuster", [], -5) }
         }
+
+        if context.accountRisk && !blocked { add(.negative, CompatFactor.accountRiskKey) }
 
         // 2. Graphics: the biggest factor for speed on a Mac.
         // Unknown (nil) unless a game binary was actually classified: no files, or only .NET/helper programs,

@@ -346,7 +346,7 @@
 "shelf.install" = "Install and play";
 "shelf.install.hint" = "Run well on Mac";
 "shelf.hard" = "Hard on Mac";
-"shelf.hard.hint" = "Blocked or known issues";
+"shelf.hard.hint" = "Low score, or something blocks it";
 "shelf.unknown" = "Not analyzed yet";
 "shelf.unknown.hint" = "Analyze a game to get a score";
 "stage.playtime" = "%@ played";
@@ -703,3 +703,15 @@
 /* Discord */
 "discord.setting" = "Show the game you're playing on Discord";
 "discord.setting.help" = "While Discord is open, your profile shows \"Playing <game>\". It's handed to the Discord app on this Mac; UniveGame sends nothing to the internet.";
+
+/* Account risk */
+"compat.f.accountRisk" = "Runs, but the publisher doesn't support translation layers like Wine: playing online puts your account at risk.";
+"blocked.risk.title" = "%@ runs, but your account may be at risk";
+"blocked.risk.body" = "The game opens on a Mac. Its publisher doesn't support playing through translation layers like Wine, and its anti-cheat may take that for cheating. Online matches risk getting your account banned; playing alone or against bots is safer.";
+"blocked.risk.alternatives" = "Ways to play without risking your account";
+"compat.notice.risk.body" = "Playing online can get your account banned. Playing alone or against bots is safer.";
+
+/* Progress labels */
+"status.updating" = "Updating %ld%%";
+"status.repairing" = "Repairing %ld%%";
+"status.moving" = "Moving";

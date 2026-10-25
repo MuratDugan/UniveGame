@@ -39,11 +39,16 @@ struct GameActionsMenu: View {
         }
         if item.isInstalled, case .store(let game) = item.backing, game.store == .epic || game.store == .gog {
             Divider()
+            // One thing at a time: an update, repair or move that's still finishing (the library refresh) would
+            // otherwise swallow the next one.
             Button(L(model.hasUpdate(item) ? "maintain.update.available" : "maintain.update"), systemImage: "arrow.down.circle") {
                 Task { await model.maintain(item, .update) }
             }
+            .disabled(model.installProgress[item.id] != nil)
             Button(L("maintain.repair"), systemImage: "wrench.and.screwdriver") { Task { await model.maintain(item, .repair) } }
+                .disabled(model.installProgress[item.id] != nil)
             Button(L("maintain.move"), systemImage: "folder") { chooseFolder(for: item) }
+                .disabled(model.installProgress[item.id] != nil)
         }
         Divider()
         if item.installPath != nil {

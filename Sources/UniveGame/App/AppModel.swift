@@ -1307,6 +1307,11 @@ final class AppModel {
                     await runner.killAll(engine: engine, bottle: bottle)
                 }
                 await applyRetina(profile.retina, runner: runner, engine: engine, bottle: bottle)
+                // Launchers that draw their own title bar (HoYoPlay) get no Mac one on top of it.
+                let env = WineRunner.environment(bottle: bottle, profile: LaunchProfile())
+                for command in ChromiumLaunchers.registryCommands(for: game.executable) {
+                    _ = try? await ProcessRunner.run(engine.wine, command, environment: env)
+                }
                 // Programs the launcher starts inherit these, so the game itself gets them too.
                 let folders = [game.workingDirectory, game.installDirectory].compactMap { $0 }
                 process = try runner.run(

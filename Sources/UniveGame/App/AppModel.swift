@@ -455,6 +455,7 @@ final class AppModel {
             func stillWanted() -> Bool { installer === session && !Task.isCancelled }
             session.phase = .preparing
             let bottle = try await BottleManager(paths: customPaths).ensure(.gog, engine: engine)
+            ExternalDrives.link(into: bottle.url)
             guard stillWanted() else { return }
             if session.installRuntime {
                 session.phase = .installingRuntime
@@ -1299,6 +1300,7 @@ final class AppModel {
             case .custom(let game):
                 guard game.executableExists else { throw UniveGameError.missingExecutable(game.executable.path) }
                 let bottle = try await BottleManager(paths: customPaths).ensure(.gog, engine: engine)
+                ExternalDrives.link(into: bottle.url)
                 let runner = WineRunner(paths: customPaths)
                 // Leftovers from an earlier run (a hidden game, a crashed client) hold single-instance
                 // locks, so the next start silently does nothing. Clear them unless another game of ours runs.
@@ -1326,6 +1328,7 @@ final class AppModel {
                 }
             case .store(let game):
                 try await BottleManager(paths: paths).prepareForPlay(game.store, engine: engine)
+                ExternalDrives.link(into: Bottle(kind: game.store.bottleKind, paths: paths).url)
                 await applyRetina(profile.retina, runner: WineRunner(paths: paths), engine: engine,
                                   bottle: Bottle(kind: game.store.bottleKind, paths: paths))
                 switch game.store {

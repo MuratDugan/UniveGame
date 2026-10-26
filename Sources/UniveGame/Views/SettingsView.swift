@@ -18,6 +18,7 @@ struct SettingsView: View {
                     case .general: GeneralSection()
                     case .engine: EngineSection()
                     case .dx12: D3DMetalSetupPanel()
+                    case .disks: DisksSection()
                     case .about: AboutSection()
                     }
                 }
@@ -50,6 +51,7 @@ private struct SectionNav: View {
             row(.general, "globe", L("settings.section.general"))
             row(.engine, "cpu", L("settings.section.engine"), flag: !model.hasEngine && !model.isDemo)
             row(.dx12, "square.stack.3d.up", L("settings.section.dx12"), flag: !model.d3dMetalReady)
+            row(.disks, "externaldrive", L("settings.section.disks"))
             row(.about, "info.circle", L("settings.section.about"), flag: model.availableUpdate != nil)
             Spacer(minLength: 0)
         }
@@ -110,6 +112,87 @@ private struct SectionTitle: View {
 }
 
 // MARK: General
+
+/// Settings › Disks: external disks and the drive letter each has in Windows, so games can be installed on them and
+/// installers see their real free space.
+private struct DisksSection: View {
+    @Environment(AppModel.self) private var model
+    @Environment(Localizer.self) private var L
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(L("disks.title")).font(Theme.Font.title).foregroundStyle(Theme.Palette.textPrimary)
+                Text(L("disks.subtitle")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            VStack(alignment: .leading, spacing: 12) {
+                row(symbol: "laptopcomputer", name: L("disks.thisMac"), detail: L("disks.thisMac.detail"), trailing: Text(verbatim: "Z:")
+                    .font(Theme.Font.mono).foregroundStyle(Theme.Palette.textSecondary))
+                ForEach(model.disks) { disk in
+                    Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                    row(symbol: "externaldrive", name: disk.name, detail: detail(disk), warning: warning(disk), trailing: picker(disk))
+                }
+                if model.disks.isEmpty {
+                    Rectangle().fill(Theme.Palette.border).frame(height: 1)
+                    Text(L("disks.none")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                }
+            }
+            .padding(Theme.Spacing.md)
+            .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
+            Text(L("disks.help")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                .lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .onAppear { model.refreshDisks() }
+    }
+
+    private func row(symbol: String, name: String, detail: String, warning: String? = nil, trailing: some View) -> some View {
+        HStack(spacing: Theme.Spacing.md) {
+            Image(systemName: symbol).font(.system(size: 18)).foregroundStyle(Theme.Palette.textSecondary).frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: name).font(Theme.Font.body).foregroundStyle(Theme.Palette.textPrimary)
+                Text(detail).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                if let warning {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill").font(Theme.Font.caption)
+                        .foregroundStyle(Theme.Palette.warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 0)
+            trailing
+        }
+    }
+
+    /// "357 GB free of 512 GB · ExFAT".
+    private func detail(_ disk: ExternalDrives.Disk) -> String {
+        var parts: [String] = []
+        if let free = disk.available, let total = disk.capacity {
+            parts.append(L("disks.space", ByteCountFormatter.string(fromByteCount: free, countStyle: .file),
+                           ByteCountFormatter.string(fromByteCount: total, countStyle: .file)))
+        }
+        if let format = disk.format { parts.append(format) }
+        return parts.joined(separator: " · ")
+    }
+
+    private func warning(_ disk: ExternalDrives.Disk) -> String? {
+        guard disk.readOnly else { return nil }
+        return L(disk.format == "NTFS" ? "disks.ntfs" : "disks.readOnly")
+    }
+
+    private func picker(_ disk: ExternalDrives.Disk) -> some View {
+        Picker("", selection: Binding(get: { model.driveLetter(disk) ?? "" },
+                                      set: { model.setDriveLetter($0.isEmpty ? nil : $0, for: disk) })) {
+            Text(L("disks.hidden")).tag("")
+            ForEach(model.availableLetters(for: disk), id: \.self) { Text(verbatim: $0).tag($0) }
+        }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .fixedSize()
+        .accessibilityLabel(L("disks.letter", disk.name))
+    }
+}
 
 private struct GeneralSection: View {
     @Environment(Localizer.self) private var L

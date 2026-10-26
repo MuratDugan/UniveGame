@@ -743,3 +743,17 @@
 "status.updating" = "Güncelleniyor %%%ld";
 "status.repairing" = "Onarılıyor %%%ld";
 "status.moving" = "Taşınıyor";
+
+/* Disks */
+"settings.section.disks" = "Diskler";
+"disks.title" = "Diskler";
+"disks.subtitle" = "Mac'e takılı diskler Windows oyunlarında kendi sürücü harfiyle görünür. Oyunu harici bir diske kurmak için o diskin harfini seç (ör. E:\\Oyunlar).";
+"disks.thisMac" = "Bu Mac";
+"disks.thisMac.detail" = "Mac'in tamamı Windows'ta Z: sürücüsü olarak görünür.";
+"disks.none" = "Takılı harici disk yok. Bir disk taktığında burada belirir.";
+"disks.space" = "%@ boş / %@";
+"disks.hidden" = "Gösterme";
+"disks.letter" = "%@ için sürücü harfi";
+"disks.ntfs" = "NTFS: macOS bu diske yazamaz, oyun kurulamaz. Oyunlar için exFAT ya da APFS bir disk kullan.";
+"disks.readOnly" = "Salt okunur: bu diske oyun kurulamaz.";
+"disks.help" = "Harf, diskin kendisine aittir: disk çıkarılıp yeniden takılsa ya da adı değişse de aynı kalır, böylece oraya kurulan oyunlar yolunu kaybetmez. Açık bir Windows programı yeni harfi, sürücülere bir sonraki bakışında görür. macOS, oyun diske ilk kez eriştiğinde UniveGame için “çıkarılabilir birim” izni sorar; İzin Ver de.";

@@ -715,3 +715,17 @@
 "status.updating" = "Updating %ld%%";
 "status.repairing" = "Repairing %ld%%";
 "status.moving" = "Moving";
+
+/* Disks */
+"settings.section.disks" = "Disks";
+"disks.title" = "Disks";
+"disks.subtitle" = "Disks plugged into your Mac show up in Windows games with a drive letter of their own. To install a game on an external disk, pick that disk's letter (say, E:\\Games).";
+"disks.thisMac" = "This Mac";
+"disks.thisMac.detail" = "Your whole Mac shows up in Windows as drive Z:.";
+"disks.none" = "No external disks plugged in. They show up here when you plug one in.";
+"disks.space" = "%@ free of %@";
+"disks.hidden" = "Don't show";
+"disks.letter" = "Drive letter for %@";
+"disks.ntfs" = "NTFS: macOS can't write to this disk, so games can't be installed on it. Use an exFAT or APFS disk for games.";
+"disks.readOnly" = "Read-only: games can't be installed on this disk.";
+"disks.help" = "The letter belongs to the disk: it stays the same when you unplug it and plug it back in or rename it, so games installed there keep their path. A Windows program that's open sees a new letter the next time it looks at its drives. The first time a game reaches the disk, macOS asks to let UniveGame use a removable volume; choose Allow.";

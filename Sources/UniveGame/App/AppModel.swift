@@ -13,7 +13,7 @@ enum SidebarItem: Hashable {
 }
 
 enum SettingsSection: String, CaseIterable, Hashable {
-    case general, engine, dx12, about
+    case general, engine, dx12, disks, about
 }
 
 /// Status of a store connection, as shown on the Stores page.
@@ -121,6 +121,7 @@ final class AppModel {
         }
         reloadEngines()
         rescoreOutdatedReports()
+        if !demo { watchDisks() }
         applyLaunchArguments()
         if !demo { Task { await checkForUpdateIfDue() } }
     }
@@ -455,7 +456,7 @@ final class AppModel {
             func stillWanted() -> Bool { installer === session && !Task.isCancelled }
             session.phase = .preparing
             let bottle = try await BottleManager(paths: customPaths).ensure(.gog, engine: engine)
-            ExternalDrives.link(into: bottle.url)
+            applyDrives()
             guard stillWanted() else { return }
             if session.installRuntime {
                 session.phase = .installingRuntime
@@ -1300,7 +1301,7 @@ final class AppModel {
             case .custom(let game):
                 guard game.executableExists else { throw UniveGameError.missingExecutable(game.executable.path) }
                 let bottle = try await BottleManager(paths: customPaths).ensure(.gog, engine: engine)
-                ExternalDrives.link(into: bottle.url)
+                applyDrives()
                 let runner = WineRunner(paths: customPaths)
                 // Leftovers from an earlier run (a hidden game, a crashed client) hold single-instance
                 // locks, so the next start silently does nothing. Clear them unless another game of ours runs.
@@ -1328,7 +1329,7 @@ final class AppModel {
                 }
             case .store(let game):
                 try await BottleManager(paths: paths).prepareForPlay(game.store, engine: engine)
-                ExternalDrives.link(into: Bottle(kind: game.store.bottleKind, paths: paths).url)
+                applyDrives()
                 await applyRetina(profile.retina, runner: WineRunner(paths: paths), engine: engine,
                                   bottle: Bottle(kind: game.store.bottleKind, paths: paths))
                 switch game.store {
@@ -1819,6 +1820,74 @@ final class AppModel {
                                               app: Self.appVersion) else { return }
         reportingGame = nil
         NSWorkspace.shared.open(url)
+    }
+
+    // MARK: Disks
+
+    /// External disks plugged in now (Settings › Disks).
+    private(set) var disks: [ExternalDrives.Disk] = []
+    /// Each disk's letter by volume id, kept while it's unplugged.
+    private var driveAssignments: [String: ExternalDrives.Assignment] = {
+        guard let data = UserDefaults.standard.data(forKey: "driveAssignments") else { return [:] }
+        return (try? JSONDecoder().decode([String: ExternalDrives.Assignment].self, from: data)) ?? [:]
+    }()
+    @ObservationIgnored private var diskObservers: [NSObjectProtocol] = []
+
+    /// Every Windows environment's `dosdevices` folder (stores' and the one for games added by hand).
+    private var allDosdevices: [URL] {
+        [paths.bottles, customPaths.bottles].flatMap { root in
+            ((try? FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)) ?? [])
+                .map { $0.appendingPathComponent("dosdevices", isDirectory: true) }
+                .filter { FileManager.default.fileExists(atPath: $0.path) }
+        }
+    }
+
+    private func watchDisks() {
+        let center = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.didMountNotification, NSWorkspace.didUnmountNotification, NSWorkspace.didRenameVolumeNotification] {
+            diskObservers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.refreshDisks() }
+            })
+        }
+        refreshDisks()
+    }
+
+    /// Looks at the plugged-in disks again, gives new ones a letter and updates every environment.
+    func refreshDisks() {
+        disks = ExternalDrives.mountedDisks()
+        let reserved = allDosdevices.reduce(into: Set<String>()) { $0.formUnion(ExternalDrives.foreignLetters(in: $1)) }
+        let updated = ExternalDrives.assign(disks, saved: driveAssignments, reserved: reserved)
+        if updated != driveAssignments { driveAssignments = updated; saveDriveAssignments() }
+        applyDrives()
+    }
+
+    /// The letter `disk` has in Windows (`"E:"`), or nil when it's kept out.
+    func driveLetter(_ disk: ExternalDrives.Disk) -> String? { driveAssignments[disk.id]?.letter?.uppercased() }
+
+    /// Letters `disk` can take: the free ones and its own.
+    func availableLetters(for disk: ExternalDrives.Disk) -> [String] {
+        let reserved = allDosdevices.reduce(into: Set<String>()) { $0.formUnion(ExternalDrives.foreignLetters(in: $1)) }
+        let others = Set(driveAssignments.filter { $0.key != disk.id }.compactMap(\.value.letter))
+        return ExternalDrives.letters.filter { !reserved.contains($0) && !others.contains($0) }.map { $0.uppercased() }
+    }
+
+    /// A new letter for `disk` ("F:"), or nil to keep it out of Windows. Takes effect in every environment at once;
+    /// a Windows program that's open sees it the next time it looks at its drives.
+    func setDriveLetter(_ letter: String?, for disk: ExternalDrives.Disk) {
+        driveAssignments[disk.id] = ExternalDrives.Assignment(letter: letter?.lowercased(), path: disk.url.path)
+        saveDriveAssignments()
+        applyDrives()
+    }
+
+    /// Puts the disks' letters into every Windows environment (also right before a game or installer starts).
+    func applyDrives() {
+        guard !isDemo else { return }
+        let wanted = ExternalDrives.wanted(driveAssignments)
+        for dosdevices in allDosdevices { ExternalDrives.apply(wanted, to: dosdevices) }
+    }
+
+    private func saveDriveAssignments() {
+        if let data = try? JSONEncoder().encode(driveAssignments) { UserDefaults.standard.set(data, forKey: "driveAssignments") }
     }
 
     // MARK: Discord

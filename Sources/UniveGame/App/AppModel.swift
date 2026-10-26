@@ -1046,6 +1046,9 @@ final class AppModel {
 
     /// D3DMetal games get the CrossOver-based engine; everything else keeps the DXVK engine it was set up
     /// with, so installing the D3DMetal engine doesn't move existing games (and their environments) onto it.
+    /// The engine installers run with (what the installer screen shows).
+    var installerEngine: Engine? { engine(for: LaunchProfile()) }
+
     private func engine(for profile: LaunchProfile) -> Engine? {
         if profile.backend == .d3dMetal { return engines.first { $0.supports(.d3dMetal) } }
         if profile.backend != .auto && profile.backend != .wined3d,
@@ -1307,7 +1310,7 @@ final class AppModel {
                 // Programs the launcher starts inherit these, so the game itself gets them too.
                 let folders = [game.workingDirectory, game.installDirectory].compactMap { $0 }
                 process = try runner.run(
-                    engine: engine, bottle: bottle, executable: game.executable.path, arguments: game.arguments,
+                    engine: engine, bottle: bottle, executable: game.executable.path, arguments: ChromiumLaunchers.arguments(for: game.executable, game.arguments),
                     workingDirectory: game.workingDirectory, profile: profile,
                     extraOverrides: NativeDLLPolicy.overrides(for: folders) + (game.dllOverrides ?? []), logID: id, onExit: nil)
                 customEngines[id] = engine

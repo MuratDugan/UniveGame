@@ -208,7 +208,7 @@ struct InstallerFlowView: View {
     }
 
     private var engineText: String {
-        guard let engine = model.engines.first else { return L("engine.missing") }
+        guard let engine = model.installerEngine else { return L("engine.missing") }
         let wine = engine.info.wineDescription
         return "\(L("settings.engineVersion", engine.version)) · \(wine.lowercased().hasPrefix("wine") ? wine : "Wine " + wine)"
     }

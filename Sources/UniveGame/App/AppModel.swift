@@ -161,6 +161,7 @@ final class AppModel {
     // MARK: Library
 
     var items: [LibraryItem] {
+        _ = diskRevision   // games on external disks come and go with them
         let custom = state.customGames.map { LibraryItem(backing: .custom($0)) }
         let stores = state.storeGames.map { LibraryItem(backing: .store($0)) }
         return (stores + custom).map { item in
@@ -307,7 +308,8 @@ final class AppModel {
     /// Downloads a found cover (and hero image) into the library's artwork folder.
     func applyCover(_ suggestion: CoverSuggestion, to id: UUID) async {
         let folder = AppPaths.customArtwork
-        guard let cover = try? await CoverFinder.download(suggestion.cover, into: folder, name: id.uuidString) else { return }
+        guard var cover = try? await CoverFinder.download(suggestion.cover, into: folder, name: id.uuidString) else { return }
+        if suggestion.isLogo, let card = CoverFinder.portraitCard(fromLogo: cover) { cover = card }
         let hero = await { () -> URL? in
             guard let h = suggestion.hero else { return nil }
             return try? await CoverFinder.download(h, into: folder, name: id.uuidString + "-hero")
@@ -1826,6 +1828,8 @@ final class AppModel {
 
     /// External disks plugged in now (Settings › Disks).
     private(set) var disks: [ExternalDrives.Disk] = []
+    /// Bumped when a disk comes or goes, so games on it show up as there or not without a restart.
+    private(set) var diskRevision = 0
     /// Each disk's letter by volume id, kept while it's unplugged.
     private var driveAssignments: [String: ExternalDrives.Assignment] = {
         guard let data = UserDefaults.standard.data(forKey: "driveAssignments") else { return [:] }
@@ -1855,6 +1859,7 @@ final class AppModel {
     /// Looks at the plugged-in disks again, gives new ones a letter and updates every environment.
     func refreshDisks() {
         disks = ExternalDrives.mountedDisks()
+        diskRevision += 1
         let reserved = allDosdevices.reduce(into: Set<String>()) { $0.formUnion(ExternalDrives.foreignLetters(in: $1)) }
         let updated = ExternalDrives.assign(disks, saved: driveAssignments, reserved: reserved)
         if updated != driveAssignments { driveAssignments = updated; saveDriveAssignments() }

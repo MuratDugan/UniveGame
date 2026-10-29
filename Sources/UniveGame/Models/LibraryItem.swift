@@ -23,6 +23,16 @@ struct CustomGame: Codable, Identifiable, Hashable {
 
     var workingDirectory: URL { executable.deletingLastPathComponent() }
     var executableExists: Bool { FileManager.default.fileExists(atPath: executable.path) }
+
+    /// The disk the game is on when that disk isn't plugged in ("STRIX ARION"), so it's shown as waiting for it
+    /// rather than gone.
+    var unpluggedDisk: String? {
+        let parts = executable.standardizedFileURL.pathComponents   // ["/", "Volumes", "STRIX ARION", …]
+        guard parts.count > 3, parts[1] == "Volumes" else { return nil }
+        var isDir: ObjCBool = false
+        let mounted = FileManager.default.fileExists(atPath: "/Volumes/" + parts[2], isDirectory: &isDir) && isDir.boolValue
+        return mounted ? nil : parts[2]
+    }
 }
 
 extension CustomGame {
@@ -108,6 +118,9 @@ struct LibraryItem: Identifiable, Hashable {
         case .custom: .custom
         }
     }
+
+    /// See `CustomGame.unpluggedDisk`.
+    var unpluggedDisk: String? { customGame?.unpluggedDisk }
 
     var isInstalled: Bool {
         switch backing {

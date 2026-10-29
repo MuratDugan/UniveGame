@@ -729,3 +729,7 @@
 "disks.ntfs" = "NTFS: macOS can't write to this disk, so games can't be installed on it. Use an exFAT or APFS disk for games.";
 "disks.readOnly" = "Read-only: games can't be installed on this disk.";
 "disks.help" = "The letter belongs to the disk: it stays the same when you unplug it and plug it back in or rename it, so games installed there keep their path. A Windows program that's open sees a new letter the next time it looks at its drives. The first time a game reaches the disk, macOS asks to let UniveGame use a removable volume; choose Allow.";
+
+/* Games on unplugged disks */
+"status.diskUnplugged" = "%@ isn't plugged in";
+"detail.locate" = "Locate…";

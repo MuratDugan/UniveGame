@@ -104,7 +104,7 @@ struct GameDetailView: View {
                 .enterOnAppear(delay: 0.08)
             FactList(facts: facts(item))
                 .enterOnAppear(delay: 0.14)
-            if let custom = item.customGame, !custom.executableExists {
+            if let custom = item.customGame, !custom.executableExists, custom.unpluggedDisk == nil {
                 Label(L("detail.exeMissing"), systemImage: "exclamationmark.triangle.fill")
                     .font(Theme.Font.caption)
                     .foregroundStyle(Theme.Palette.warning)
@@ -159,6 +159,13 @@ struct GameDetailView: View {
                 Button { Task { await model.install(item) } } label: { ctaLabel(L("action.install"), "arrow.down.to.line") }
                     .buttonStyle(SecondaryButtonStyle(height: 44))
             }
+        } else if let disk = item.unpluggedDisk {
+            Button {} label: { ctaLabel(L("status.diskUnplugged", disk), "externaldrive.badge.xmark") }
+                .buttonStyle(SecondaryButtonStyle(height: 44))
+                .disabled(true)
+        } else if !item.isInstalled, let custom = item.customGame {
+            Button { model.editingCustomGame = custom } label: { ctaLabel(L("detail.locate"), "folder") }
+                .buttonStyle(SecondaryButtonStyle(height: 44))
         } else if item.isInstalled {
             Button { Task { await model.play(item) } } label: {
                 if model.isLaunching(item) {

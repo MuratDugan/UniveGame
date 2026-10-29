@@ -757,3 +757,7 @@
 "disks.ntfs" = "NTFS: macOS bu diske yazamaz, oyun kurulamaz. Oyunlar için exFAT ya da APFS bir disk kullan.";
 "disks.readOnly" = "Salt okunur: bu diske oyun kurulamaz.";
 "disks.help" = "Harf, diskin kendisine aittir: disk çıkarılıp yeniden takılsa ya da adı değişse de aynı kalır, böylece oraya kurulan oyunlar yolunu kaybetmez. Açık bir Windows programı yeni harfi, sürücülere bir sonraki bakışında görür. macOS, oyun diske ilk kez eriştiğinde UniveGame için “çıkarılabilir birim” izni sorar; İzin Ver de.";
+
+/* Games on unplugged disks */
+"status.diskUnplugged" = "%@ takılı değil";
+"detail.locate" = "Dosyayı Bul…";

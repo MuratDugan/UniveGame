@@ -11,6 +11,15 @@ final class CompatibilityScorerTests: XCTestCase {
         XCTAssertEqual(r.factors.first?.kind, .blocker)
     }
 
+    func testGenshinsKernelDriverIsFound() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("hoyo-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: folder.appendingPathComponent("HoYoKProtect.sys").path, contents: Data([0]))
+        let findings = GameFileAnalyzer.analyze(folders: [folder])
+        XCTAssertTrue(findings.antiCheats.contains { $0.name == "HoYoKProtect" && $0.kernel })
+    }
+
     func testLinuxSupportedAntiCheatStillBlocksOnMac() {
         var o = OnlineFindings(); o.antiCheats = ["Easy Anti-Cheat"]; o.antiCheatStatus = "Supported"; o.directXVersion = 11
         let r = CompatibilityScorer.score(files: nil, online: o, context: .init())

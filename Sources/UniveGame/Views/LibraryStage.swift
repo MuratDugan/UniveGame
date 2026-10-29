@@ -76,7 +76,8 @@ struct LibraryStage: View {
         } else if let p = model.installProgress[item.id] ?? item.installProgress {
             parts.append(L(model.progressLabelKey(item), Int(p * 100)))
         } else {
-            parts.append(item.isInstalled ? L("filter.installed") : L("status.notInstalled"))
+            parts.append(item.unpluggedDisk.map { L("status.diskUnplugged", $0) }
+                         ?? (item.isInstalled ? L("filter.installed") : L("status.notInstalled")))
         }
         if item.isInstalled, item.playTime > 0 {
             parts.append(L("stage.playtime", item.playTime.playTimeText(L)))
@@ -159,8 +160,15 @@ struct LibraryStage: View {
             }
             .buttonStyle(PrimaryButtonStyle())
             .disabled(model.isLaunching(item))
+        } else if let disk = item.unpluggedDisk {
+            Button {} label: { Label(L("status.diskUnplugged", disk), systemImage: "externaldrive.badge.xmark") }
+                .buttonStyle(SecondaryButtonStyle())
+                .disabled(true)
         } else if model.installProgress[item.id] != nil {
             EmptyView()
+        } else if let custom = item.customGame {
+            Button { model.editingCustomGame = custom } label: { Label(L("detail.locate"), systemImage: "folder") }
+                .buttonStyle(SecondaryButtonStyle())
         } else {
             Button { Task { await model.install(item) } } label: {
                 HStack(spacing: 8) {

@@ -177,7 +177,8 @@ struct LibraryView: View {
         let customOrder = model.sort != .title
         func tier(_ item: LibraryItem) -> CompatTier { model.compatReport(for: item)?.tier ?? .unknown }
 
-        var ready = list.filter(\.isInstalled)
+        // A game on an unplugged disk stays with the installed ones, marked as waiting for its disk.
+        var ready = list.filter { $0.isInstalled || $0.unpluggedDisk != nil }
         if !customOrder {
             ready.sort {
                 let a = $0.lastPlayed ?? .distantPast, b = $1.lastPlayed ?? .distantPast
@@ -185,7 +186,7 @@ struct LibraryView: View {
                 return $0.title.compare($1.title, options: [.caseInsensitive, .numeric], locale: locale) == .orderedAscending
             }
         }
-        let notInstalled = list.filter { !$0.isInstalled }
+        let notInstalled = list.filter { !$0.isInstalled && $0.unpluggedDisk == nil }
         var install = notInstalled.filter { [.excellent, .good].contains(tier($0)) }
         var hard = notInstalled.filter { [.playable, .poor, .broken].contains(tier($0)) }
         let unknown = notInstalled.filter { tier($0) == .unknown }

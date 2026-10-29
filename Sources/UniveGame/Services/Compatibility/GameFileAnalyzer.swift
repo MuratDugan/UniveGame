@@ -27,6 +27,8 @@ enum GameFileAnalyzer {
         ("NetEase Game Security", ["neacsafe"]),
         ("FACEIT", ["faceit"]),
         ("mhyprot", ["mhyprot"]),
+        // Genshin Impact 7.x: its driver fails to start under Wine ("initDriver Failed") and the game quits.
+        ("HoYoKProtect", ["hoyokprotect"]),
         ("Wellbia XIGNCODE", ["wellbia"]),
     ]
 

@@ -15,7 +15,7 @@ enum CompatibilityScorer {
 
     static let baseline = 70
     /// Bump when the rules change; stored reports are then re-scored from their saved evidence.
-    static let version = 7
+    static let version = 8
 
     /// Anti-cheats that don't stop a Wine game on macOS (server-side or user-mode).
     static let harmlessAntiCheats: Set<String> = ["vac", "valve anti-cheat", "fairfight", "punkbuster"]

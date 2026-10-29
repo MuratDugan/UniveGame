@@ -372,7 +372,6 @@
 "game.fact.source" = "Kaynak";
 "compat.notice.blocked" = "Mac'te açılmaz";
 "compat.notice.blocked.body" = "Bu engel kalkana kadar yüklesen de oyun açılmaz.";
-"compat.notice.track" = "Durumu takip et";
 "compat.notice.d3d" = "Önce D3DMetal'i kur";
 "compat.notice.d3d.body" = "Bu oyun DirectX 12 kullanıyor. Motor yaklaşık 290 MB; Apple'ın Game Porting Toolkit'i de gerekir.";
 "launch.backend.wined3d" = "WineD3D elle seçildi: Wine'ın kendi Direct3D'si, DirectX 9 ve öncesi için. macOS'ta DirectX 10 ve 11 çalıştıramaz, bu oyunlar yine DXVK ile açılır.";
@@ -761,3 +760,11 @@
 /* Games on unplugged disks */
 "status.diskUnplugged" = "%@ takılı değil";
 "detail.locate" = "Dosyayı Bul…";
+
+/* Play in the cloud */
+"cloud.playOnGFN" = "GeForce NOW'da Oyna";
+"cloud.playInCloud" = "Bulutta Oyna";
+"cloud.onGFN.title" = "%@ GeForce NOW'da var";
+"cloud.onGFN.body" = "Oyun NVIDIA'nın bilgisayarlarında çalışır, Mac'ine görüntüsü gelir. Anti-cheat sorun olmaz, hesabın güvende kalır. Ücretsiz katmanı var; aynı hesapla giriş yapınca ilerlemen kaldığı yerden devam eder.";
+"cloud.notice.onGFN" = "Mac'te açılmaz, ama GeForce NOW'da oynayabilirsin: oyun NVIDIA'nın bilgisayarlarında çalışır, ilerlemen aynı kalır.";
+"cloud.notice.body" = "Mac'te açılmaz. Bulut servislerinde ya da evdeki Windows bilgisayarından Mac'ine yayınlayarak oynayabilirsin.";

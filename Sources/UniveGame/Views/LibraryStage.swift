@@ -137,6 +137,13 @@ struct LibraryStage: View {
         let needsD3DMetal = report?.factors.contains { $0.key == "compat.f.dx12noMetal" } == true && !model.d3dMetalReady
         HStack(spacing: 8) {
             if report?.tier == .broken {
+                if CloudGaming.isOnGeForceNow(item.title) {
+                    Button { CloudGaming.openGeForceNow() } label: { Label(L("cloud.playOnGFN"), systemImage: "cloud.fill") }
+                        .buttonStyle(PrimaryButtonStyle())
+                } else if let reason = report?.factors.first(where: { $0.kind == .blocker }) {
+                    Button { model.showCloudOptions(item, reason: reason) } label: { Label(L("cloud.playInCloud"), systemImage: "cloud") }
+                        .buttonStyle(PrimaryButtonStyle())
+                }
                 Button(L("stage.whyBroken"), action: openPage).buttonStyle(SecondaryButtonStyle())
             } else if needsD3DMetal {
                 Button(L("stage.setUpD3DMetal")) { model.openSettings(.dx12) }.buttonStyle(SecondaryButtonStyle())

@@ -372,7 +372,6 @@
 "game.fact.source" = "Source";
 "compat.notice.blocked" = "Won't open on Mac";
 "compat.notice.blocked.body" = "Until this block is lifted, the game won't open even if you install it.";
-"compat.notice.track" = "Track status";
 "compat.notice.d3d" = "Set up D3DMetal first";
 "compat.notice.d3d.body" = "This game uses DirectX 12. The engine is about 290 MB, and Apple's Game Porting Toolkit is also needed.";
 "launch.backend.wined3d" = "WineD3D chosen manually: Wine's own Direct3D, for DirectX 9 and older. It can't run DirectX 10 or 11 on macOS, so those games still use DXVK.";
@@ -733,3 +732,11 @@
 /* Games on unplugged disks */
 "status.diskUnplugged" = "%@ isn't plugged in";
 "detail.locate" = "Locate…";
+
+/* Play in the cloud */
+"cloud.playOnGFN" = "Play on GeForce NOW";
+"cloud.playInCloud" = "Play in the Cloud";
+"cloud.onGFN.title" = "%@ is on GeForce NOW";
+"cloud.onGFN.body" = "The game runs on NVIDIA's computers and streams to your Mac. Anti-cheat is no problem and your account stays safe. There's a free tier; sign in with the same account and your progress carries over.";
+"cloud.notice.onGFN" = "It won't open on a Mac, but you can play it on GeForce NOW: the game runs on NVIDIA's computers and your progress stays the same.";
+"cloud.notice.body" = "It won't open on a Mac. You can play it in a cloud service, or stream it from a Windows PC at home.";

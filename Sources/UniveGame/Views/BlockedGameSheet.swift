@@ -15,6 +15,7 @@ struct BlockedGameSheet: View {
     }
 
     private var isAccountRisk: Bool { warning.reason.key == CompatFactor.accountRiskKey }
+    private var onGeForceNow: Bool { CloudGaming.isOnGeForceNow(warning.item.title) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
@@ -38,6 +39,26 @@ struct BlockedGameSheet: View {
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
 
+            if onGeForceNow {
+                HStack(alignment: .top, spacing: Theme.Spacing.md) {
+                    Image(systemName: "cloud.fill").font(.system(size: 18)).foregroundStyle(Theme.Palette.accent).frame(width: 28)
+                    VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L("cloud.onGFN.title", warning.item.title)).font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Theme.Palette.textPrimary)
+                            Text(L("cloud.onGFN.body")).font(Theme.Font.caption).foregroundStyle(Theme.Palette.textSecondary)
+                                .lineSpacing(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Button(L("cloud.playOnGFN")) { CloudGaming.openGeForceNow(); model.blockedWarning = nil }
+                            .buttonStyle(PrimaryButtonStyle())
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(Theme.Spacing.md)
+                .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.accent.opacity(0.5)))
+            }
             VStack(alignment: .leading, spacing: 8) {
                 Text(L(isAccountRisk ? "blocked.risk.alternatives" : "blocked.alternatives")).font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.Palette.textPrimary)
@@ -58,9 +79,15 @@ struct BlockedGameSheet: View {
                     model.continueDespiteWarning(warning)
                 }
                 .buttonStyle(SecondaryButtonStyle())
-                Button(L("common.cancel")) { model.blockedWarning = nil }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .keyboardShortcut(.defaultAction)
+                if onGeForceNow {
+                    Button(L("common.cancel")) { model.blockedWarning = nil }
+                        .buttonStyle(SecondaryButtonStyle())
+                        .keyboardShortcut(.cancelAction)
+                } else {
+                    Button(L("common.cancel")) { model.blockedWarning = nil }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .keyboardShortcut(.defaultAction)
+                }
             }
         }
         .padding(Theme.Spacing.xl)

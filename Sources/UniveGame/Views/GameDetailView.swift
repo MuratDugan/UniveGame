@@ -265,9 +265,11 @@ struct GameDetailView: View {
             let titleKey = blocker.key + ".title"
             let title = L(titleKey) == titleKey ? L("compat.notice.blocked")
                 : (blocker.args.isEmpty ? L(titleKey) : String(format: L(titleKey), locale: locale, arguments: blocker.args.map { $0 as CVarArg }))
-            let antiCheat = ["compat.f.onlineAC", "compat.f.kernelAC", "compat.f.acLinuxOnly", "compat.f.deckAC"].contains(blocker.key)
-            NoticeBanner(kind: .destructive, title: title, message: L("compat.notice.blocked.body"),
-                         action: antiCheat ? .link(L("compat.notice.track"), Self.antiCheatPage(item.title)) : nil)
+            // Can't run here: point to where it can.
+            let onGFN = CloudGaming.isOnGeForceNow(item.title)
+            NoticeBanner(kind: .destructive, title: title, message: L(onGFN ? "cloud.notice.onGFN" : "cloud.notice.body"),
+                         action: onGFN ? .primary(L("cloud.playOnGFN")) { CloudGaming.openGeForceNow() }
+                                       : .primary(L("cloud.playInCloud")) { model.showCloudOptions(item, reason: blocker) })
                 .enterOnAppear(delay: 0.06)
         } else if model.compatReport(for: item)?.factors.contains(where: { $0.key == CompatFactor.accountRiskKey }) == true {
             NoticeBanner(kind: .warning, title: L("blocked.risk.title", item.title), message: L("compat.notice.risk.body"))
@@ -277,12 +279,6 @@ struct GameDetailView: View {
                          action: .primary(L("d3dmetal.setUp")) { model.openSettings(.dx12) })
                 .enterOnAppear(delay: 0.06)
         }
-    }
-
-    static func antiCheatPage(_ title: String) -> URL {
-        var components = URLComponents(string: "https://areweanticheatyet.com/")!
-        components.queryItems = [URLQueryItem(name: "search", value: title)]
-        return components.url!
     }
 }
 

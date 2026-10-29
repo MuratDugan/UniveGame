@@ -881,6 +881,11 @@ final class AppModel {
     /// Streams from the player's own Windows PC.
     static let moonlight = URL(string: "https://moonlight-stream.org")!
 
+    /// "Play in the cloud" from a game page: the won't-run sheet, with its ways to play elsewhere.
+    func showCloudOptions(_ item: LibraryItem, reason: CompatFactor) {
+        blockedWarning = BlockedGameWarning(item: item, reason: reason, action: item.isInstalled ? .play : .install)
+    }
+
     /// The blocker the analysis found, unless the player already chose to go ahead with this game.
     private func unacceptedBlocker(_ item: LibraryItem) -> CompatFactor? {
         guard !(state.acceptedRisks ?? []).contains(item.id) else { return nil }

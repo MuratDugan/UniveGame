@@ -1506,6 +1506,11 @@ final class AppModel {
         guard bottle.exists else { return }
         if !(await runner.isBottleActive(engine: engine, bottle: bottle)) {
             await runner.syncMacDriver(["RetinaMode": retina], engine: engine, bottle: bottle)
+            let reg = (try? String(contentsOf: bottle.url.appendingPathComponent("user.reg"), encoding: .utf8)) ?? ""
+            if DisplayModes.current(inUserReg: reg) != emulatesDisplayModes {
+                _ = try? await ProcessRunner.run(engine.wine, DisplayModes.command(on: emulatesDisplayModes),
+                                                 environment: WineRunner.environment(bottle: bottle, profile: LaunchProfile()))
+            }
             // Wine reads controller options when its device service starts, so like Retina only while idle.
             let key = bottle.url.path
             if state.appliedControllerMode?[key] != playStationAsXbox {
@@ -1515,6 +1520,12 @@ final class AppModel {
             }
         }
         await runner.syncGPUIdentity(engine: engine, bottle: bottle)
+    }
+
+    /// Wine scales games that change the resolution instead of switching the Mac's display (`DisplayModes`). On by
+    /// default; takes effect the next time a game's environment starts.
+    var emulatesDisplayModes: Bool = UserDefaults.standard.object(forKey: "emulatesDisplayModes") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(emulatesDisplayModes, forKey: "emulatesDisplayModes") }
     }
 
     // MARK: Mac integration

@@ -654,6 +654,8 @@
 /* Graphics tuning */
 "shaders.title" = "Shader cache";
 "shaders.help" = "Graphics caches games build as they play. Clear them after broken graphics or crashes following an engine update; the first sessions may stutter a little while they're rebuilt.";
+"displayModes.title" = "Emulate screen resolutions";
+"displayModes.help" = "Games that change the resolution get a scaled picture with black bars instead of switching your Mac's display, and see the standard Windows resolutions (1280×720, 1920×1080…). Some games only accept these and stay on a black screen otherwise (Anomaly Agent). Takes effect the next time a game starts.";
 "shaders.clear" = "Clear";
 "shaders.busy" = "Close running games first.";
 "launch.fpsLimit" = "Frame rate limit";

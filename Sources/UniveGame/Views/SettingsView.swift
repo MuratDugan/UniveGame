@@ -370,9 +370,18 @@ private struct EngineSection: View {
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .enterOnAppear(delay: 0.12)
+            displayModesCard.enterOnAppear(delay: 0.14)
             shaderCacheCard.enterOnAppear(delay: 0.16)
         }
         .task { await model.measureShaderCaches() }
+    }
+
+    private var displayModesCard: some View {
+        @Bindable var model = model
+        return SettingToggle(title: L("displayModes.title"), detail: L("displayModes.help"), isOn: $model.emulatesDisplayModes)
+            .padding(Theme.Spacing.md)
+            .background(Theme.Palette.card, in: RoundedRectangle(cornerRadius: Theme.Radius.lg))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.lg).strokeBorder(Theme.Palette.border))
     }
 
     private var shaderCacheCard: some View {

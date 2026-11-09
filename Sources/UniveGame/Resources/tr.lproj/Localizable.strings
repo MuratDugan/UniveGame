@@ -682,6 +682,8 @@
 /* Graphics tuning */
 "shaders.title" = "Gölgelendirici önbelleği";
 "shaders.help" = "Oyunlar oynadıkça hazırladığı grafik önbellekleri. Bozuk görüntü ya da motor güncellemesinden sonra çökme olursa temizle; ilk oyunlarda biraz takılma olabilir, önbellek yeniden oluşur.";
+"displayModes.title" = "Ekran çözünürlüklerini taklit et";
+"displayModes.help" = "Çözünürlük değiştiren oyunlar Mac ekranını değiştirmek yerine siyah kenarlı, ölçeklenmiş görüntü alır ve standart Windows çözünürlüklerini (1280×720, 1920×1080…) görür. Bazı oyunlar yalnızca bunları kabul eder, yoksa siyah ekranda kalır (Anomaly Agent). Bir sonraki oyun açılışında geçerli olur.";
 "shaders.clear" = "Temizle";
 "shaders.busy" = "Önce açık oyunları kapat.";
 "launch.fpsLimit" = "Kare hızı sınırı";
